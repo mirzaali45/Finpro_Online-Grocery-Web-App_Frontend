@@ -1,34 +1,78 @@
-"use client"
+"use client";
 
-import { useRouter } from 'next/navigation';
-import LoginForm from '@/components/loginSuperAdmin';
-import { loginUser } from '@/services/auth.service';
-import type { LoginFormValues } from '@/types/login-types';
+import LoginForm from "@/components/loginSuperAdmin";
+import { AuthService } from "@/services/auth.service";
+import { useRouter } from "next/navigation";
+import { LoginFormValues } from "@/types/auth-types";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-export default function SuperAdminLogin() {
+export default function LoginPage() {
   const router = useRouter();
 
   const handleSubmit = async (values: LoginFormValues) => {
     try {
-      const response = await loginUser(values);
-      
-      // Store auth data
-      localStorage.setItem('token', response.token);
-      localStorage.setItem('user', JSON.stringify(response.user));
+      // Show loading toast
+      toast.info("Logging in...", {
+        autoClose: false, // Won't auto close
+        isLoading: true,
+      });
 
-      // Verify role and redirect
-      if (response.user.role === 'SUPER_ADMIN') {
-        router.push('/dashboard');
+      const response = await AuthService.login(values);
+
+      if (response.user.role === "super_admin") {
+        // Dismiss all toasts first
+        toast.dismiss();
+
+        // Show success toast
+        toast.success("Login successful! Redirecting...", {
+          position: "bottom-right",
+          autoClose: 3000,
+          theme: "colored",
+          hideProgressBar: false,
+          onClose: () => {
+            router.push("/dashboard-superAdmin");
+          },
+        });
       } else {
-        throw new Error('Unauthorized access. Super Admin only.');
+        toast.dismiss();
+        toast.error("Access denied. Admin privileges required.", {
+          position: "bottom-right",
+          autoClose: 5000,
+          theme: "colored",
+          hideProgressBar: false,
+        });
+
+        setTimeout(() => {
+          router.push("/");
+        }, 5000);
       }
     } catch (error) {
-      if (error instanceof Error) {
-        throw new Error(error.message);
-      }
-      throw new Error('Login failed. Please try again.');
+      toast.dismiss();
+      toast.error(error instanceof Error ? error.message : "Login failed", {
+        position: "bottom-right",
+        autoClose: 5000,
+        theme: "colored",
+        hideProgressBar: false,
+      });
     }
   };
 
-  return <LoginForm onSubmit={handleSubmit} />;
+  return (
+    <>
+      <ToastContainer
+        position="bottom-right"
+        autoClose={5000}
+        hideProgressBar={false}
+        newestOnTop={false}
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="colored"
+      />
+      <LoginForm onSubmit={handleSubmit} />
+    </>
+  );
 }

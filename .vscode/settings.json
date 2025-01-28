@@ -1,0 +1,11 @@
+{
+  "css.validate": false,
+  "less.validate": false,
+  "scss.validate": false,
+  "stylelint.enable": false,
+  "postcss.validate": true,
+  "tailwindCSS.validation.enable": true,
+  "tailwindCSS.experimental.classRegex": [
+    ["@apply ([^;]*);", "(?:@apply )?([^;]*)"]
+  ]
+}
