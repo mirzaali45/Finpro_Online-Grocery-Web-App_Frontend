@@ -1,28 +1,31 @@
-"use client"
+"use client";
 
-import React, { useState } from 'react';
-import { Formik, Form, Field, FormikHelpers } from 'formik';
-import { Shield, Eye, EyeOff, AlertCircle } from 'lucide-react';
-import { loginSchema } from '../helper/validation-schema-login';
-import type { LoginFormValues, LoginFormProps } from '../types/login-types';
+import React, { useState } from "react";
+import { Formik, Form, Field, FormikHelpers } from "formik";
+import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { loginSchema } from "../helper/validation-schema-login";
+import type { LoginFormValues, LoginFormProps } from "../types/auth-types";
 
 const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   const [showPassword, setShowPassword] = useState(false);
-  const [serverError, setServerError] = useState('');
+  const [serverError, setServerError] = useState("");
 
   const initialValues: LoginFormValues = {
-    email: '',
-    password: '',
+    email: "",
+    password: "",
   };
 
   const handleSubmit = async (
-    values: LoginFormValues, 
+    values: LoginFormValues,
     { setSubmitting }: FormikHelpers<LoginFormValues>
   ) => {
     try {
       await onSubmit(values);
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : 'An error occurred during login';
+      const errorMessage =
+        error instanceof Error
+          ? error.message
+          : "An error occurred during login";
       setServerError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -63,7 +66,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
               <div className="space-y-4">
                 {/* Email Field */}
                 <div>
-                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="email"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Email Address
                   </label>
                   <Field
@@ -72,9 +78,11 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     type="email"
                     autoComplete="email"
                     className={`mt-1 block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                      ${errors.email && touched.email 
-                        ? 'border-red-500' 
-                        : 'border-gray-300'}`}
+                      ${
+                        errors.email && touched.email
+                          ? "border-red-500"
+                          : "border-gray-300"
+                      }`}
                     placeholder="super.admin@example.com"
                   />
                   {errors.email && touched.email && (
@@ -84,19 +92,24 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
 
                 {/* Password Field */}
                 <div className="relative">
-                  <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
                     Password
                   </label>
                   <div className="mt-1 relative">
                     <Field
                       id="password"
                       name="password"
-                      type={showPassword ? 'text' : 'password'}
+                      type={showPassword ? "text" : "password"}
                       autoComplete="current-password"
                       className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-                        ${errors.password && touched.password 
-                          ? 'border-red-500' 
-                          : 'border-gray-300'}`}
+                        ${
+                          errors.password && touched.password
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
                       placeholder="••••••••"
                     />
                     <button
@@ -112,7 +125,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     </button>
                   </div>
                   {errors.password && touched.password && (
-                    <p className="mt-1 text-sm text-red-600">{errors.password}</p>
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.password}
+                    </p>
                   )}
                 </div>
               </div>
@@ -122,9 +137,10 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                 type="submit"
                 disabled={isSubmitting}
                 className={`w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white 
-                  ${isSubmitting 
-                    ? 'bg-blue-400 cursor-not-allowed' 
-                    : 'bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500'
+                  ${
+                    isSubmitting
+                      ? "bg-blue-400 cursor-not-allowed"
+                      : "bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
                   }`}
               >
                 {isSubmitting ? (
@@ -133,7 +149,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
                     Authenticating...
                   </div>
                 ) : (
-                  'Sign in as Super Admin'
+                  "Sign in as Super Admin"
                 )}
               </button>
             </Form>
