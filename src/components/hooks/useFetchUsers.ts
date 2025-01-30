@@ -7,7 +7,7 @@ interface User {
   first_name?: string;
   last_name?: string;
   phone?: string;
-  role: "customer" | "store_admin" | "super_admin"; // Keep "super_admin" here for exclusion
+  role: "customer" | "store_admin" | "super_admin"; 
   verified: boolean;
   created_at: string;
   updated_at: string;
@@ -92,7 +92,6 @@ export default function useFetchUsers() {
       const jsonResponse = await response.json();
 
       if (jsonResponse.status === "success") {
-        // Remove the user from the state after successful deletion
         setUsers((prevUsers) =>
           prevUsers.filter((user) => user.user_id !== userId)
         );

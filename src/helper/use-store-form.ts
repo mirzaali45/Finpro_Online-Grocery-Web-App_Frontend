@@ -1,6 +1,6 @@
 // hooks/use-store-form.ts
 import { useState } from "react";
-import { StoreData } from "@/types/storeForm-types";
+import { StoreData } from "@/types/store-types";
 
 const initialFormData: StoreData = {
   store_name: "",
