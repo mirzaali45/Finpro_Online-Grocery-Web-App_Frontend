@@ -172,6 +172,7 @@ export default function ProductAdmin() {
 
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className={`${isSidebarOpen ? "md:ml-20" : ""}`}>
       <Sidebar
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
@@ -250,6 +251,7 @@ export default function ProductAdmin() {
             loading={loading}
           />
         </Modal>
+      </div>
       </div>
     </div>
   );

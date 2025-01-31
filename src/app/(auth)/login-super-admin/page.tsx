@@ -7,7 +7,7 @@ import { LoginFormValues } from "@/types/auth-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function LoginPage() {
+export default function SuperLoginPage() {
   const router = useRouter();
 
   const handleSubmit = async (values: LoginFormValues) => {

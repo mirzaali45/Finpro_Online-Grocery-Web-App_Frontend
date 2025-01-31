@@ -9,6 +9,7 @@ export default function UserAdmin() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
+      <div className={`${isSidebarOpen ? "md:ml-64" : ""}`}>
            <Sidebar
                 isSidebarOpen={isSidebarOpen}
                 setIsSidebarOpen={setIsSidebarOpen}
@@ -16,6 +17,7 @@ export default function UserAdmin() {
       <main className="container mx-auto p-6">
         <UserManagement />
       </main>
+      </div>
     </div>
   );
 }
