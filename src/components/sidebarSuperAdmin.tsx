@@ -8,8 +8,10 @@ import {
   LogOut,
   StoreIcon,
   X,
+  Menu,
   FolderKanban,
   Boxes,
+  PackageOpen 
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import Swal from "sweetalert2";
@@ -53,6 +55,11 @@ export default function Sidebar({
       icon: <Boxes className="h-5 w-5" />,
       href: "/dashboard-superAdmin/product",
     },
+    {
+      title: "Inventory",
+      icon: <PackageOpen className="h-5 w-5" />,
+      href: "/dashboard-superAdmin/inventory",
+    },
   ];
 
   const handleLogout = () => {
@@ -76,7 +83,7 @@ export default function Sidebar({
           });
           router.push("/login-super-admin");
         } catch (error) {
-          console.error("Logout failed:", error); // Using the error variable
+          console.error("Logout failed:", error);
           Swal.fire({
             title: "Error!",
             text: error instanceof Error ? error.message : "Failed to logout",
@@ -88,52 +95,74 @@ export default function Sidebar({
   };
 
   return (
-    <aside
-      className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
-        isSidebarOpen ? "translate-x-0" : "-translate-x-full"
-      } md:translate-x-0 bg-white border-r border-gray-200 w-64`}
-    >
-      <div className="flex flex-col h-full">
-        {/* Sidebar Header */}
-        <div className="flex items-center justify-between p-4 border-b">
-          <h2 className="text-xl font-bold text-gray-800">Super Admin</h2>
-          <button
-            onClick={() => setIsSidebarOpen(false)}
-            className="md:hidden text-gray-500 hover:text-gray-700"
-          >
-            <X className="h-6 w-6" />
-          </button>
-        </div>
+    <>
+      {/* Mobile Sidebar Toggle Button */}
+      <button
+        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+        className="fixed top-4 left-4 z-50 md:hidden bg-white p-2 rounded-lg shadow-lg text-gray-900 hover:text-gray-600 focus:outline-none"
+        aria-label="Toggle Sidebar"
+      >
+        <Menu className="h-6 w-full" />
+      </button>
 
-        {/* Sidebar Links */}
-        <nav className="flex-1 p-4 space-y-1">
-          {sidebarLinks.map((link) => (
-            <Link
-              key={link.title}
-              href={link.href}
-              className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
-                link.active
-                  ? "bg-blue-50 text-blue-700"
-                  : "text-gray-700 hover:bg-gray-100"
-              }`}
+      {/* Backdrop for mobile */}
+      {isSidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
+      {/* Sidebar */}
+      <aside
+        className={`fixed top-0 left-0 z-40 h-screen transition-transform ${
+          isSidebarOpen ? "translate-x-0" : "-translate-x-full"
+        } md:translate-x-0 bg-white border-r border-gray-200 w-64 shadow-lg`}
+      >
+        <div className="flex flex-col h-full">
+          {/* Sidebar Header */}
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="text-xl font-bold text-gray-800">Super Admin</h2>
+            <button
+              onClick={() => setIsSidebarOpen(false)}
+              className="md:hidden text-gray-900 hover:text-gray-600"
+              aria-label="Close Sidebar"
             >
-              {link.icon}
-              <span>{link.title}</span>
-            </Link>
-          ))}
-        </nav>
+              <X className="h-6 w-6" />
+            </button>
+          </div>
 
-        {/* Sidebar Footer */}
-        <div className="p-4 border-t">
-          <button
-            onClick={handleLogout}
-            className="flex items-center space-x-3 text-red-600 hover:text-red-700 w-full px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
-          >
-            <LogOut className="h-5 w-5" />
-            <span>Logout</span>
-          </button>
+          {/* Sidebar Links */}
+          <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+            {sidebarLinks.map((link) => (
+              <Link
+                key={link.title}
+                href={link.href}
+                className={`flex items-center space-x-3 px-3 py-2 rounded-lg transition-colors ${
+                  link.active
+                    ? "bg-blue-50 text-blue-700"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
+                onClick={() => setIsSidebarOpen(false)}
+              >
+                {link.icon}
+                <span>{link.title}</span>
+              </Link>
+            ))}
+          </nav>
+
+          {/* Sidebar Footer */}
+          <div className="p-4 border-t">
+            <button
+              onClick={handleLogout}
+              className="flex items-center space-x-3 text-red-600 hover:text-red-700 w-full px-3 py-2 rounded-lg hover:bg-red-50 transition-colors"
+            >
+              <LogOut className="h-5 w-5" />
+              <span>Logout</span>
+            </button>
+          </div>
         </div>
-      </div>
-    </aside>
+      </aside>
+    </>
   );
 }

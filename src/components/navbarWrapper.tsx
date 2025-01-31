@@ -14,6 +14,7 @@ export default function NavbarWrapper() {
     "/dashboard-superAdmin/user",
     "/dashboard-superAdmin/categories",
     "/dashboard-superAdmin/product",
+    "/dashboard-superAdmin/inventory"
   ];
 
   return noNavbarRoutes.includes(pathname) ? null : <Navbar />;

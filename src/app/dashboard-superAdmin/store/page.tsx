@@ -20,7 +20,6 @@ export default function StoreDashboard() {
     city: "",
     province: "",
     postcode: "",
-    description: "",
   });
   const handleSuccess = () => {
     fetchStores(); // Refresh the stores list
@@ -103,7 +102,7 @@ export default function StoreDashboard() {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <div className="p-8 ml-[16rem]">
+      <div className="p-8 ml-[5rem]">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
             <div className="flex justify-between items-center mb-6">

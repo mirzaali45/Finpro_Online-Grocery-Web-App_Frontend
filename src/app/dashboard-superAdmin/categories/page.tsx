@@ -18,7 +18,6 @@ export default function CategoriesAdmin() {
   const [formData, setFormData] = useState<CategoryFormData>({
     category_name: "",
     description: "",
-    category_url: "",
   });
 
   useEffect(() => {
@@ -58,7 +57,6 @@ export default function CategoriesAdmin() {
       setFormData({
         category_name: "",
         description: "",
-        category_url: "",
       });
     } catch (err) {
       setError(
