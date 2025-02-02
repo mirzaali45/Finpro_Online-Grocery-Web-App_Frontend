@@ -1,4 +1,4 @@
-// components/category-management/CategoryCard.tsx
+
 import { Pencil, Trash2 } from "lucide-react";
 import { Category } from "@/types/category-types";
 

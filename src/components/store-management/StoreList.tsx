@@ -1,4 +1,4 @@
-// components/store-management/StoreList.tsx
+
 import { StoreData } from "@/types/store-types";
 import StoreCard from "./StoreCard";
 

@@ -1,4 +1,4 @@
-// components/category-management/CategoryModal.tsx
+
 import { CategoryFormData } from "@/types/category-types";
 
 interface CategoryModalProps {

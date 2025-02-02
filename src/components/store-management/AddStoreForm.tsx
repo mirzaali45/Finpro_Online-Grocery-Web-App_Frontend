@@ -14,7 +14,6 @@ import {
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 
-// Fix for default marker icons
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/marker-icon-2x.png",
   iconUrl: "/marker-icon.png",
@@ -29,8 +28,6 @@ interface AddStoreFormProps {
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
 }
-
-// Map click handler component
 function MapClickHandler({
   setFormData,
 }: {
