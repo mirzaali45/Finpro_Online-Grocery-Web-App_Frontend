@@ -32,7 +32,6 @@ export default function Sidebar({
   const pathname = usePathname();
   const [activeLink, setActiveLink] = useState(pathname);
 
-  // Update active link when pathname changes
   useEffect(() => {
     setActiveLink(pathname);
   }, [pathname]);

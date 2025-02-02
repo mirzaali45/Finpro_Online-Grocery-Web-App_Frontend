@@ -5,11 +5,8 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export const productService = {
   async getProducts(): Promise<Product[]> {
-    const token = localStorage.getItem("token");
     const response = await fetch(`${BASE_URL}/product`, {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  
     });
 
     if (!response.ok) throw new Error("Failed to fetch products");
