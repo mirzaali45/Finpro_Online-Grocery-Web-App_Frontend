@@ -5,6 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "sweetalert2/dist/sweetalert2.css";
 import NavbarWrapper from "@/components/navbarWrapper";
 import "leaflet/dist/leaflet.css";
+import Footer from "@/components/footer";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -29,12 +30,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
+      <meta name="viewport" content="width=device-width, initial-scale=1.0" />
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <NavbarWrapper />
-
         {children}
+        <Footer />
       </body>
     </html>
   );

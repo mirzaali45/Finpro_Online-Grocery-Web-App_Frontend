@@ -1,48 +1,43 @@
 "use client";
 
-import LoginFormSuper from "@/components/login/loginSuperAdmin";
+import LoginFormStore from "@/components/login/loginStoreAdmin";
 import { AuthService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
-import { LoginFormSuperValues } from "@/types/auth-types";
+import { LoginFormStoreValues } from "@/types/auth-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function SuperLoginPage() {
+export default function StoreLoginPage() {
   const router = useRouter();
 
-  const handleSubmit = async (values: LoginFormSuperValues) => {
+  const handleSubmit = async (values: LoginFormStoreValues) => {
     try {
-      // Show loading toast
       toast.info("Logging in...", {
-        autoClose: false, // Won't auto close
+        autoClose: false, 
         isLoading: true,
       });
 
       const response = await AuthService.login(values);
 
-      if (response.user.role === "super_admin") {
-        // Dismiss all toasts first
+      if (response.user.role === "store_admin") {
         toast.dismiss();
-
-        // Show success toast
         toast.success("Login successful! Redirecting...", {
           position: "bottom-right",
           autoClose: 3000,
           theme: "colored",
           hideProgressBar: false,
           onClose: () => {
-            router.push("/dashboard-superAdmin");
+            router.push("/dashboard-storeAdmin");
           },
         });
       } else {
         toast.dismiss();
-        toast.error("Access denied. Admin privileges required.", {
+        toast.error("Access denied.Store-Admin privileges required.", {
           position: "bottom-right",
           autoClose: 5000,
           theme: "colored",
           hideProgressBar: false,
-        });
-
+        })
         setTimeout(() => {
           router.push("/");
         }, 5000);
@@ -72,7 +67,7 @@ export default function SuperLoginPage() {
         pauseOnHover
         theme="colored"
       />
-      <LoginFormSuper onSubmit={handleSubmit} />
+      <LoginFormStore onSubmit={handleSubmit} />
     </>
   );
 }

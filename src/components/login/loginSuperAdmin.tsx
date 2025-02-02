@@ -3,21 +3,21 @@
 import React, { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
-import { loginSchema } from "../helper/validation-schema-login";
-import type { LoginFormValues, LoginFormProps } from "../types/auth-types";
+import { loginSchema } from "../../helper/validation-schema-login";
+import type { LoginFormSuperValues, LoginFormSuperProps } from "../../types/auth-types";
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginFormSuper: React.FC<LoginFormSuperProps> = ({ onSubmit }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  const initialValues: LoginFormValues = {
+  const initialValues: LoginFormSuperValues = {
     email: "",
     password: "",
   };
 
   const handleSubmit = async (
-    values: LoginFormValues,
-    { setSubmitting }: FormikHelpers<LoginFormValues>
+    values: LoginFormSuperValues,
+    { setSubmitting }: FormikHelpers<LoginFormSuperValues>
   ) => {
     try {
       await onSubmit(values);
@@ -35,7 +35,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-black to-gray-600 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-xl">
-        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
             <Shield className="h-12 w-12 text-blue-600" />
@@ -165,4 +164,4 @@ const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
   );
 };
 
-export default LoginForm;
+export default LoginFormSuper;

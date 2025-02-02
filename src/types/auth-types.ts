@@ -19,11 +19,18 @@ export interface ApiError {
   statusCode?: number;
 }
 
-export interface LoginFormValues {
+export interface LoginFormStoreValues {
+  email: string;
+  password: string;
+}
+export interface LoginFormSuperValues {
   email: string;
   password: string;
 }
 
-export interface LoginFormProps {
-  onSubmit: (values: LoginFormValues) => Promise<void>;
+export interface LoginFormStoreProps {
+  onSubmit: (values: LoginFormStoreValues) => Promise<void>;
+}
+export interface LoginFormSuperProps {
+  onSubmit: (values: LoginFormSuperValues) => Promise<void>;
 }
