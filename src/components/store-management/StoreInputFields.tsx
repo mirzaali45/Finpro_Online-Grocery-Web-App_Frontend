@@ -1,4 +1,4 @@
-// components/InputField.tsx
+
 import React from "react";
 import { StoreDataKey } from "@/types/store-types";
 

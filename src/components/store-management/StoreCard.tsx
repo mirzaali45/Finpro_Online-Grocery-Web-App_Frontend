@@ -1,4 +1,4 @@
-// components/store-management/StoreCard.tsx
+
 import { Trash2 } from "lucide-react";
 import { StoreData } from "@/types/store-types";
 

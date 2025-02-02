@@ -41,7 +41,7 @@ export const storeService = {
       const token = localStorage.getItem("token");
       if (!token) throw new StoreServiceError("No authentication token found");
 
-      // Extract only the fields we want to send
+
       const storeData: StoreData = {
         store_name: formData.store_name,
         address: formData.address,
