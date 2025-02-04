@@ -1,10 +1,11 @@
-"use client"
+"use client";
 
 import React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { categoryService } from "@/components/hooks/useCategoryAdmin";
 import { Category } from "@/types/category-types";
+import Image from "next/image";
 
 export default function ShopCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
@@ -65,9 +66,17 @@ export default function ShopCategories() {
               key={category.category_name}
               href={`/category/${category.category_name.toLowerCase()}`}
               className="bg-gray-800/50 rounded-lg p-6 sm:p-8 lg:p-12 flex flex-col items-center justify-center 
-                         hover:bg-gray-800/70 hover:scale-105 transition-all duration-300 group"
+                 hover:bg-gray-800/70 hover:scale-105 transition-all duration-300 group aspect-square"
             >
-              <span className="text-white text-lg font-medium text-center group-hover:text-gray-300 transition-colors">
+              <div className="relative w-full h-1/2">
+                <Image
+                  src={category.category_thumbnail || "/placeholder.jpg"}
+                  alt={`${category.category_name} thumbnail`}
+                  fill
+                  className="object-contain rounded-full group-hover:opacity-80 transition-opacity"
+                />
+              </div>
+              <span className="text-white text-lg font-medium text-center mt-4 group-hover:text-gray-300 transition-colors">
                 {category.category_name}
               </span>
             </Link>

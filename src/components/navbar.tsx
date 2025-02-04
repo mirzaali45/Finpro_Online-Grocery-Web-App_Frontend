@@ -39,10 +39,10 @@ export default function Navbar() {
                   Home
                 </Link>
                 <Link
-                  href="/phones"
+                  href="/products"
                   className="hover:text-gray-300 transition-colors"
                 >
-                  Phones
+                  Products
                 </Link>
                 <Link
                   href="/gadgets"
