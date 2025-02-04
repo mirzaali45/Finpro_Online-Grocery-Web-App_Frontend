@@ -3,6 +3,7 @@ export interface Category {
   id: number;
   category_name: string;
   description: string;
+  category_thumbnail?: string;
   Product?: string;
 }
 
