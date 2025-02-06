@@ -5,16 +5,26 @@ import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Product } from "@/types/product-types";
 import { productService } from "@/services/product.service";
+import { addToCart } from "@/services/cart.service";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
+interface ProductDetailProps {
+  params: {
+    slug: string;
+  };
+  onCartUpdate?: () => void;
+}
 
 export default function ProductDetail({
   params,
-}: {
-  params: { slug: string };
-}) {
+  onCartUpdate,
+}: ProductDetailProps) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedImage, setSelectedImage] = useState(0);
+  const [isAddingToCart, setIsAddingToCart] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
@@ -38,6 +48,21 @@ export default function ProductDetail({
 
     fetchProduct();
   }, [params.slug]);
+
+  const handleAddToCart = async () => {
+    if (!product) return;
+    try {
+      setIsAddingToCart(true);
+      await addToCart(product.product_id, 1);
+      toast.success("Product added to cart successfully"); // Updated toast
+      onCartUpdate?.();
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      toast.error("Failed to add product to cart"); // Updated toast
+    } finally {
+      setIsAddingToCart(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -67,6 +92,7 @@ export default function ProductDetail({
                 fill
                 className="object-cover rounded-lg"
                 priority
+                sizes="(max-width: 768px) 100vw, 50vw"
                 onError={(e) => {
                   const img = e.target as HTMLImageElement;
                   img.src = "/product-placeholder.jpg";
@@ -90,6 +116,7 @@ export default function ProductDetail({
                       src={image.url}
                       alt={`${product.name} - Image ${index + 1}`}
                       fill
+                      sizes="80px"
                       className="object-cover"
                     />
                   </button>
@@ -101,6 +128,11 @@ export default function ProductDetail({
           {/* Product Info Section */}
           <div className="text-white flex flex-col">
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
+            <div className="flex items-center gap-2 mb-4">
+              <span className="px-3 py-1 bg-indigo-600 rounded-full text-sm">
+                {product.category.category_name}
+              </span>
+            </div>
             <p className="text-gray-300 mb-6">{product.description}</p>
 
             <div className="space-y-4 mb-6">
@@ -111,19 +143,23 @@ export default function ProductDetail({
                 </span>
               </div>
 
-              {product.category && (
+              {product.store && (
                 <div className="flex justify-between items-center">
-                  <span className="text-gray-300">Category</span>
+                  <span className="text-gray-300">Store</span>
                   <span className="text-gray-100">
-                    {product.category.category_name}
+                    {product.store.store_name}
                   </span>
                 </div>
               )}
             </div>
 
             <div className="mt-auto">
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition-colors">
-                Add to Cart
+              <button
+                onClick={handleAddToCart}
+                disabled={isAddingToCart}
+                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
               </button>
             </div>
           </div>
