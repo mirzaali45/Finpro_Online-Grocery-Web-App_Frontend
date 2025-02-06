@@ -1,9 +1,8 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebarSuperAdmin";
-import { storeService } from "@/components/hooks/useStoreAdmin";
+import { storeService } from "@/services/store-admin.service";
 import { StoreData } from "@/types/store-types";
 import StoreList from "@/components/store-management/StoreList";
 import AddStoreModal from "@/components/store-management/AddStoreModal";

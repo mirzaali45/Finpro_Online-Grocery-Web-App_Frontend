@@ -1,8 +1,8 @@
-"use client"
+"use client";
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
-import { productService } from "@/components/hooks/useProductAdmin";
+import { productService } from "@/services/product.service";
 import { Product } from "@/types/product-types";
 import { formatRupiah } from "@/helper/currencyRp";
 

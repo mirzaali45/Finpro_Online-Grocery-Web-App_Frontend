@@ -8,8 +8,7 @@ import "sweetalert2/dist/sweetalert2.css";
 import {
   LayoutDashboard,
   ShoppingBag,
-  Package,
-  Users,
+  PercentDiamond,
   Settings,
   LogOut,
   BarChart3,
@@ -26,19 +25,9 @@ export default function StoreSideBar() {
       href: "/dashboard-storeAdmin",
     },
     {
-      title: "Products",
-      icon: <ShoppingBag size={20} />,
-      href: "/dashboard-storeAdmin/products",
-    },
-    {
-      title: "Inventory",
-      icon: <Package size={20} />,
-      href: "/dashboard-storeAdmin/inventory",
-    },
-    {
-      title: "Customers",
-      icon: <Users size={20} />,
-      href: "/dashboard-storeAdmin/customers",
+      title: "Discount Management",
+      icon: <PercentDiamond size={20} />,
+      href: "/dashboard-storeAdmin/discount",
     },
     {
       title: "Reports",

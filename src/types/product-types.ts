@@ -39,3 +39,12 @@ export interface Product {
     url: string;
   }[];
 }
+
+export interface ModalState {
+  isSearchOpen: boolean;
+  isCartOpen: boolean;
+}
+
+export interface NavbarProps {
+  className?: string;
+}
