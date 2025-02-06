@@ -29,6 +29,8 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   category: Category;
+  highlightedName?: React.ReactNode;
+  slug: string;
   store: Store;
   Inventory?: {
     total_qty: number;

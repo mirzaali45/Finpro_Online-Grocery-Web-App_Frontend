@@ -1,15 +1,39 @@
-
 import { Product, ProductFormData } from "@/types/product-types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export const productService = {
   async getProducts(): Promise<Product[]> {
-    const response = await fetch(`${BASE_URL}/product`, {
-  
-    });
+    const response = await fetch(`${BASE_URL}/product`);
 
     if (!response.ok) throw new Error("Failed to fetch products");
+    return response.json();
+  },
+
+  async getProductBySlug(slug: string): Promise<Product> {
+    try {
+      const response = await fetch(`${BASE_URL}/product/slug/${slug}`);
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          throw new Error("Product not found");
+        }
+        throw new Error("Failed to fetch product");
+      }
+  
+      const product: Product = await response.json();
+      return product;
+    } catch (error) {
+      // Re-throw the error with a more specific message
+      throw error instanceof Error 
+        ? error 
+        : new Error("An error occurred while fetching the product");
+    }
+  },
+
+  async getProductById(productId: number): Promise<Product> {
+    const response = await fetch(`${BASE_URL}/product/${productId}`);
+    if (!response.ok) throw new Error("Failed to fetch product");
     return response.json();
   },
 
