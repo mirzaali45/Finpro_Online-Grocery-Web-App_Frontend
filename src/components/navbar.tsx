@@ -1,58 +1,46 @@
+"use client";
+import Link from "next/link";
+import { useState } from "react";
 import { TiShoppingCart } from "react-icons/ti";
-import React from "react";
+import MiniCart from "./minicart";
+import { useCart } from "../context/cartcontext";
 
-type NavbarProps = {
-  cartCount: number;
-};
+const Navbar = () => {
+  const { totalQuantity } = useCart();
+  const [isOpen, setIsOpen] = useState(false);
 
-export const Navbar: React.FC<NavbarProps> = ({ cartCount }) => {
   return (
-    <nav className="bg-white shadow-md fixed top-0 left-0 w-full z-50">
-      <div className="container mx-auto px-4 py-4 flex justify-between items-center">
-        {/* Logo */}
-        <div className="text-2xl font-bold text-gray-800">ShopNow</div>
+    <nav className="bg-gray-900 p-4 text-white flex justify-between items-center relative">
+      <Link href="/" className="text-2xl font-bold">
+        ShopLogo
+      </Link>
 
-        {/* Navigation Links */}
-        <div className="hidden md:flex space-x-6">
-          <a href="#" className="text-gray-600 hover:text-gray-800 transition">
-            Home
-          </a>
-          <a href="#" className="text-gray-600 hover:text-gray-800 transition">
-            Shop
-          </a>
-          <a href="#" className="text-gray-600 hover:text-gray-800 transition">
-            Contact
-          </a>
+      <div className="flex items-center space-x-6">
+        <Link href="/products" className="hover:text-gray-400">Shop</Link>
+        <Link href="/about" className="hover:text-gray-400">About</Link>
+
+        {/* 🔹 Container untuk Hover & Click */}
+        <div
+          className="relative"
+          onMouseEnter={() => setIsOpen(true)}
+          onMouseLeave={() => setIsOpen(false)}
+        >
+          {/* 🔹 Klik Ikon Cart untuk ke halaman "/cart" */}
+          <Link href="/cart" className="relative">
+            <TiShoppingCart className="w-8 h-8" />
+            {totalQuantity > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-xs px-2 py-1 rounded-full">
+                {totalQuantity}
+              </span>
+            )}
+          </Link>
+
+          {/* 🔹 Mini Cart Dropdown */}
+          {isOpen && <MiniCart isOpen={isOpen} setIsOpen={setIsOpen} />}
         </div>
-
-        {/* Cart Icon */}
-        <div className="relative">
-          <TiShoppingCart size={28} className="text-gray-800" />
-          {cartCount > 0 && (
-            <span className="absolute -top-1 -right-2 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-              {cartCount}
-            </span>
-          )}
-        </div>
-
-        {/* Mobile Menu Button */}
-        <button className="md:hidden text-gray-800">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            fill="none"
-            viewBox="0 0 24 24"
-            strokeWidth="2"
-            stroke="currentColor"
-            className="w-6 h-6"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M4 6h16M4 12h16M4 18h16"
-            />
-          </svg>
-        </button>
       </div>
     </nav>
   );
 };
+
+export default Navbar;
