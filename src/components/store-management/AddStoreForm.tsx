@@ -64,6 +64,11 @@ export default function AddStoreForm({
       }));
     };
 
+  const DEFAULT_CENTER = {
+    lat: -6.9175,
+    lng: 107.6191,
+  };
+
   return (
     <form
       onSubmit={(e) => {
@@ -156,8 +161,8 @@ export default function AddStoreForm({
       <div className="mb-6 h-[300px] w-full">
         <MapContainer
           center={[
-            formData.latitude || -6.2088,
-            formData.longitude || 106.8456,
+            formData.latitude || DEFAULT_CENTER.lat,
+            formData.longitude || DEFAULT_CENTER.lng,
           ]}
           zoom={13}
           className="h-full w-full rounded-lg"

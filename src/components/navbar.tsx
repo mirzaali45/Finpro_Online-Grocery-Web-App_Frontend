@@ -4,7 +4,6 @@ import React, { useState, useCallback, useRef, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { Search, ShoppingCart } from "lucide-react";
-import { useSearch } from "@/components/searchContext";
 import { productService } from "@/services/product.service";
 import debounce from "lodash/debounce";
 import { NavbarProps, ModalState, Product } from "@/types/product-types";
@@ -19,7 +18,6 @@ export default function Navbar({ className }: NavbarProps) {
   });
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const { setSearchTerm } = useSearch();
   const modalRef = useRef<HTMLDivElement>(null);
 
   const handleSearch = useCallback(async (term: string) => {
@@ -27,7 +25,6 @@ export default function Navbar({ className }: NavbarProps) {
       setSearchResults([]);
       return;
     }
-
     setIsLoading(true);
     try {
       const products = await productService.getProducts();
@@ -66,15 +63,12 @@ export default function Navbar({ className }: NavbarProps) {
     }, 300),
     []
   );
-
   const handleSearchInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     debouncedSearch(e.target.value);
   };
-
   const toggleSearch = (isOpen: boolean) => {
     setModalState((prev) => ({ ...prev, isSearchOpen: isOpen }));
   };
-
   const toggleCart = (isOpen: boolean) =>
     setModalState((prev) => ({ ...prev, isCartOpen: isOpen }));
 
@@ -156,7 +150,6 @@ export default function Navbar({ className }: NavbarProps) {
                 </Link>
               </div>
             </div>
-
             <div className="flex items-center space-x-4">
               <button
                 onClick={() => toggleSearch(true)}
@@ -176,7 +169,6 @@ export default function Navbar({ className }: NavbarProps) {
           </div>
         </div>
       </nav>
-
       <div ref={modalRef}>
         <SearchModal
           isOpen={modalState.isSearchOpen}
@@ -185,7 +177,6 @@ export default function Navbar({ className }: NavbarProps) {
           isLoading={isLoading}
           searchResults={searchResults}
         />
-
         <CartModal
           isOpen={modalState.isCartOpen}
           onClose={() => toggleCart(false)}
