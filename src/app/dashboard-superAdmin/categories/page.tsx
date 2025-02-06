@@ -1,4 +1,3 @@
-
 "use client";
 
 import { useState, useEffect } from "react";
@@ -6,7 +5,7 @@ import { Plus } from "lucide-react";
 import Sidebar from "@/components/sidebarSuperAdmin";
 import CategoryCard from "@/components/category-management/CategoryCard";
 import CategoryModal from "@/components/category-management/CategoryModal";
-import { categoryService } from "@/components/hooks/useCategoryAdmin";
+import { categoryService } from "@/services/category-admin.service";
 import { Category, CategoryFormData } from "@/types/category-types";
 
 export default function CategoriesAdmin() {

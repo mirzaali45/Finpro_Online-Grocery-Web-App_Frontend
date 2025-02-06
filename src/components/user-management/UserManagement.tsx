@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { Plus, RefreshCw, AlertTriangle } from "lucide-react";
 import UserCard from "./UserCard";
 import UserForm from "./UserForm";
-import useFetchUsers from "../hooks/useFetchUsers";
+import useFetchUsers from "../../services/fetch-users.service";
 
 export default function UserManagement() {
   const [isModalOpen, setIsModalOpen] = useState(false);

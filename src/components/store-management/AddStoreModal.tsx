@@ -1,7 +1,7 @@
 import { Store } from "lucide-react";
 import { useStoreForm } from "@/helper/use-store-form";
 import AddStoreForm from "./AddStoreForm";
-import { storeService } from "@/components/hooks/useStoreAdmin";
+import { storeService } from "@/services/store-admin.service";
 import Swal from "sweetalert2";
 import { useState } from "react";
 
@@ -17,12 +17,13 @@ export default function AddStoreModal({
   onSuccess,
 }: AddStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { formData, errors, handleChange, validateForm, setFormData } = useStoreForm();
+  const { formData, errors, handleChange, validateForm, setFormData } =
+    useStoreForm();
 
-  const showNotification = (type: 'success' | 'error', message: string) => {
+  const showNotification = (type: "success" | "error", message: string) => {
     Swal.fire({
       icon: type,
-      title: type === 'success' ? 'Success!' : 'Oops...',
+      title: type === "success" ? "Success!" : "Oops...",
       text: message,
       toast: true,
       position: "top-end",
@@ -34,7 +35,7 @@ export default function AddStoreModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!validateForm()) {
       return;
     }
@@ -43,14 +44,13 @@ export default function AddStoreModal({
 
     try {
       await storeService.createStore(formData);
-      showNotification('success', 'Store created successfully');
+      showNotification("success", "Store created successfully");
       onSuccess();
       onClose();
     } catch (error) {
-      const errorMessage = error instanceof Error 
-        ? error.message 
-        : "Failed to create store";
-      showNotification('error', errorMessage);
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to create store";
+      showNotification("error", errorMessage);
     } finally {
       setIsSubmitting(false);
     }

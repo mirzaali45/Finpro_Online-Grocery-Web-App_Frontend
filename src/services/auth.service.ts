@@ -1,5 +1,8 @@
-// services/auth.service.ts
-import { LoginFormValues, LoginResponse, ApiError } from "../types/auth-types";
+import {
+  LoginFormCustomerValues,
+  LoginResponse,
+  ApiError,
+} from "../types/auth-types";
 
 interface DecodedToken {
   id: string;
@@ -11,7 +14,9 @@ interface DecodedToken {
 const base_url_be = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export class AuthService {
-  static async login(credentials: LoginFormValues): Promise<LoginResponse> {
+  static async login(
+    credentials: LoginFormCustomerValues
+  ): Promise<LoginResponse> {
     try {
       const response = await fetch(`${base_url_be}/auth/login`, {
         method: "POST",
@@ -22,19 +27,28 @@ export class AuthService {
         body: JSON.stringify(credentials),
       });
 
+      // Parse response once
+      const responseData = await response.json();
+
       if (!response.ok) {
-        const error = (await response.json()) as ApiError;
-        throw new Error(error.message || "Login failed");
+        throw new Error(responseData.message || "Login failed");
       }
 
-      const data = (await response.json()) as LoginResponse;
+      const data = responseData as LoginResponse;
+      console.log("Login response:", data); // Debug log
 
       if (data.token) {
         localStorage.setItem("token", data.token);
       }
 
+      if (data.user && data.user.user_id) {
+        console.log("Setting user_id:", data.user.user_id); // Debug log
+        localStorage.setItem("user_id", data.user.user_id.toString());
+      }
+
       return data;
     } catch (error) {
+      console.error("Login error:", error); // Debug error log
       if (error instanceof Error) {
         throw error;
       }
@@ -44,14 +58,21 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     localStorage.removeItem("token");
+    localStorage.removeItem("user_id"); // Also remove user_id on logout
   }
 
   static getToken(): string | null {
     return localStorage.getItem("token");
   }
 
+  static getUserId(): string | null {
+    return localStorage.getItem("user_id");
+  }
+
   static isAuthenticated(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    const userId = this.getUserId();
+    return !!(token && userId);
   }
 
   static parseToken(): DecodedToken | null {

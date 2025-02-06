@@ -1,7 +1,7 @@
 // ProductList.tsx
 import { useState, useEffect } from "react";
 import { Product } from "@/types/product-types";
-import { productService } from "@/components/hooks/useProductAdmin";
+import { productService } from "@/services/product.service";
 import { ProductCard } from "./ProductCard";
 
 export default function ProductList() {

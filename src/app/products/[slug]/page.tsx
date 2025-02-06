@@ -4,9 +4,13 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import { notFound } from "next/navigation";
 import { Product } from "@/types/product-types";
-import { productService } from "@/components/hooks/useProductAdmin";
+import { productService } from "@/services/product.service";
 
-export default function ProductDetail({ params }: { params: { slug: string } }) {
+export default function ProductDetail({
+  params,
+}: {
+  params: { slug: string };
+}) {
   const [product, setProduct] = useState<Product | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -23,7 +27,9 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
         setProduct(data);
         setError(null);
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to fetch product");
+        setError(
+          error instanceof Error ? error.message : "Failed to fetch product"
+        );
         console.error("Error fetching product:", error);
       } finally {
         setLoading(false);
@@ -53,7 +59,10 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
           <div className="space-y-4">
             <div className="relative aspect-square">
               <Image
-                src={product.ProductImage?.[selectedImage]?.url || "/product-placeholder.jpg"}
+                src={
+                  product.ProductImage?.[selectedImage]?.url ||
+                  "/product-placeholder.jpg"
+                }
                 alt={product.name}
                 fill
                 className="object-cover rounded-lg"
@@ -64,7 +73,7 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
                 }}
               />
             </div>
-            
+
             {/* Thumbnail Gallery */}
             {product.ProductImage && product.ProductImage.length > 1 && (
               <div className="flex gap-2 overflow-x-auto pb-2">
@@ -73,7 +82,9 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
                     key={image.url}
                     onClick={() => setSelectedImage(index)}
                     className={`relative w-20 h-20 flex-shrink-0 rounded-md overflow-hidden 
-                      ${selectedImage === index ? 'ring-2 ring-indigo-500' : ''}`}
+                      ${
+                        selectedImage === index ? "ring-2 ring-indigo-500" : ""
+                      }`}
                   >
                     <Image
                       src={image.url}
@@ -86,12 +97,12 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
               </div>
             )}
           </div>
-          
+
           {/* Product Info Section */}
           <div className="text-white flex flex-col">
             <h1 className="text-3xl font-bold mb-4">{product.name}</h1>
             <p className="text-gray-300 mb-6">{product.description}</p>
-            
+
             <div className="space-y-4 mb-6">
               <div className="flex justify-between items-center">
                 <span className="text-gray-300">Price</span>
@@ -103,15 +114,15 @@ export default function ProductDetail({ params }: { params: { slug: string } }) 
               {product.category && (
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Category</span>
-                  <span className="text-gray-100">{product.category.category_name}</span>
+                  <span className="text-gray-100">
+                    {product.category.category_name}
+                  </span>
                 </div>
               )}
             </div>
 
             <div className="mt-auto">
-              <button 
-                className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition-colors"
-              >
+              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 rounded-lg transition-colors">
                 Add to Cart
               </button>
             </div>

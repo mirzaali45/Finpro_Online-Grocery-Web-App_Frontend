@@ -3,7 +3,7 @@
 import React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
-import { categoryService } from "@/components/hooks/useCategoryAdmin";
+import { categoryService } from "@/services/category-admin.service";
 import { Category } from "@/types/category-types";
 import Image from "next/image";
 

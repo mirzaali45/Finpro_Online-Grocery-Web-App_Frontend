@@ -8,7 +8,7 @@ import Modal from "@/components/product-management/Modal";
 import ProductForm from "@/components/product-management/ProductForm";
 import ImageUploadForm from "@/components/product-management/ImageUploadForm";
 import { Product, ProductFormData } from "@/types/product-types";
-import { productService } from "@/components/hooks/useProductAdmin";
+import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
 
 export default function ProductAdmin() {
@@ -17,7 +17,8 @@ export default function ProductAdmin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
-  const [showImageUploadModal, setShowImageUploadModal] = useState<boolean>(false);
+  const [showImageUploadModal, setShowImageUploadModal] =
+    useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState<ProductFormData>({
@@ -66,7 +67,10 @@ export default function ProductAdmin() {
 
     setLoading(true);
     try {
-      await productService.uploadProductImages(selectedProduct.product_id, selectedFiles);
+      await productService.uploadProductImages(
+        selectedProduct.product_id,
+        selectedFiles
+      );
       await fetchProducts();
       setShowImageUploadModal(false);
       resetForm();
@@ -203,8 +207,8 @@ export default function ProductAdmin() {
           )}
 
           {/* Add Product Modal */}
-          <Modal 
-            isOpen={showAddModal} 
+          <Modal
+            isOpen={showAddModal}
             onClose={() => {
               setShowAddModal(false);
               resetForm();
