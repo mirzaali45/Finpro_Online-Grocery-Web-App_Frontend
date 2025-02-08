@@ -1,4 +1,4 @@
-import React, { useRef, useCallback } from "react";
+import React, { useRef } from "react";
 import { Search, X } from "lucide-react";
 import { Product } from "@/types/product-types";
 import { SearchResult } from "./SearchResult";
@@ -26,53 +26,86 @@ export const SearchModal = ({
     <div
       role="dialog"
       aria-label="Search products"
-      className="fixed inset-x-0 top-0 z-50 bg-gray-100/95 mx-auto mt-20 rounded-lg shadow-lg max-w-2xl transition-all transform"
+      className={`fixed inset-0 z-[100] pt-20 pb-20 flex justify-center ${
+        isOpen
+          ? "animate-in fade-in slide-in-from-top duration-300"
+          : "animate-out fade-out slide-out-to-top duration-200"
+      }`}
     >
-      <div className="p-4">
-        <div className="flex justify-between items-center mb-3">
-          <h2 className="text-lg font-semibold text-gray-900">
-            Search Products
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-500 hover:text-gray-700"
-            aria-label="Close search"
-          >
-            <X size={20} />
-          </button>
-        </div>
-        <div className="relative">
-          <input
-            ref={searchInputRef}
-            type="search"
-            role="searchbox"
-            aria-label="Search products"
-            placeholder="Search products..."
-            className="w-full px-4 py-2 bg-white border border-gray-200 rounded-md focus:outline-none focus:ring-1 focus:ring-gray-300"
-            onChange={onSearch}
-          />
-          {isLoading ? (
-            <div className="absolute right-3 top-2.5">
-              <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-gray-400" />
-            </div>
-          ) : (
-            <Search
-              className="absolute right-3 top-2.5 text-gray-400"
-              size={18}
-            />
-          )}
+      {/* Backdrop */}
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
 
-          {searchResults.length > 0 && (
-            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-md shadow-lg border border-gray-200 max-h-96 overflow-y-auto">
-              {searchResults.map((product) => (
-                <SearchResult
-                  key={product.product_id}
-                  product={product}
-                  onClose={onClose}
+      <div className="relative w-full max-w-2xl mx-4">
+        <div className="relative overflow-hidden rounded-2xl h-[80vh]">
+          {/* Glass background with subtle gradient */}
+          <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/90 to-neutral-900/95 backdrop-blur-xl border border-neutral-800/50" />
+
+          <div className="relative h-full flex flex-col">
+            {/* Header Section */}
+            <div className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="relative flex items-center gap-3">
+                  <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 blur-xl" />
+                  <Search className="relative w-5 h-5 text-neutral-400" />
+                  <span className="relative text-lg font-medium bg-clip-text text-transparent bg-gradient-to-r from-neutral-200 to-neutral-400">
+                    Search Products
+                  </span>
+                </div>
+                <button
+                  onClick={onClose}
+                  className="ml-auto relative group/btn"
+                >
+                  <div className="absolute inset-0 bg-gradient-to-r from-rose-500/0 to-blue-500/0 group-hover/btn:from-rose-500/10 group-hover/btn:to-blue-500/10 rounded-full blur transition-all duration-300" />
+                  <X className="relative w-5 h-5 text-neutral-400 group-hover/btn:text-neutral-200 transition-colors" />
+                </button>
+              </div>
+
+              {/* Search Input Section */}
+              <div className="group relative flex items-center">
+                {/* Input background with hover effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-neutral-800 to-neutral-800/80 rounded-xl transition-colors group-hover:from-neutral-800/90 group-hover:to-neutral-800/70" />
+
+                {/* Focus gradient */}
+                <div className="absolute inset-0 bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 rounded-xl opacity-0 group-focus-within:opacity-100 transition-opacity duration-300" />
+
+                {/* Search icon and input */}
+                <Search className="relative ml-4 w-5 h-5 text-neutral-500 group-focus-within:text-neutral-400 transition-colors" />
+                <input
+                  ref={searchInputRef}
+                  type="text"
+                  autoFocus
+                  placeholder="Search products..."
+                  className="relative w-full bg-transparent text-neutral-200 placeholder-neutral-500 px-4 py-4 focus:outline-none"
+                  onChange={onSearch}
                 />
-              ))}
+
+                {/* Loading spinner */}
+                {isLoading && (
+                  <div className="relative mr-4">
+                    <div className="w-5 h-5 rounded-full border-2 border-neutral-700 border-t-neutral-300 animate-spin" />
+                  </div>
+                )}
+              </div>
             </div>
-          )}
+
+            {/* Search Results Section */}
+            {searchResults.length > 0 && (
+              <div className="flex-1 overflow-hidden mt-2">
+                <div className="h-full overflow-y-auto divide-y divide-neutral-800/50">
+                  {searchResults.map((product) => (
+                    <SearchResult
+                      key={product.product_id}
+                      product={product}
+                      onClose={onClose}
+                    />
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
