@@ -29,8 +29,11 @@ export interface Product {
   created_at?: string;
   updated_at?: string;
   category: Category;
+<<<<<<< HEAD
   highlightedName?: React.ReactNode;
   slug: string;
+=======
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
   store: Store;
   Inventory?: {
     total_qty: number;
@@ -38,6 +41,7 @@ export interface Product {
   ProductImage?: {
     url: string;
   }[];
+<<<<<<< HEAD
 }
 
 export interface ModalState {
@@ -48,3 +52,6 @@ export interface ModalState {
 export interface NavbarProps {
   className?: string;
 }
+=======
+}
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a

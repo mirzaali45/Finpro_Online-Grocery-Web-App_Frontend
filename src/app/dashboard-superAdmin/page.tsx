@@ -1,5 +1,6 @@
 "use client";
 
+<<<<<<< HEAD
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import Sidebar from "@/components/sidebarSuperAdmin";
@@ -9,14 +10,44 @@ import {
   Bell,
   ChevronDown,
   User,
+=======
+import React, { useState, useEffect } from "react";
+import Sidebar from "@/components/sidebarSuperAdmin";
+import { UserManagementService } from "@/services/user-management.service";
+import {
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
   PieChart,
   ShoppingCart,
   DollarSign,
   Users,
 } from "lucide-react";
 import SuperAdminGuard from "@/components/high-ordered-component/superAdminGuard";
+<<<<<<< HEAD
 
 export default function DashboardSuperAdmin() {
+=======
+import { useRouter } from "next/navigation";
+import HeaderSuperAdmin from "@/components/headerSuperAdmin";
+
+export default function DashboardSuperAdmin() {
+  const router = useRouter();
+
+  function decodeToken(token) {
+    const [header, payload] = token.split('.').slice(0, 2);
+    return {
+      header: JSON.parse(atob(header)),
+      payload: JSON.parse(atob(payload)),
+    };
+  }
+  
+  useEffect(() => {
+      if ((localStorage.getItem('token') && decodeToken(localStorage.getItem('token')).payload.role !== "super_admin") || !localStorage.getItem('is_login')) {
+        console.log('not')
+        router.push("/");
+      }
+  }, [router])
+
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isProfileDropdownOpen, setIsProfileDropdownOpen] = useState(false);
   const [totalUsers, setTotalUsers] = useState(0);
@@ -127,11 +158,16 @@ export default function DashboardSuperAdmin() {
 
   return (
     <SuperAdminGuard>
+<<<<<<< HEAD
       <div className="min-h-screen bg-gray-100">
+=======
+      <div className="min-h-screen bg-gray-100 dark:bg-gray-900 dark:text-white">
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
         <Sidebar
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
+<<<<<<< HEAD
         <div className={`${isSidebarOpen ? "md:ml-64" : ""}`}>
           <header className="bg-white border-b border-gray-200">
             <div className="flex items-center justify-between px-4 py-3">
@@ -190,18 +226,33 @@ export default function DashboardSuperAdmin() {
           </header>
           <main className="p-4 md:p-6 space-y-6">
             <h1 className="text-2xl font-bold text-gray-800">
+=======
+        <div className={`${isSidebarOpen ? "" : ""}`}>
+          <HeaderSuperAdmin setIsSidebarOpen={setIsSidebarOpen} setIsProfileDropdownOpen={setIsProfileDropdownOpen} isProfileDropdownOpen={isProfileDropdownOpen} />
+          <main className="p-4 md:p-6 space-y-6">
+            <h1 className="text-2xl font-bold">
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
               Dashboard Overview
             </h1>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
               {statistics.map((stat) => (
                 <div
                   key={stat.title}
+<<<<<<< HEAD
                   className="bg-white rounded-lg shadow p-6 space-y-4"
                 >
                   <div className="flex items-center justify-between">
                     <div>
                       <p className="text-sm text-gray-600">{stat.title}</p>
                       <p className="text-2xl font-bold text-gray-900">
+=======
+                  className="bg-white dark:bg-gray-800 dark:text-white rounded-lg shadow p-6 space-y-4"
+                >
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <p className="text-sm">{stat.title}</p>
+                      <p className="text-2xl font-bold ">
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
                         {stat.title === "Total Users" ? stat.value : stat.value}
                       </p>
                     </div>
@@ -214,9 +265,15 @@ export default function DashboardSuperAdmin() {
                 </div>
               ))}
             </div>
+<<<<<<< HEAD
             <div className="bg-white rounded-lg shadow">
               <div className="p-6">
                 <h2 className="text-lg font-semibold text-gray-800 mb-4">
+=======
+            <div className="bg-white dark:bg-gray-800 dark:text-white rounded-lg shadow">
+              <div className="p-6">
+                <h2 className="text-lg font-semibold mb-4">
+>>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
                   Recent Activity
                 </h2>
                 <div className="space-y-4">

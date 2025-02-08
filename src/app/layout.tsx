@@ -5,7 +5,7 @@ import "react-toastify/dist/ReactToastify.css";
 import "sweetalert2/dist/sweetalert2.css";
 import NavbarWrapper from "@/components/navbarWrapper";
 import "leaflet/dist/leaflet.css";
-import Footer from "@/components/Footer";
+import Footer from "@/components/footer";
 import { SearchProvider } from "@/components/searchContext";
 
 const geistSans = localFont({
