@@ -232,7 +232,11 @@ export default function Navbar({ className }: NavbarProps) {
                           <Link
                             key={item}
                             href={
-                              item === "Home" ? "/" : `/${item.toLowerCase()}`
+                              item === "Home"
+                                ? "/"
+                                : item === "Login"
+                                ? "/login-user-customer"
+                                : `/${item.toLowerCase()}`
                             }
                             className="relative group"
                           >

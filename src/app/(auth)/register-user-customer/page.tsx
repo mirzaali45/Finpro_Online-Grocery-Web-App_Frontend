@@ -8,6 +8,7 @@ import "react-toastify/dist/ReactToastify.css";
 import RegisterCustomer from "@/components/register/RegisterCustomer";
 import React, { useEffect } from "react";
 
+
 export default function StoreRegisterPage() {
   const router = useRouter();
   useEffect(() => {

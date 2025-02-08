@@ -2,11 +2,16 @@
 
 import React, { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import { StoreIcon, Eye, EyeOff, AlertCircle } from "lucide-react";
-import type { LoginFormCustomerProps, RegisterFormCustomerValues } from "../../types/auth-types";
+import { StoreIcon, AlertCircle } from "lucide-react";
+import {
+  RegisterFormCustomerProps,
+  RegisterFormCustomerValues,
+} from "@/types/auth-types";
 import { registerSchema } from "@/helper/validation-schema-register";
 
-const RegisterCustomer: React.FC<LoginFormCustomerProps> = ({ onSubmit }) => {
+const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
+  onSubmit,
+}) => {
   const [serverError, setServerError] = useState("");
 
   const initialValues: RegisterFormCustomerValues = {
@@ -23,7 +28,7 @@ const RegisterCustomer: React.FC<LoginFormCustomerProps> = ({ onSubmit }) => {
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred during login";
+          : "An error occurred during registration";
       setServerError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -41,7 +46,7 @@ const RegisterCustomer: React.FC<LoginFormCustomerProps> = ({ onSubmit }) => {
             Register TechElite
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Let&apos;s creating a account
+            Let&apos;s create an account
           </p>
         </div>
 
@@ -102,7 +107,7 @@ const RegisterCustomer: React.FC<LoginFormCustomerProps> = ({ onSubmit }) => {
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin mr-2"></div>
-                    Authenticating...
+                    Registering...
                   </div>
                 ) : (
                   "Sign Up Now"
@@ -114,9 +119,13 @@ const RegisterCustomer: React.FC<LoginFormCustomerProps> = ({ onSubmit }) => {
 
         {/* Security Notice */}
         <div className="text-xs text-gray-500 text-center mt-4">
-          Already have some account? <a href="/login-user-customer" className="text-blue-500">Login here.</a>
+          Already have an account?{" "}
+          <a href="/login-user-customer" className="text-blue-500">
+            Login here.
+          </a>
           <br />
-          This is a secure, encrypted connection. All login attempts are logged.
+          This is a secure, encrypted connection. All registration attempts are
+          logged.
         </div>
       </div>
     </div>
