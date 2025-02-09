@@ -10,6 +10,7 @@ import {
   ResetPassValues,
   ResetPassResponse,
   VerifyResetPassValues,
+  TokenCheckResponse
 } from "../types/auth-types";
 
 interface DecodedToken {
@@ -45,6 +46,7 @@ export class AuthService {
       if (data.token) {
         localStorage.setItem("verify_email", "true");
         localStorage.setItem("token", data.token);
+        localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
@@ -55,40 +57,6 @@ export class AuthService {
       throw new Error("An unexpected error occurred");
     }
   }
-
-  // static async registerStoreAdmin(
-  //   credentials: RegisterFormStoreAdminValues
-  // ): Promise<RegisterResponse> {
-  //   try {
-  //     const response = await fetch(`${base_url_be}/auth/register/store-admin`, {
-  //       method: "POST",
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //       },
-  //       credentials: "include",
-  //       body: JSON.stringify(credentials),
-  //     });
-
-  //     if (!response.ok) {
-  //       const error = (await response.json()) as ApiError;
-  //       throw new Error(error.message || "Login failed");
-  //     }
-
-  //     const data = (await response.json()) as RegisterResponse;
-
-  //     if (data.token) {
-  //       localStorage.setItem("verify_email", "true");
-  //       localStorage.setItem("token", data.token);
-  //     }
-
-  //     return data;
-  //   } catch (error) {
-  //     if (error instanceof Error) {
-  //       throw error;
-  //     }
-  //     throw new Error("An unexpected error occurred");
-  //   }
-  // }
 
   static async verifikasiAndSetPass(
     credentials: VerifyAndSetPassValues
@@ -196,7 +164,9 @@ export class AuthService {
     }
   }
 
-  static async login(credentials: LoginFormCustomerValues): Promise<LoginResponse> {
+  static async login(
+    credentials: LoginFormCustomerValues
+  ): Promise<LoginResponse> {
     // console.log(credentials)
     try {
       const response = await fetch(`${base_url_be}/auth/login`, {
@@ -219,6 +189,7 @@ export class AuthService {
         localStorage.setItem("is_login", "true");
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
+        localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
@@ -234,9 +205,10 @@ export class AuthService {
     localStorage.removeItem("token");
     localStorage.removeItem("is_login");
     localStorage.removeItem("exp_token");
+    localStorage.removeItem("user_id");
   }
 
-  static async checkTokenVerifyEmailExp(token: string): Promise<void> {
+  static async checkTokenVerifyEmailExp(): Promise<TokenCheckResponse> {
     try {
       const response = await fetch(
         `${base_url_be}/auth/check-email-token/${localStorage.getItem(
@@ -254,7 +226,7 @@ export class AuthService {
         throw new Error(error.message || "Token Expired");
       }
 
-      const data = await response.json();
+      const data = (await response.json()) as TokenCheckResponse;
       return data;
     } catch (error) {
       if (error instanceof Error) {

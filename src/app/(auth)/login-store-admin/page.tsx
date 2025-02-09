@@ -6,21 +6,9 @@ import { useRouter } from "next/navigation";
 import { LoginFormStoreValues } from "@/types/auth-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-<<<<<<< HEAD
 
 export default function StoreLoginPage() {
   const router = useRouter();
-=======
-import React, { useEffect } from "react";
-
-export default function StoreLoginPage() {
-  const router = useRouter();
-  useEffect(() => {
-      if (!localStorage.getItem('verify_email') && localStorage.getItem('is_login')) {
-        router.push("/");
-      }
-  }, [router])
->>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a
 
   const handleSubmit = async (values: LoginFormStoreValues) => {
     try {

@@ -8,19 +8,30 @@ import "react-toastify/dist/ReactToastify.css";
 import LoginUser from "@/components/login/loginUser";
 import React, { useEffect } from "react";
 import { signIn } from "next-auth/react";
+import { motion } from "framer-motion";
+import {
+  Sparkles,
+  ShieldCheck,
+  Laptop,
+  Store,
+  Headphones,
+} from "lucide-react";
 
 export default function StoreLoginPage() {
   const router = useRouter();
   useEffect(() => {
-      if (!localStorage.getItem('verify_email') && localStorage.getItem('is_login')) {
-        router.push("/");
-      }
-  }, [router])
+    if (
+      !localStorage.getItem("verify_email") &&
+      localStorage.getItem("is_login")
+    ) {
+      router.push("/");
+    }
+  }, [router]);
 
   const handleSubmit = async (values: LoginFormCustomerValues) => {
     try {
       toast.info("Logging in...", {
-        autoClose: false, 
+        autoClose: false,
         isLoading: true,
       });
 
@@ -34,22 +45,19 @@ export default function StoreLoginPage() {
           theme: "colored",
           hideProgressBar: false,
           onClose: () => {
-            // router.push("/");
-            window.location.href = "/"
-            // history.back(); 
+            window.location.href = "/";
           },
         });
       } else {
         toast.dismiss();
-        toast.error("Access denied.Store-Admin privileges required.", {
+        toast.error("Access denied. Store-Admin privileges required.", {
           position: "bottom-right",
           autoClose: 3000,
           theme: "colored",
           hideProgressBar: false,
-        })
+        });
         setTimeout(() => {
-          // router.push("/");
-          window.location.href = "/"
+          window.location.href = "/";
         }, 5000);
       }
     } catch (error) {
@@ -62,34 +70,126 @@ export default function StoreLoginPage() {
       });
     }
   };
-  
 
   const handlegoogle = async () => {
     try {
-      // Gunakan Google untuk memilih akun
       const res = await signIn("google", { callbackUrl: "/waiting" });
-      if (!res) throw new Error("Gagal login dengan Google");
+      if (!res) throw new Error("Failed to login with Google");
     } catch (error) {
-      // return console.log('error', error)
       console.error("Login error:", error);
     }
   };
 
   return (
-    <>
-      <ToastContainer
-        position="bottom-right"
-        autoClose={5000}
-        hideProgressBar={false}
-        newestOnTop={false}
-        closeOnClick
-        rtl={false}
-        pauseOnFocusLoss
-        draggable
-        pauseOnHover
-        theme="colored"
-      />
-      <LoginUser onSubmit={handleSubmit} handleGoogleLogin={handlegoogle} />
-    </>
+    <div className="min-h-screen bg-gradient-to-br from-black to-gray-800 flex items-center justify-center py-20 px-4">
+      <motion.div
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{ opacity: 1, scale: 1 }}
+        transition={{ duration: 0.5 }}
+        className="h-[85vh] w-[85vw] rounded-2xl overflow-hidden relative"
+      >
+        {/* Background Effects */}
+        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20" />
+
+        <div className="relative h-full w-full flex">
+          {/* Left Section */}
+          <motion.div
+            initial={{ opacity: 0, x: -20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.2, duration: 0.5 }}
+            className="w-[60%] p-10"
+          >
+            <div className="h-full flex flex-col justify-center space-y-8">
+              {/* Video Section */}
+              <div className="aspect-video rounded-2xl overflow-hidden shadow-2xl border border-white/10 relative">
+                <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
+                <iframe
+                  className="w-full h-full"
+                  src="https://www.youtube.com/embed/eDqfg_LexCQ?autoplay=1&loop=1&playlist=eDqfg_LexCQ&controls=0&modestbranding=1"
+                  title="TechElite Promo Video"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                  allowFullScreen
+                />
+              </div>
+
+              {/* Content Section */}
+              <div className="space-y-8">
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.4 }}
+                  className="space-y-4"
+                >
+                  <div className="flex items-center gap-3">
+                    <Sparkles className="w-8 h-8 text-blue-400" />
+                    <h2 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                      Welcome to TechElite
+                    </h2>
+                  </div>
+                  <p className="text-xl text-gray-300 pl-11">
+                    Your premium tech shopping destination
+                  </p>
+                </motion.div>
+
+                {/* Features Grid */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.5 }}
+                  className="grid grid-cols-2 gap-4"
+                >
+                  <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors">
+                    <Laptop className="w-6 h-6 text-purple-400" />
+                    <span className="text-gray-300">Premium Products</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors">
+                    <ShieldCheck className="w-6 h-6 text-blue-400" />
+                    <span className="text-gray-300">Secure Shopping</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors">
+                    <Store className="w-6 h-6 text-pink-400" />
+                    <span className="text-gray-300">Multiple Stores</span>
+                  </div>
+                  <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors">
+                    <Headphones className="w-6 h-6 text-green-400" />
+                    <span className="text-gray-300">24/7 Support</span>
+                  </div>
+                </motion.div>
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Right Section - Login Form */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+            className="w-[70%] flex justify-center items-center bg-white/5 backdrop-blur-md border-l border-white/10"
+          >
+            <div className="w-full max-w-[60%] px-8">
+              <LoginUser
+                onSubmit={handleSubmit}
+                handleGoogleLogin={handlegoogle}
+              />
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Toast Container */}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop={false}
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="colored"
+        />
+      </motion.div>
+    </div>
   );
 }
