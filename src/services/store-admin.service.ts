@@ -12,15 +12,7 @@ class StoreServiceError extends Error {
 export const storeService = {
   async getStores(): Promise<StoreData[]> {
     try {
-      const token = localStorage.getItem("token");
-      if (!token) throw new StoreServiceError("No authentication token found");
-
-      const response = await fetch(`${BASE_URL}/store`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(`${BASE_URL}/store`);
 
       if (!response.ok) {
         throw new StoreServiceError(
@@ -36,11 +28,10 @@ export const storeService = {
     }
   },
 
- async createStore(formData: StoreData): Promise<StoreData> {
+  async createStore(formData: StoreData): Promise<StoreData> {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new StoreServiceError("No authentication token found");
-
 
       const storeData: StoreData = {
         store_name: formData.store_name,
@@ -51,7 +42,7 @@ export const storeService = {
         postcode: formData.postcode,
         latitude: formData.latitude,
         longitude: formData.longitude,
-        description: formData.description
+        description: formData.description,
       };
 
       const response = await fetch(`${BASE_URL}/store`, {
@@ -75,7 +66,7 @@ export const storeService = {
       if (error instanceof StoreServiceError) throw error;
       throw new StoreServiceError("Failed to create store: Network error");
     }
-},
+  },
 
   async deleteStore(storeId: number): Promise<void> {
     try {

@@ -7,11 +7,9 @@
   "tailwindCSS.validation.enable": true,
   "tailwindCSS.experimental.classRegex": [
     ["@apply ([^;]*);", "(?:@apply )?([^;]*)"]
-<<<<<<< HEAD
-  ]
-}
-=======
   ],
-  "postman.settings.dotenv-detection-notification-visibility": false
+  "typescript.validate.enable": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "@typescript-eslint/ban-ts-comment": "off",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }
->>>>>>> 62c2c231c94f84dc4574bf680ec2ffc3b2ccc68a

@@ -22,6 +22,12 @@ export interface RegisterResponse {
   user: User;
 }
 
+export interface TokenCheckResponse {
+  status: string;
+  message: string;
+}
+
+
 export interface ResetPassResponse {
   token: string;
   email: string;
@@ -31,6 +37,7 @@ export interface VerifyResponse {
   status: string;
   message: string;
   token: string;
+  role: "customer" | "store_admin" | "super_admin";
 }
 
 export interface LoginResponse {

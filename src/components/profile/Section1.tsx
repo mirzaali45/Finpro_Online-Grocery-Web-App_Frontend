@@ -26,6 +26,7 @@ const Section1 = () => {
       localStorage.removeItem("is_login");
       localStorage.removeItem("token");
       localStorage.removeItem("exp_token");
+      localStorage.removeItem("user_id")
       signOut({ callbackUrl: "/" }); 
     }
   };
@@ -85,16 +86,16 @@ const Section1 = () => {
             onChange={(e) => handlePickImage(e)}
           />
         </button>
-        {
-          profile && profile.password === "" ? (
-            <button
-              onClick={() => setModalSetPass(true)}
-              className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-6"
-            >
-              Set Password
-            </button>
-          ) : ""
-        }
+        {profile && profile.password === "" ? (
+          <button
+            onClick={() => setModalSetPass(true)}
+            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-6"
+          >
+            Set Password
+          </button>
+        ) : (
+          ""
+        )}
         <button
           onClick={() => handleLogout()}
           className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mb-6"
@@ -142,7 +143,9 @@ const Section1 = () => {
           <input
             type="number"
             value={profile.phone}
-            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
+            onChange={(e) =>
+              setProfile({ ...profile, phone: parseInt(e.target.value, 10) })
+            }
             placeholder="Enter phone"
             className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -177,13 +180,17 @@ const Section1 = () => {
         </div>
       </div>
       {/* modal set password */}
-      {
-        profile && profile.password === "" ? (
-          <Modal isOpen={modalSetPass} onClose={() => setModalSetPass(false)} title='Set Password'>
-              <FormSetPassword onsubmit={setPasswordHandle} />
-          </Modal>
-        ) : ""
-      }
+      {profile && profile.password === "" ? (
+        <Modal
+          isOpen={modalSetPass}
+          onClose={() => setModalSetPass(false)}
+          title="Set Password"
+        >
+          <FormSetPassword onsubmit={setPasswordHandle} />
+        </Modal>
+      ) : (
+        ""
+      )}
     </section>
   );
 };
