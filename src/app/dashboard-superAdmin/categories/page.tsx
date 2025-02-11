@@ -1,16 +1,12 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import Sidebar from "@/components/sidebarSuperAdmin";
-
-interface Category {
-  id: number;
-  category_name: string;
-  description: string;
-  category_url: string;
-  Product?: string; // Made optional with ?
-}
+import CategoryCard from "@/components/category-management/CategoryCard";
+import CategoryModal from "@/components/category-management/CategoryModal";
+import { categoryService } from "@/services/category-admin.service";
+import { Category, CategoryFormData } from "@/types/category-types";
 
 export default function CategoriesAdmin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -18,15 +14,11 @@ export default function CategoriesAdmin() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-
-  // Form states
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<CategoryFormData>({
     category_name: "",
     description: "",
-    category_url: "",
   });
 
-  // Fetch categories on component mount
   useEffect(() => {
     fetchCategories();
   }, []);
@@ -34,14 +26,7 @@ export default function CategoriesAdmin() {
   const fetchCategories = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/category`
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to fetch categories");
-      }
-      const data = await response.json();
+      const data = await categoryService.getCategories();
       setCategories(data);
     } catch (err) {
       setError(
@@ -62,37 +47,15 @@ export default function CategoriesAdmin() {
     }));
   };
 
-  const handleAddCategory = async () => {
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication required");
-      }
-
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/category`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
-
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to create category");
-      }
-
-      const newCategory = await response.json();
+      const newCategory = await categoryService.createCategory(formData);
       setCategories((prev) => [...prev, newCategory]);
       setIsModalOpen(false);
       setFormData({
         category_name: "",
         description: "",
-        category_url: "",
       });
     } catch (err) {
       setError(
@@ -101,9 +64,14 @@ export default function CategoriesAdmin() {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleAddCategory();
+  const handleEdit = (category: Category) => {
+    // Implement edit functionality
+    console.log("Edit category:", category);
+  };
+
+  const handleDelete = (id: number) => {
+    // Implement delete functionality
+    console.log("Delete category:", id);
   };
 
   if (error) {
@@ -146,110 +114,23 @@ export default function CategoriesAdmin() {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
-              <div
+              <CategoryCard
                 key={category.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold">
-                    {category.category_name}
-                  </h3>
-                  <div className="flex gap-2">
-                    <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                      <Pencil size={18} />
-                    </button>
-                    <button className="text-red-600 hover:text-red-700 dark:text-red-400">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  {category.description}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Total Products: {category.Product?.length || 0}
-                </p>
-              </div>
+                category={category}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
+              />
             ))}
           </div>
         )}
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Add New Category</h2>
-                <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
-                >
-                  ✕
-                </button>
-              </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    name="category_name"
-                    value={formData.category_name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category URL
-                  </label>
-                  <input
-                    type="text"
-                    name="category_url"
-                    value={formData.category_url}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Add Category
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
-        )}
+        <CategoryModal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          formData={formData}
+          onSubmit={handleSubmit}
+          onChange={handleInputChange}
+        />
       </div>
     </div>
   );
