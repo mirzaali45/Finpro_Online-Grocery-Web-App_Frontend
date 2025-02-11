@@ -1,16 +1,16 @@
 "use client";
 
-import LoginForm from "@/components/loginSuperAdmin";
+import LoginFormSuper from "@/components/login/loginSuperAdmin";
 import { AuthService } from "@/services/auth.service";
 import { useRouter } from "next/navigation";
-import { LoginFormValues } from "@/types/auth-types";
+import { LoginFormSuperValues } from "@/types/auth-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
-export default function LoginPage() {
+export default function SuperLoginPage() {
   const router = useRouter();
 
-  const handleSubmit = async (values: LoginFormValues) => {
+  const handleSubmit = async (values: LoginFormSuperValues) => {
     try {
       // Show loading toast
       toast.info("Logging in...", {
@@ -72,7 +72,7 @@ export default function LoginPage() {
         pauseOnHover
         theme="colored"
       />
-      <LoginForm onSubmit={handleSubmit} />
+      <LoginFormSuper onSubmit={handleSubmit} />
     </>
   );
 }
