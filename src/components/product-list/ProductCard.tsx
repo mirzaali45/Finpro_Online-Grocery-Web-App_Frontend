@@ -1,18 +1,26 @@
+// ProductCard.tsx
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/types/product-types";
 import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
+import { ChevronLeft, ChevronRight } from "lucide-react";
+import ProductCardSkeleton from "./ProductCartSkeleton";
 
 interface ProductCardProps {
   product: Product;
   onCartUpdate?: () => void;
 }
 
-export function ProductCard({ product, onCartUpdate }: ProductCardProps) {
+const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
+
+  const images = product.ProductImage || [];
+  const hasMultipleImages = images.length > 1;
 
   const handleAddToCart = async () => {
     try {
@@ -25,6 +33,28 @@ export function ProductCard({ product, onCartUpdate }: ProductCardProps) {
       setIsLoading(false);
     }
   };
+
+  const nextImage = () => {
+    setIsImageLoading(true);
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setIsImageLoading(true);
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  // Auto-rotate images when hovered
+  useEffect(() => {
+    if (isHovered && hasMultipleImages) {
+      const timer = setInterval(nextImage, 3000);
+      return () => clearInterval(timer);
+    }
+  }, [isHovered, hasMultipleImages]);
+
+  if (!product) {
+    return <ProductCardSkeleton />;
+  }
 
   return (
     <div
@@ -43,12 +73,68 @@ export function ProductCard({ product, onCartUpdate }: ProductCardProps) {
         {/* Image container */}
         <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-900/10 z-10" />
+          
+          {/* Loading skeleton */}
+          {isImageLoading && (
+            <div className="absolute inset-0 bg-neutral-800/50 animate-pulse" />
+          )}
+          
+          {/* Main Image */}
           <Image
-            src={product.ProductImage?.[0]?.url || "/product-placeholder.jpg"}
-            alt={product.name}
+            src={images[currentImageIndex]?.url || "/product-placeholder.jpg"}
+            alt={`${product.name} - Image ${currentImageIndex + 1}`}
             fill
-            className="object-cover transform transition-all duration-500 group-hover:scale-110"
+            className={`object-cover transform transition-all duration-500 group-hover:scale-110 ${
+              isImageLoading ? 'opacity-0' : 'opacity-100'
+            }`}
+            onLoadingComplete={() => setIsImageLoading(false)}
           />
+
+          {/* Image Navigation Controls - Only show when hovered and has multiple images */}
+          {hasMultipleImages && isHovered && (
+            <>
+              {/* Previous Button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  prevImage();
+                }}
+                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-20"
+              >
+                <ChevronLeft className="w-4 h-4 text-white" />
+              </button>
+
+              {/* Next Button */}
+              <button
+                onClick={(e) => {
+                  e.preventDefault();
+                  nextImage();
+                }}
+                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-20"
+              >
+                <ChevronRight className="w-4 h-4 text-white" />
+              </button>
+
+              {/* Image Indicators */}
+              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+                {images.map((_, index) => (
+                  <button
+                    key={index}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      setIsImageLoading(true);
+                      setCurrentImageIndex(index);
+                    }}
+                    className={`w-1.5 h-1.5 rounded-full transition-all ${
+                      currentImageIndex === index
+                        ? "bg-white w-3"
+                        : "bg-white/50 hover:bg-white/75"
+                    }`}
+                  />
+                ))}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Product details */}
@@ -123,4 +209,6 @@ export function ProductCard({ product, onCartUpdate }: ProductCardProps) {
       </div>
     </div>
   );
-}
+};
+
+export default ProductCard;
