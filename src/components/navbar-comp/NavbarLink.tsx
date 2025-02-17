@@ -74,7 +74,7 @@ export const NavLinks = () => {
   const navigationItems = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
-    { name: "Gadgets", path: "/gadgets" },
+    { name: "Brands", path: "/brands" },
     { name: "Deals", path: "/deals" },
     ...(isCustomer
       ? [

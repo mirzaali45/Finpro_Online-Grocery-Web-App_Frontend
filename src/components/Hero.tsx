@@ -70,7 +70,7 @@ export default function Hero() {
           </p>
 
           {/* CTA Button with modern design */}
-          <Link href="/shop" className="group relative inline-flex items-center">
+          <Link href="/products" className="group relative inline-flex items-center">
             {/* Button background and effects */}
             <div className="relative px-8 py-4 bg-white rounded-lg overflow-hidden transition-transform duration-300 ease-out transform group-hover:translate-y-[-2px] group-hover:shadow-lg">
               {/* Gradient shine effect */}
