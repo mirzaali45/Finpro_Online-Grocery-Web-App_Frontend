@@ -12,16 +12,9 @@ export default function StoreDashboard() {
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [formData, setFormData] = useState<StoreData>({
-    store_name: "",
-    address: "",
-    subdistrict: "",
-    city: "",
-    province: "",
-    postcode: "",
-  });
+
   const handleSuccess = () => {
-    fetchStores(); 
+    fetchStores();
   };
 
   useEffect(() => {
@@ -39,18 +32,6 @@ export default function StoreDashboard() {
     }
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    try {
-      await storeService.createStore(formData);
-      await fetchStores();
-      handleCloseModal();
-      resetForm();
-    } catch (error) {
-      console.error("Error creating store:", error);
-    }
-  };
-
   const handleDeleteStore = async (storeId: number) => {
     try {
       await storeService.deleteStore(storeId);
@@ -60,32 +41,7 @@ export default function StoreDashboard() {
     }
   };
 
-  const handleInputChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-  ) => {
-    const { id, value } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [id]: value,
-    }));
-  };
-
-  const resetForm = () => {
-    setFormData({
-      store_name: "",
-      address: "",
-      subdistrict: "",
-      city: "",
-      province: "",
-      postcode: "",
-      description: "",
-    });
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-    resetForm();
-  };
+  // Remove formData state and resetForm since they're not used
 
   if (loading) {
     return (

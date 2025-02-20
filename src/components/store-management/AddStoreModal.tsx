@@ -1,9 +1,11 @@
 import { Store } from "lucide-react";
-import { useStoreForm } from "@/helper/use-store-form";
+import useStoreForm from "@/components/hooks/useStoreForm";
 import AddStoreForm from "./AddStoreForm";
 import { storeService } from "@/services/store-admin.service";
+import { storeAdminService } from "@/services/fetch-store-admin.service";
 import Swal from "sweetalert2";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import type { StoreAdmin } from "@/services/fetch-store-admin.service";
 
 interface AddStoreModalProps {
   isOpen: boolean;
@@ -17,8 +19,21 @@ export default function AddStoreModal({
   onSuccess,
 }: AddStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [storeAdmins, setStoreAdmins] = useState<StoreAdmin[]>([]);
   const { formData, errors, handleChange, validateForm, setFormData } =
     useStoreForm();
+
+  useEffect(() => {
+    if (isOpen) {
+      storeAdminService
+        .getStoreAdmins()
+        .then(setStoreAdmins)
+        .catch((error) => {
+          showNotification("error", "Failed to fetch store admins");
+          console.error(error);
+        });
+    }
+  }, [isOpen]);
 
   const showNotification = (type: "success" | "error", message: string) => {
     Swal.fire({
@@ -59,7 +74,7 @@ export default function AddStoreModal({
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 p-4">
-      <div className="bg-white rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg w-full max-w-4xl max-h-[90vh] overflow-y-auto">
         <div className="bg-blue-600 text-white p-6 flex items-center rounded-t-lg">
           <Store className="h-8 w-8 mr-4" />
           <h2 className="text-2xl font-bold">Add New Store</h2>
@@ -80,6 +95,7 @@ export default function AddStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            storeAdmins={storeAdmins}
           />
         </div>
       </div>

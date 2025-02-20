@@ -22,7 +22,7 @@ export default function Inventory() {
     try {
       const data = await InventoryService.getInventory();
       setInventoryData(data);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to fetch inventory');
     } finally {
       setIsLoading(false);
@@ -39,7 +39,7 @@ export default function Inventory() {
       toast.success('Inventory created successfully');
       fetchInventory();
       setIsCreateModalOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to create inventory');
     }
   };
@@ -50,7 +50,7 @@ export default function Inventory() {
       toast.success('Inventory updated successfully');
       fetchInventory();
       setIsUpdateModalOpen(false);
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to update inventory');
     }
   };
@@ -62,7 +62,7 @@ export default function Inventory() {
       await InventoryService.deleteInventory(invId);
       toast.success('Inventory deleted successfully');
       fetchInventory();
-    } catch (error) {
+    } catch (_error) {
       toast.error('Failed to delete inventory');
     }
   };
