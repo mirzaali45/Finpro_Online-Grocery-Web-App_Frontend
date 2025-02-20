@@ -21,7 +21,7 @@ export default function StoreDashboard() {
     postcode: "",
   });
   const handleSuccess = () => {
-    fetchStores(); // Refresh the stores list
+    fetchStores(); 
   };
 
   useEffect(() => {
