@@ -10,10 +10,13 @@ import ImageUploadForm from "@/components/product-management/ImageUploadForm";
 import { Product, ProductFormData } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
+import { Pagination } from "@/components/product-list/Pagination";
 
 export default function ProductAdmin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [totalPages, setTotalPages] = useState<number>(0);
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
@@ -31,14 +34,15 @@ export default function ProductAdmin() {
   });
 
   useEffect(() => {
-    fetchProducts();
-  }, []);
+    fetchProducts(currentPage);
+  }, [currentPage]);
 
-  const fetchProducts = async () => {
+  const fetchProducts = async (page: number) => {
     setLoading(true);
     try {
-      const data = await productService.getProducts();
-      setProducts(data);
+      const response = await productService.getProducts(page);
+      setProducts(response.products);
+      setTotalPages(response.totalPages);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -71,7 +75,7 @@ export default function ProductAdmin() {
         selectedProduct.product_id,
         selectedFiles
       );
-      await fetchProducts();
+      await fetchProducts(currentPage);
       setShowImageUploadModal(false);
       resetForm();
     } catch (error) {
@@ -87,7 +91,7 @@ export default function ProductAdmin() {
     try {
       if (!selectedProduct) throw new Error("No product selected");
       await productService.updateProduct(selectedProduct.product_id, formData);
-      await fetchProducts();
+      await fetchProducts(currentPage);
       setShowEditModal(false);
       resetForm();
     } catch (error) {
@@ -101,7 +105,7 @@ export default function ProductAdmin() {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       await productService.deleteProduct(productId);
-      await fetchProducts();
+      await fetchProducts(currentPage);
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -201,9 +205,21 @@ export default function ProductAdmin() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {products.map(renderProductCard)}
-            </div>
+            <>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {products.map(renderProductCard)}
+              </div>
+
+              {totalPages > 1 && (
+                <div className="mt-8 flex justify-center">
+                  <Pagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    onPageChange={setCurrentPage}
+                  />
+                </div>
+              )}
+            </>
           )}
 
           {/* Add Product Modal */}
@@ -251,7 +267,7 @@ export default function ProductAdmin() {
             onClose={() => {
               setShowImageUploadModal(false);
               resetForm();
-              fetchProducts();
+              fetchProducts(currentPage);
             }}
             title="Upload Product Images"
           >

@@ -1,12 +1,11 @@
-// ProductCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Product } from "@/types/product-types";
+import { ChevronLeft, ChevronRight } from "lucide-react";
 import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
-import { ChevronLeft, ChevronRight } from "lucide-react";
-import ProductCardSkeleton from "./ProductCartSkeleton";
+import { toast } from "react-toastify";
 
 interface ProductCardProps {
   product: Product;
@@ -14,26 +13,46 @@ interface ProductCardProps {
 }
 
 const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
-  const [isLoading, setIsLoading] = useState(false);
-  const [isImageLoading, setIsImageLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [isImageLoading, setIsImageLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-
+  const [isLoading, setIsLoading] = useState(false);
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
 
-  const handleAddToCart = async () => {
-    try {
-      setIsLoading(true);
-      await addToCart(product.product_id, 1);
-      onCartUpdate?.();
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+ const handleAddToCart = async () => {
+   try {
+     setIsLoading(true);
+     await addToCart(product.product_id, 1);
 
+     // Success toast
+     toast.success(`${product.name} added to cart!`, {
+       position: "bottom-right",
+       autoClose: 3000,
+       hideProgressBar: false,
+       closeOnClick: true,
+       pauseOnHover: true,
+       draggable: true,
+       progress: undefined,
+     });
+
+     onCartUpdate?.();
+   } catch (error) {
+     // Error toast
+     toast.error("Failed to add product to cart", {
+       position: "bottom-right",
+       autoClose: 3000,
+       hideProgressBar: false,
+       closeOnClick: true,
+       pauseOnHover: true,
+       draggable: true,
+       progress: undefined,
+     });
+     console.error("Failed to add to cart:", error);
+   } finally {
+     setIsLoading(false);
+   }
+ };
   const nextImage = () => {
     setIsImageLoading(true);
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
@@ -52,10 +71,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
     }
   }, [isHovered, hasMultipleImages]);
 
-  if (!product) {
-    return <ProductCardSkeleton />;
-  }
-
   return (
     <div
       className="group relative rounded-xl overflow-hidden"
@@ -73,19 +88,19 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
         {/* Image container */}
         <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-900/10 z-10" />
-          
+
           {/* Loading skeleton */}
           {isImageLoading && (
             <div className="absolute inset-0 bg-neutral-800/50 animate-pulse" />
           )}
-          
+
           {/* Main Image */}
           <Image
             src={images[currentImageIndex]?.url || "/product-placeholder.jpg"}
             alt={`${product.name} - Image ${currentImageIndex + 1}`}
             fill
             className={`object-cover transform transition-all duration-500 group-hover:scale-110 ${
-              isImageLoading ? 'opacity-0' : 'opacity-100'
+              isImageLoading ? "opacity-0" : "opacity-100"
             }`}
             onLoadingComplete={() => setIsImageLoading(false)}
           />
