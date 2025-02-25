@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { MapPin, Building2, Save } from "lucide-react";
 import { InputField } from "@/components/store-management/StoreInputFields";
-import { StoreData, FormErrorsWithIndex, StoreDataV2 } from "@/types/store-types";
+import { StoreData, FormErrorsWithIndex } from "@/types/store-types";
 import {
   MapContainer,
   TileLayer,
@@ -27,7 +27,7 @@ interface EditStoreFormProps {
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  dataStore: StoreDataV2
+  dataStore: StoreData;
 }
 function MapClickHandler({
   setFormData,
@@ -54,10 +54,14 @@ export default function EditStoreForm({
   setFormData,
   handleSubmit,
   isSubmitting,
-  dataStore
+  dataStore,
 }: EditStoreFormProps) {
   // State untuk menyimpan posisi marker
-  const [markerPosition, setMarkerPosition] = useState([formData.latitude || -6.19676128457438, formData.longitude || 106.83754574840799]);
+  const [markerPosition, setMarkerPosition] = useState<[number, number]>([
+    formData.latitude || -6.19676128457438,
+    formData.longitude || 106.83754574840799,
+  ]);
+
   const handleNumberChange =
     (fieldName: "latitude" | "longitude") =>
     (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -67,12 +71,15 @@ export default function EditStoreForm({
         [fieldName]: value ? parseFloat(value) : undefined,
       }));
     };
-    // Efek untuk mengatur default values saat formData berubah
-      useEffect(() => {
-        if (formData) {
-          setMarkerPosition([formData.latitude || -6.19676128457438, formData.longitude || 106.83754574840799]);
-        }
-      }, [formData]);
+  // Efek untuk mengatur default values saat formData berubah
+  useEffect(() => {
+    if (formData) {
+      setMarkerPosition([
+        formData.latitude || -6.19676128457438,
+        formData.longitude || 106.83754574840799,
+      ] as [number, number]);
+    }
+  }, [formData]);
 
   return (
     <form
@@ -156,8 +163,8 @@ export default function EditStoreForm({
           label="Longitude"
           Icon={MapPin}
           type="number"
-          value={formData.longitude}
-          error={errors.longitude}
+          value={formData.longitude?.toString()}
+          error={errors.longitude?.toString()}
           onChange={handleNumberChange("longitude")}
         />
       </div>
