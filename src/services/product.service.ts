@@ -2,12 +2,13 @@ import { Product, ProductFormData, ProductResponse } from "@/types/product-types
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
-
 export const productService = {
   async getProducts(
     page: number = 1,
     limit: number = 8,
-    categoryId?: number
+    categoryId?: number,
+    minPrice?: number,
+    maxPrice?: number
   ): Promise<ProductResponse> {
     try {
       const params = new URLSearchParams({
@@ -17,6 +18,14 @@ export const productService = {
 
       if (categoryId !== undefined) {
         params.append("categoryId", categoryId.toString());
+      }
+      
+      if (minPrice !== undefined) {
+        params.append("minPrice", minPrice.toString());
+      }
+      
+      if (maxPrice !== undefined) {
+        params.append("maxPrice", maxPrice.toString());
       }
 
       const response = await fetch(`${BASE_URL}/product?${params}`, {
@@ -40,7 +49,7 @@ export const productService = {
   async getFeaturedProducts(limit: number = 4): Promise<Product[]> {
     try {
       const response = await fetch(
-        `http://localhost:8000/api/product?featured=true&limit=${limit}`,
+        `${BASE_URL}/product?featured=true&limit=${limit}`,
         {
           method: "GET",
           headers: {
@@ -61,6 +70,7 @@ export const productService = {
     }
   },
 
+  // Rest of your service methods remain unchanged
   async getProductBySlug(slug: string): Promise<Product> {
     try {
       const response = await fetch(`${BASE_URL}/product/slug/${slug}`);

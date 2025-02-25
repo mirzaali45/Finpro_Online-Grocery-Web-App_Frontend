@@ -3,6 +3,8 @@ import React from "react";
 export interface Store {
   store_id: number;
   store_name: string;
+  latitude: number;
+  longitude: number;
   city: string;
 }
 
