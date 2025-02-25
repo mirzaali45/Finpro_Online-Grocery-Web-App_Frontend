@@ -8,6 +8,7 @@ import {
 } from "@/services/cart.service";
 import { formatRupiah } from "@/helper/currencyRp";
 import { CartModalProps, CartData } from "@/types/cart-types";
+import Link from "next/link";
 
 export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const [cartData, setCartData] = useState<CartData | null>(null);
@@ -249,18 +250,19 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                 <span>{cartData?.summary.totalItems || 0} items</span>
               </div>
             </div>
-
-            <button
-              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!cartData?.items.length}
-            >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
-              <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
-                <span className="text-neutral-200 font-medium">
-                  Proceed to Checkout
-                </span>
-              </div>
-            </button>
+            <Link href={`/checkout`}>
+              <button
+                className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!cartData?.items.length}
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
+                <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
+                  <span className="text-neutral-200 font-medium">
+                    Proceed to Checkout
+                  </span>
+                </div>
+              </button>
+            </Link>
           </div>
         </div>
       </div>
