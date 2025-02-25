@@ -2,10 +2,11 @@
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebarSuperAdmin";
-import { RefreshCw, ArrowUpDown, FileText } from "lucide-react";
+import { RefreshCw, ArrowUpDown, FileText, ChevronLeft, ChevronRight } from "lucide-react";
 import type {
   Inventory,
   UpdateInventoryRequest,
+  PaginationMetadata,
 } from "@/types/inventory-types";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { categoryService } from "@/services/category-admin.service";
@@ -19,6 +20,14 @@ import { LogDetails } from "@/types/log-types";
 export default function Inventory() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
+  const [pagination, setPagination] = useState<PaginationMetadata>({
+    total: 0,
+    page: 1,
+    pageSize: 10,
+    totalPages: 0,
+    hasNextPage: false,
+    hasPrevPage: false
+  });
   const [categoriesCount, setCategoriesCount] = useState(0);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isLogViewerOpen, setIsLogViewerOpen] = useState(false);
@@ -31,84 +40,91 @@ export default function Inventory() {
     Inventory[]
   >([]);
 
- const createLog = (
-   action: string,
-   details: LogDetails,
-   inventory?: Inventory
- ) => {
-   if (action === "Update") {
-     // Create a more descriptive log message
-     const logDescription = inventory
-       ? `Updated ${inventory.product.name} at ${inventory.store.store_name}. 
-         Quantity ${details.updates?.operation}: ${details.updates?.qty}`
-       : JSON.stringify(details);
+  const createLog = (
+    action: string,
+    details: LogDetails,
+    inventory?: Inventory
+  ) => {
+    if (action === "Update") {
+      // Create a more descriptive log message
+      const logDescription = inventory
+        ? `Updated ${inventory.product.name} at ${inventory.store.store_name}. 
+          Quantity ${details.updates?.operation}: ${details.updates?.qty}`
+        : JSON.stringify(details);
 
-     LogService.createLog({
-       action,
-       description: logDescription,
-       module: "Inventory Management",
-       timestamp: new Date(),
-     });
-   }
- };
+      LogService.createLog({
+        action,
+        description: logDescription,
+        module: "Inventory Management",
+        timestamp: new Date(),
+      });
+    }
+  };
 
-
-  const fetchInventoryAndCategories = async () => {
+  const fetchInventoryAndCategories = async (page = 1) => {
     try {
       setIsRefreshing(true);
       const [inventoryResponse, categoriesResponse] = await Promise.all([
-        InventoryService.getInventory(),
+        InventoryService.getInventory({ page }),
         categoryService.getCategories(),
       ]);
 
-      // Detect added and deleted items
-      const addedItems = inventoryResponse.filter(
-        (newItem) =>
-          !previousInventoryData.some(
-            (oldItem) => oldItem.inv_id === newItem.inv_id
-          )
-      );
+      // Extract inventory data and pagination info
+      const { data: newInventoryData, pagination: newPagination } = inventoryResponse;
 
-      const deletedItems = previousInventoryData.filter(
-        (oldItem) =>
-          !inventoryResponse.some(
-            (newItem) => newItem.inv_id === oldItem.inv_id
-          )
-      );
+      // Detect added and deleted items (only when staying on same page)
+      if (pagination.page === page) {
+        const addedItems = newInventoryData.filter(
+          (newItem) =>
+            !previousInventoryData.some(
+              (oldItem) => oldItem.inv_id === newItem.inv_id
+            )
+        );
 
-      // Log added items
-      if (addedItems.length > 0) {
-        createLog("Add", {
-          items: addedItems.map((item) => ({
-            id: item.inv_id,
-            name: item.product.name,
-            store: item.store.store_name,
-            quantity: item.qty,
-          })),
-          totalAddedItems: addedItems.length,
-        });
+        const deletedItems = previousInventoryData.filter(
+          (oldItem) =>
+            !newInventoryData.some(
+              (newItem) => newItem.inv_id === oldItem.inv_id
+            )
+        );
+
+        // Log added items
+        if (addedItems.length > 0) {
+          createLog("Add", {
+            items: addedItems.map((item) => ({
+              id: item.inv_id,
+              name: item.product.name,
+              store: item.store.store_name,
+              quantity: item.qty,
+            })),
+            totalAddedItems: addedItems.length,
+          });
+        }
+
+        // Log deleted items
+        if (deletedItems.length > 0) {
+          createLog("Delete", {
+            items: deletedItems.map((item) => ({
+              id: item.inv_id,
+              name: item.product.name,
+              store: item.store.store_name,
+              quantity: item.qty,
+            })),
+            totalDeletedItems: deletedItems.length,
+          });
+        }
       }
 
-      // Log deleted items
-      if (deletedItems.length > 0) {
-        createLog("Delete", {
-          items: deletedItems.map((item) => ({
-            id: item.inv_id,
-            name: item.product.name,
-            store: item.store.store_name,
-            quantity: item.qty,
-          })),
-          totalDeletedItems: deletedItems.length,
-        });
-      }
-
-      setInventoryData(inventoryResponse);
+      setInventoryData(newInventoryData);
+      setPagination(newPagination);
       setCategoriesCount(categoriesResponse.length);
-      setPreviousInventoryData(inventoryResponse);
+      setPreviousInventoryData(newInventoryData);
 
       // Log the inventory refresh
       createLog("Refresh", {
-        totalItems: inventoryResponse.length,
+        totalItems: newPagination.total,
+        page: newPagination.page,
+        totalPages: newPagination.totalPages,
         totalCategories: categoriesResponse.length,
       });
     } catch (error) {
@@ -152,7 +168,7 @@ export default function Inventory() {
         updatedInventory
       );
 
-      fetchInventoryAndCategories();
+      fetchInventoryAndCategories(pagination.page);
       setIsUpdateModalOpen(false);
     } catch (error) {
       console.error("Error updating inventory:", error);
@@ -189,7 +205,13 @@ export default function Inventory() {
         });
       }
 
-      fetchInventoryAndCategories();
+      // Reload current page or go to previous page if this was the only item
+      const nextPage = 
+        inventoryData.length === 1 && pagination.page > 1 
+          ? pagination.page - 1 
+          : pagination.page;
+      
+      fetchInventoryAndCategories(nextPage);
     } catch (error) {
       console.error("Error deleting inventory:", error);
       toast.error("Failed to delete inventory");
@@ -216,6 +238,10 @@ export default function Inventory() {
 
   const handleViewLogs = () => {
     setIsLogViewerOpen(true);
+  };
+
+  const handlePageChange = (newPage: number) => {
+    fetchInventoryAndCategories(newPage);
   };
 
   return (
@@ -248,7 +274,7 @@ export default function Inventory() {
                     View Logs
                   </button>
                   <button
-                    onClick={fetchInventoryAndCategories}
+                    onClick={() => fetchInventoryAndCategories(pagination.page)}
                     disabled={isRefreshing}
                     className="flex items-center px-3 py-2 bg-blue-50 text-blue-600 rounded-md hover:bg-blue-100 transition-colors border border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800 dark:hover:bg-blue-900/50"
                   >
@@ -271,7 +297,7 @@ export default function Inventory() {
                         Total Items
                       </p>
                       <h3 className="text-2xl font-bold mt-1">
-                        {inventoryData.length}
+                        {pagination.total}
                       </h3>
                     </div>
                     <div className="p-2 bg-blue-50 rounded-lg dark:bg-blue-900/30">
@@ -335,7 +361,7 @@ export default function Inventory() {
                 </h2>
                 <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
                   {inventoryData.length > 0
-                    ? `Showing ${inventoryData.length} items`
+                    ? `Showing ${inventoryData.length} of ${pagination.total} items (Page ${pagination.page} of ${pagination.totalPages})`
                     : "No items found"}
                 </p>
               </div>
@@ -383,6 +409,34 @@ export default function Inventory() {
                         onEdit={handleEdit}
                         onDelete={handleDeleteInventory}
                       />
+                      
+                      {/* Pagination Controls */}
+                      <div className="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
+                        <div className="text-sm text-gray-500 dark:text-gray-400">
+                          Showing {inventoryData.length} of {pagination.total} items
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <button
+                            onClick={() => handlePageChange(pagination.page - 1)}
+                            disabled={!pagination.hasPrevPage}
+                            className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Previous page"
+                          >
+                            <ChevronLeft className="w-5 h-5" />
+                          </button>
+                          <span className="text-sm font-medium">
+                            Page {pagination.page} of {pagination.totalPages}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(pagination.page + 1)}
+                            disabled={!pagination.hasNextPage}
+                            className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                            aria-label="Next page"
+                          >
+                            <ChevronRight className="w-5 h-5" />
+                          </button>
+                        </div>
+                      </div>
                     </div>
                   )}
                 </div>
