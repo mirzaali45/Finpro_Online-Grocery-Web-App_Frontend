@@ -46,7 +46,6 @@ export class AuthService {
       if (data.token) {
         localStorage.setItem("verify_email", "true");
         localStorage.setItem("token", data.token);
-        localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
@@ -186,10 +185,8 @@ export class AuthService {
       const data = (await response.json()) as LoginResponse;
 
       if (data.token) {
-        localStorage.setItem("is_login", "true");
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
-        localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
@@ -203,9 +200,7 @@ export class AuthService {
 
   static async logout(): Promise<void> {
     localStorage.removeItem("token");
-    localStorage.removeItem("is_login");
     localStorage.removeItem("exp_token");
-    localStorage.removeItem("user_id");
   }
 
   static async checkTokenVerifyEmailExp(): Promise<TokenCheckResponse> {
