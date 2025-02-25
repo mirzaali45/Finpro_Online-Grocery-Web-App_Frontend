@@ -5,14 +5,14 @@ import { storeService } from "@/components/hooks/useStoreAdmin";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
-import { StoreDataV2 } from "@/types/store-types";
+import { StoreData } from "@/types/store-types";
 
 
 interface EditStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  dataStore: StoreDataV2;
+  dataStore: StoreData;
 }
 
 export default function EditStoreModal({
@@ -49,7 +49,10 @@ export default function EditStoreModal({
     setIsSubmitting(true);
     // console.log(dataStore.store_id)
     try {
-      await storeService.editStore(formData, dataStore.store_id);
+     if (!dataStore.store_id) {
+       throw new Error("Store ID is missing");
+     }
+     await storeService.editStore(formData, dataStore.store_id);
       showNotification('success', 'Store edited successfully');
       onSuccess();
       onClose();
