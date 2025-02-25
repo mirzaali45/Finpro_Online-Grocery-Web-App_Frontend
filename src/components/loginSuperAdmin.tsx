@@ -2,28 +2,22 @@
 
 import React, { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
-import { StoreIcon, AlertCircle } from "lucide-react";
-import {
-  RegisterFormCustomerProps,
-  RegisterFormCustomerValues,
-} from "@/types/auth-types";
-import { registerSchema } from "@/helper/validation-schema-register";
-import { motion, AnimatePresence } from "framer-motion";
-import Image from "next/image";
+import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
+import { loginSchema } from "../helper/validation-schema-login";
+import type { LoginFormValues, LoginFormProps } from "../types/auth-types";
 
-const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
-  onSubmit,
-  handleGoogleRegister
-}) => {
+const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+  const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  const initialValues: RegisterFormCustomerValues = {
+  const initialValues: LoginFormValues = {
     email: "",
+    password: "",
   };
 
   const handleSubmit = async (
-    values: RegisterFormCustomerValues,
-    { setSubmitting }: FormikHelpers<RegisterFormCustomerValues>
+    values: LoginFormValues,
+    { setSubmitting }: FormikHelpers<LoginFormValues>
   ) => {
     try {
       await onSubmit(values);
@@ -31,7 +25,7 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
       const errorMessage =
         error instanceof Error
           ? error.message
-          : "An error occurred during registration";
+          : "An error occurred during login";
       setServerError(errorMessage);
     } finally {
       setSubmitting(false);
@@ -39,17 +33,18 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center mt-10 bg-gradient-to-br from-black to-gray-600 py-12 px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-gray-100 to-gray-300 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-xl">
+        {/* Header */}
         <div className="text-center">
           <div className="flex justify-center">
-            <StoreIcon className="h-12 w-12 text-blue-600" />
+            <Shield className="h-12 w-12 text-blue-600" />
           </div>
           <h2 className="mt-4 text-3xl font-bold text-gray-900">
-            Register TechElite
+            Super Admin Access
           </h2>
           <p className="mt-2 text-sm text-gray-600">
-            Let&apos;s create an account
+            Secure login portal for administrative control
           </p>
         </div>
 
@@ -63,7 +58,7 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
 
         <Formik
           initialValues={initialValues}
-          validationSchema={registerSchema}
+          validationSchema={loginSchema}
           onSubmit={handleSubmit}
         >
           {({ errors, touched, isSubmitting }) => (
@@ -88,10 +83,51 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
                           ? "border-red-500"
                           : "border-gray-300"
                       }`}
-                    placeholder="jhonyreva@example.com"
+                    placeholder="super.admin@example.com"
                   />
                   {errors.email && touched.email && (
                     <p className="mt-1 text-sm text-red-600">{errors.email}</p>
+                  )}
+                </div>
+
+                {/* Password Field */}
+                <div className="relative">
+                  <label
+                    htmlFor="password"
+                    className="block text-sm font-medium text-gray-700"
+                  >
+                    Password
+                  </label>
+                  <div className="mt-1 relative">
+                    <Field
+                      id="password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      autoComplete="current-password"
+                      className={`block w-full px-3 py-2 border rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+                        ${
+                          errors.password && touched.password
+                            ? "border-red-500"
+                            : "border-gray-300"
+                        }`}
+                      placeholder="••••••••"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute inset-y-0 right-0 pr-3 flex items-center"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5 text-gray-400" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                  {errors.password && touched.password && (
+                    <p className="mt-1 text-sm text-red-600">
+                      {errors.password}
+                    </p>
                   )}
                 </div>
               </div>
@@ -110,57 +146,23 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
                 {isSubmitting ? (
                   <div className="flex items-center">
                     <div className="w-5 h-5 border-t-2 border-white border-solid rounded-full animate-spin mr-2"></div>
-                    Registering...
+                    Authenticating...
                   </div>
                 ) : (
-                  "Sign Up Now"
+                  "Sign in as Super Admin"
                 )}
               </button>
             </Form>
           )}
         </Formik>
 
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ delay: 0.7 }}
-          className="mt-6"
-        >
-          <div className="relative">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-gray-600/20"></div>
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-2 bg-transparent text-gray-600">
-                Or continue with
-              </span>
-            </div>
-          </div>
-
-          <motion.button
-            whileHover={{ scale: 1.02 }}
-            whileTap={{ scale: 0.98 }}
-            onClick={handleGoogleRegister}
-            className="mt-4 w-full flex items-center justify-center gap-3 px-4 py-3 border border-gray-600/20 rounded-lg bg-white/5 hover:bg-white/10 transition-colors duration-200"
-          >
-            <Image src="/google.png" alt="Google" width={20} height={20} />
-            <span className="text-black">Sign up with Google</span>
-          </motion.button>
-        </motion.div>
-
         {/* Security Notice */}
         <div className="text-xs text-gray-500 text-center mt-4">
-          Already have an account?{" "}
-          <a href="/login-user-customer" className="text-blue-500">
-            Login here.
-          </a>
-          <br />
-          This is a secure, encrypted connection. All registration attempts are
-          logged.
+          This is a secure, encrypted connection. All login attempts are logged.
         </div>
       </div>
     </div>
   );
 };
 
-export default RegisterCustomer;
+export default LoginForm;

@@ -9,7 +9,7 @@ import Section3 from '@/components/profile/Section3';
 export default function ProfilePage() {
     const router = useRouter();
     useEffect(() => {
-        if (!localStorage.getItem('is_login')) {
+        if (!localStorage.getItem('token')) {
           router.push("/login-user-customer");
         }
     }, [router])
