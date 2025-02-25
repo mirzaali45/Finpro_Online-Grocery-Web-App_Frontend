@@ -18,14 +18,19 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      const userId = localStorage.getItem("user_id");
-      if (!userId) throw new Error("Please login to view your cart");
+      const token = localStorage.getItem("token");
+      if (!token) throw new Error("Please login to view your cart");
 
-      const response = await fetchCartId(userId);
+      const response = await fetchCartId();
       setCartData(response.data);
       setError("");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to load cart");
+      if (error instanceof Error && error.message.includes("login")) {
+        // Handle authentication error
+        localStorage.removeItem("token");
+        // You might want to trigger a redirect or show a login modal
+      }
     } finally {
       setIsLoading(false);
     }
@@ -70,11 +75,14 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
           },
         });
       }
-      loadCart();
+      loadCart(); // Refresh cart data after update
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to update quantity"
       );
+      if (error instanceof Error && error.message.includes("login")) {
+        localStorage.removeItem("token");
+      }
       loadCart();
     } finally {
       setIsUpdating(null);
@@ -90,6 +98,9 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       setError(
         error instanceof Error ? error.message : "Failed to remove item"
       );
+      if (error instanceof Error && error.message.includes("login")) {
+        localStorage.removeItem("token");
+      }
     } finally {
       setIsUpdating(null);
     }

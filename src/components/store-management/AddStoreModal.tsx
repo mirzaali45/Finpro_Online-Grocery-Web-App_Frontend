@@ -4,20 +4,17 @@ import AddStoreForm from "./AddStoreForm";
 import { storeService } from "@/services/store-admin.service";
 import Swal from "sweetalert2";
 import { useState } from "react";
-import { User } from "@/types/user-types";
 
 interface AddStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  users: User[];
 }
 
 export default function AddStoreModal({
   isOpen,
   onClose,
   onSuccess,
-  users,
 }: AddStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { formData, errors, handleChange, validateForm, setFormData } =
@@ -83,7 +80,6 @@ export default function AddStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            users={users}
           />
         </div>
       </div>

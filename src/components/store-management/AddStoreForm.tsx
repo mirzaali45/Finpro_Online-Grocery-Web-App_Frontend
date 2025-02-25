@@ -13,8 +13,6 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import { SelectField } from "./StoreSelectFields";
-import { User } from "@/types/user-types";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/marker-icon-2x.png",
@@ -25,11 +23,10 @@ L.Icon.Default.mergeOptions({
 interface AddStoreFormProps {
   formData: StoreData;
   errors: FormErrorsWithIndex;
-  handleChange: (e: React.ChangeEvent<any>) => void;
+  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  users: User[]
 }
 function MapClickHandler({
   setFormData,
@@ -56,7 +53,6 @@ export default function AddStoreForm({
   setFormData,
   handleSubmit,
   isSubmitting,
-  users
 }: AddStoreFormProps) {
   const handleNumberChange =
     (fieldName: "latitude" | "longitude") =>
@@ -159,15 +155,6 @@ export default function AddStoreForm({
           value={formData.longitude}
           error={errors.longitude}
           onChange={handleNumberChange("longitude")}
-        />
-        <SelectField
-          name="user_id"
-          label="Store Admin"
-          Icon={MapPin}
-          value={formData.user_id}
-          error={errors.user_id}
-          onChange={handleChange}
-          options={users?.map((v: User) => ({ value: v.user_id, label: v.first_name }))}
         />
       </div>
 

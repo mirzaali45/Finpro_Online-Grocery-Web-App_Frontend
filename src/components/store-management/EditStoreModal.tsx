@@ -6,7 +6,6 @@ import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
 import { StoreDataV2 } from "@/types/store-types";
-import { User } from "@/types/user-types";
 
 
 interface EditStoreModalProps {
@@ -14,15 +13,13 @@ interface EditStoreModalProps {
   onClose: () => void;
   onSuccess: () => void;
   dataStore: StoreDataV2;
-  users: User[]
 }
 
 export default function EditStoreModal({
   isOpen,
   onClose,
   onSuccess,
-  dataStore,
-  users
+  dataStore
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { formData, errors, handleChange, validateForm, setFormData } = useStoreForm();
@@ -104,7 +101,6 @@ export default function EditStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            users={users}
           />
         </div>
       </div>

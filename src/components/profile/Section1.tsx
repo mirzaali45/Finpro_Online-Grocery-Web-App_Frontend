@@ -146,8 +146,8 @@ const Section1 = () => {
           <input
             type="number"
             value={profile.phone}
-            onChange={(e) =>
-              setProfile({ ...profile, phone: parseInt(e.target.value, 10) })
+            onChange={
+              (e) => setProfile({ ...profile, phone: e.target.value }) // Remove parseInt
             }
             placeholder="Enter phone"
             className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"

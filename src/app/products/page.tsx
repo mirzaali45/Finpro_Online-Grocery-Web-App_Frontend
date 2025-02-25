@@ -5,7 +5,6 @@ import { Product } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { ProductList } from "@/components/product-list/ProductList";
 import { Pagination } from "@/components/product-list/Pagination";
-import ToastContainerElement from "@/components/ToastContainerElement";
 
 export default function ProductPage() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -138,7 +137,6 @@ export default function ProductPage() {
           animation: spin 4s linear infinite;
         }
       `}</style>
-      <ToastContainerElement />
     </div>
   );
 }

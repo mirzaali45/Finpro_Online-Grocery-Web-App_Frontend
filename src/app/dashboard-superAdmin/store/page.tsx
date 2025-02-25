@@ -6,8 +6,6 @@ import { storeService } from "@/services/store-admin.service";
 import { StoreData } from "@/types/store-types";
 import StoreList from "@/components/store-management/StoreList";
 import AddStoreModal from "@/components/store-management/AddStoreModal";
-import { UserManagementService } from "@/services/user-management.service";
-import { User } from "@/types/user-types";
 
 export default function StoreDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -22,14 +20,12 @@ export default function StoreDashboard() {
     province: "",
     postcode: "",
   });
-  const [storeAdmins, setStoreAdmins] = useState<User[]>([]);
   const handleSuccess = () => {
     fetchStores(); // Refresh the stores list
   };
 
   useEffect(() => {
     fetchStores();
-    fetchUsers()
   }, []);
 
   const fetchStores = async () => {
@@ -38,17 +34,6 @@ export default function StoreDashboard() {
       setStores(data);
     } catch (error) {
       console.error("Error fetching stores:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchUsers = async () => {
-    try {
-      const data = await UserManagementService.getAllStoreAdmin();
-      setStoreAdmins(data);
-    } catch (error) {
-      console.error("Error fetching admins:", error);
     } finally {
       setLoading(false);
     }
@@ -116,7 +101,7 @@ export default function StoreDashboard() {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
-      <div className="p-8 ml-[20rem]">
+      <div className="p-8 ml-[5rem]">
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
             <div className="flex justify-between items-center mb-6">
@@ -135,18 +120,12 @@ export default function StoreDashboard() {
             </div>
           </header>
 
-          <StoreList
-            stores={stores}
-            onDeleteStore={handleDeleteStore}
-            handleSuccess={handleSuccess}
-            users={storeAdmins}
-          />
+          <StoreList stores={stores} onDeleteStore={handleDeleteStore} />
 
           <AddStoreModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSuccess={handleSuccess}
-            users={storeAdmins}
           />
         </div>
       </div>

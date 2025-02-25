@@ -7,8 +7,6 @@ import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import ProductCardSkeleton from "./ProductCartSkeleton";
-import { toast, ToastOptions } from "react-toastify";
-import { useRouter } from "next/navigation";
 
 interface ProductCardProps {
   product: Product;
@@ -20,30 +18,17 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  const router = useRouter();
 
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
-  const showToast = (message: string, type: keyof typeof toast, onClose: any = null) => {
-      toast.dismiss();
-      (toast[type] as (content: string, options?: ToastOptions) => void)(message, {
-        position: "bottom-right",
-        autoClose: 3000,
-        theme: "colored",
-        hideProgressBar: false,
-        onClose,
-      });
-    };
 
   const handleAddToCart = async () => {
     try {
       setIsLoading(true);
       await addToCart(product.product_id, 1);
       onCartUpdate?.();
-    } catch (error: any) {
+    } catch (error) {
       console.error("Failed to add to cart:", error);
-      showToast(error.message, "error");
-      router.push("/login-user-customer")
     } finally {
       setIsLoading(false);
     }

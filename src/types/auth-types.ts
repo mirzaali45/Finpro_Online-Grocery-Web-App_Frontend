@@ -13,6 +13,8 @@ export interface User {
   verified: boolean;
   created_at: string;
   updated_at: string;
+  referral_code?: string; // Add this
+  is_google?: boolean; // Add this
 }
 
 // API Response interfaces
