@@ -114,7 +114,7 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
             onSubmit={handleSubmit}
           >
             {({ errors, touched, isSubmitting }) => (
-              <Form className="mt-8 space-y-6">
+              <Form className="mt-2 space-y-4">
                 <div className="space-y-4">
                   <motion.div
                     initial={{ opacity: 0, x: -20 }}
@@ -182,6 +182,15 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
                         {errors.password}
                       </motion.p>
                     )}
+                    <div className="flex justify-end mt-2">
+                      <motion.a
+                        whileHover={{ color: "#60A5FA" }}
+                        href="/reset-password"
+                        className="text-blue-400 hover:text-blue-300 transition-colors"
+                      >
+                        Forgot password?
+                      </motion.a>
+                    </div>
                   </motion.div>
                 </div>
 
@@ -256,16 +265,6 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
               </motion.a>
             </p>
             <p>
-              Forgot password?{" "}
-              <motion.a
-                whileHover={{ color: "#60A5FA" }}
-                href="/reset-password"
-                className="text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Reset password
-              </motion.a>
-            </p>
-            <p>
               Want to login as super admin?{" "}
               <motion.a
                 whileHover={{ color: "#60A5FA" }}
@@ -275,7 +274,7 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
                 Login as admin
               </motion.a>
             </p>
-            <p className="pt-4 text-xs text-gray-500">
+            <p className="text-xs text-gray-500">
               This is a secure, encrypted connection
             </p>
           </motion.div>

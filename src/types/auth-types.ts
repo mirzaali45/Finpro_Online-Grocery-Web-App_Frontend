@@ -13,6 +13,8 @@ export interface User {
   verified: boolean;
   created_at: string;
   updated_at: string;
+  referral_code?: string; // Add this
+  is_google?: boolean; // Add this
 }
 
 // API Response interfaces
@@ -94,6 +96,7 @@ export interface LoginFormSuperValues {
 // Props interfaces
 export interface RegisterFormCustomerProps {
   onSubmit: (values: RegisterFormCustomerValues) => Promise<void>;
+  handleGoogleRegister: () => void;
 }
 
 export interface ResetPassProps {
