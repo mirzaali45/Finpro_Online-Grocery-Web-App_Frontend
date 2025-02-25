@@ -2,7 +2,13 @@ import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
 import { Product } from "@/types/product-types";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  ShoppingCart,
+  ExternalLink,
+  Store,
+} from "lucide-react";
 import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
@@ -17,207 +23,174 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
+  const inventory = product.Inventory?.[0]?.total_qty || 0;
 
- const handleAddToCart = async () => {
-   try {
-     setIsLoading(true);
-     await addToCart(product.product_id, 1);
+  const handleAddToCart = async () => {
+    if (isLoading) return;
 
-     // Success toast
-     toast.success(`${product.name} added to cart!`, {
-       position: "bottom-right",
-       autoClose: 3000,
-       hideProgressBar: false,
-       closeOnClick: true,
-       pauseOnHover: true,
-       draggable: true,
-       progress: undefined,
-     });
-
-     onCartUpdate?.();
-   } catch (error) {
-     // Error toast
-     toast.error("Failed to add product to cart", {
-       position: "bottom-right",
-       autoClose: 3000,
-       hideProgressBar: false,
-       closeOnClick: true,
-       pauseOnHover: true,
-       draggable: true,
-       progress: undefined,
-     });
-     console.error("Failed to add to cart:", error);
-   } finally {
-     setIsLoading(false);
-   }
- };
-  const nextImage = () => {
-    setIsImageLoading(true);
-    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+    try {
+      setIsLoading(true);
+      await addToCart(product.product_id, 1);
+      toast.success(`${product.name} added to cart!`, {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
+      onCartUpdate?.();
+    } catch (error) {
+      toast.error("Failed to add product to cart", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+      console.error("Failed to add to cart:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
-  const prevImage = () => {
+  const handleImageNavigation = (direction: "next" | "prev") => {
     setIsImageLoading(true);
-    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+    setCurrentImageIndex((prev) => {
+      if (direction === "next") return (prev + 1) % images.length;
+      return (prev - 1 + images.length) % images.length;
+    });
   };
 
   // Auto-rotate images when hovered
   useEffect(() => {
     if (isHovered && hasMultipleImages) {
-      const timer = setInterval(nextImage, 3000);
+      const timer = setInterval(() => handleImageNavigation("next"), 3000);
       return () => clearInterval(timer);
     }
   }, [isHovered, hasMultipleImages]);
 
   return (
     <div
-      className="group relative rounded-xl overflow-hidden"
+      className="group relative rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Glass background with gradient */}
+      {/* Background */}
       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl rounded-xl border border-neutral-800/50 transition-all duration-500 group-hover:backdrop-blur-2xl" />
 
-      {/* Animated gradient border */}
+      {/* Hover Effect Border */}
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
-      {/* Content container */}
-      <div className="relative p-4">
-        {/* Image container */}
-        <div className="relative h-48 mb-4 rounded-lg overflow-hidden">
+      <div className="relative p-4 space-y-4">
+        {/* Image Section */}
+        <div className="relative h-52 rounded-lg overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-900/10 z-10" />
 
-          {/* Loading skeleton */}
           {isImageLoading && (
-            <div className="absolute inset-0 bg-neutral-800/50 animate-pulse" />
+            <div className="absolute inset-0 bg-neutral-800/50 animate-pulse rounded-lg" />
           )}
 
-          {/* Main Image */}
           <Image
             src={images[currentImageIndex]?.url || "/product-placeholder.jpg"}
-            alt={`${product.name} - Image ${currentImageIndex + 1}`}
+            alt={product.name}
             fill
-            className={`object-cover transform transition-all duration-500 group-hover:scale-110 ${
+            className={`object-cover transition-transform duration-700 group-hover:scale-105 ${
               isImageLoading ? "opacity-0" : "opacity-100"
             }`}
             onLoadingComplete={() => setIsImageLoading(false)}
           />
 
-          {/* Image Navigation Controls - Only show when hovered and has multiple images */}
+          {/* Image Navigation */}
           {hasMultipleImages && isHovered && (
-            <>
-              {/* Previous Button */}
+            <div className="absolute inset-0 flex items-center justify-between z-20 px-2">
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  prevImage();
+                  handleImageNavigation("prev");
                 }}
-                className="absolute left-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-20"
+                className="p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
               >
                 <ChevronLeft className="w-4 h-4 text-white" />
               </button>
-
-              {/* Next Button */}
               <button
                 onClick={(e) => {
                   e.preventDefault();
-                  nextImage();
+                  handleImageNavigation("next");
                 }}
-                className="absolute right-2 top-1/2 -translate-y-1/2 p-1.5 rounded-full bg-black/50 hover:bg-black/70 transition-colors z-20"
+                className="p-2 rounded-full bg-black/50 hover:bg-black/70 transition-colors"
               >
                 <ChevronRight className="w-4 h-4 text-white" />
               </button>
+            </div>
+          )}
 
-              {/* Image Indicators */}
-              <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
-                {images.map((_, index) => (
-                  <button
-                    key={index}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      setIsImageLoading(true);
-                      setCurrentImageIndex(index);
-                    }}
-                    className={`w-1.5 h-1.5 rounded-full transition-all ${
-                      currentImageIndex === index
-                        ? "bg-white w-3"
-                        : "bg-white/50 hover:bg-white/75"
-                    }`}
-                  />
-                ))}
-              </div>
-            </>
+          {/* Image Indicators */}
+          {hasMultipleImages && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
+              {images.map((_, index) => (
+                <button
+                  key={index}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    setIsImageLoading(true);
+                    setCurrentImageIndex(index);
+                  }}
+                  className={`h-1.5 rounded-full transition-all ${
+                    currentImageIndex === index
+                      ? "w-3 bg-white"
+                      : "w-1.5 bg-white/50 hover:bg-white/75"
+                  }`}
+                />
+              ))}
+            </div>
           )}
         </div>
 
-        {/* Product details */}
+        {/* Product Info */}
         <div className="space-y-3">
-          <h3 className="text-lg font-medium bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
-            {product.name}
-          </h3>
-
-          <p className="text-sm text-neutral-400 line-clamp-2 min-h-[40px]">
-            {product.description}
-          </p>
-
-          {/* Price */}
-          <div className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400 mb-4">
-            Rp.{product.price.toLocaleString()}
+          <div>
+            <h3 className="text-lg font-medium text-neutral-100">
+              {product.name}
+            </h3>
+            <div className="flex items-center gap-2 group/store">
+              <Store className="w-4 h-4 text-neutral-500 group-hover/store:text-neutral-300 transition-colors" />
+              <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors">
+                {product.store.store_name}
+              </p>
+            </div>
           </div>
 
-          {/* Buttons */}
-          <div className="flex gap-3">
-            {/* See More Button */}
+          <div className="flex items-center justify-between">
+            <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+              Rp.{product.price.toLocaleString()}
+            </span>
+            <span className="text-sm text-neutral-400">Stock: {inventory}</span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2 pt-2">
             <Link
               href={`/products/${generateSlug(product.name)}`}
-              className="relative group/btn flex-1"
+              className="flex-1 px-4 py-2.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors duration-200 flex items-center justify-center gap-2 group"
             >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover/btn:opacity-100 transition duration-300" />
-              <div className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-900 rounded-lg leading-none">
-                <span className="text-sm text-neutral-300">Details</span>
-                <svg
-                  className="w-4 h-4 stroke-neutral-300 transform transition-transform duration-300 group-hover/btn:translate-x-0.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M9 5l7 7-7 7"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+              <span className="text-sm text-neutral-200">View Details</span>
+              <ExternalLink className="w-4 h-4 text-neutral-400 group-hover:text-neutral-200 transition-colors" />
             </Link>
 
-            {/* Add to Cart Button */}
             <button
               onClick={handleAddToCart}
-              disabled={isLoading}
-              className="relative group/btn flex-1 disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={isLoading || inventory === 0}
+              className="flex-1 px-4 py-2.5 rounded-lg bg-neutral-800 hover:bg-neutral-700 transition-colors duration-200 flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed group"
             >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover/btn:opacity-100 transition duration-300" />
-              <div className="relative flex items-center justify-center gap-2 px-4 py-2.5 bg-neutral-900 rounded-lg leading-none">
-                <span className="text-sm text-neutral-300">
-                  {isLoading ? "Adding..." : "Add to Cart"}
-                </span>
-                <svg
-                  className="w-4 h-4 stroke-neutral-300"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path
-                    d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
-                    strokeWidth="2"
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                  />
-                </svg>
-              </div>
+              <span className="text-sm text-neutral-200">
+                {isLoading
+                  ? "Adding..."
+                  : inventory === 0
+                  ? "Out of Stock"
+                  : "Add to Cart"}
+              </span>
+              <ShoppingCart className="w-4 h-4 text-neutral-400 group-hover:text-neutral-200 transition-colors" />
             </button>
           </div>
         </div>
