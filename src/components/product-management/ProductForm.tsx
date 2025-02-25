@@ -201,19 +201,19 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
       <div
         ref={editorRef}
         contentEditable
-        className="min-h-[200px] p-3 focus:outline-none 
-          bg-white dark:bg-gray-800 
-          text-gray-900 dark:text-gray-100
-          text-left rtl:text-right
-          [&_*]:text-inherit
-          [&_*]:direction-ltr
-          [&_p]:my-1
-          [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2
-          [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2
-          [&_li]:my-1
-          selection:bg-blue-200 dark:selection:bg-blue-900
-          caret-blue-600 dark:caret-blue-400
-          break-words whitespace-pre-wrap"
+        className="min-h-[200px] max-h-[300px] overflow-y-auto p-3 focus:outline-none 
+    bg-white dark:bg-gray-800 
+    text-gray-900 dark:text-gray-100
+    text-left rtl:text-right
+    [&_*]:text-inherit
+    [&_*]:direction-ltr
+    [&_p]:my-1
+    [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2
+    [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2
+    [&_li]:my-1
+    selection:bg-blue-200 dark:selection:bg-blue-900
+    caret-blue-600 dark:caret-blue-400
+    break-words whitespace-pre-wrap"
         onPaste={handlePaste}
         spellCheck={false}
         suppressContentEditableWarning
@@ -224,6 +224,8 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
           WebkitTextFillColor: "inherit",
           textDecoration: "none",
           whiteSpace: "pre-wrap",
+          maxHeight: "300px",
+          overflowY: "auto",
         }}
       />
     </div>
