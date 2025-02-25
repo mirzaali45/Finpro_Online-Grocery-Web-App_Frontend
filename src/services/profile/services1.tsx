@@ -19,7 +19,7 @@ const ProfileServices = () => {
     firstName: "Loading..",
     lastName: "Loading..",
     email: "Loading..",
-    phone: 0,
+    phone: "",
     password: "Loading..",
     role: "Loading..",
     status: "Loading..",
@@ -30,7 +30,10 @@ const ProfileServices = () => {
 
   const [isSaveAvatar, setIsSaveAvatar] = useState(false);
   const [isChangeAvatar, setIsChangeAvatar] = useState(false);
-  const [newFile, setNewFile] = useState({ file: null, url: "" });
+  const [newFile, setNewFile] = useState<{ file: File | null; url: string }>({
+    file: null,
+    url: "",
+  });
 
   useEffect(() => {
     getDataUser();
@@ -55,36 +58,8 @@ const ProfileServices = () => {
           phone: data.phone ?? "",
           role: data.role,
           status: data.verified ? "Aktif" : "Tidak Aktif",
-          referral_code: data.referral_code,
-          is_google: data.is_google,
-        }));
-      }
-    } catch {
-      showToast("Failed to get user data.", "error");
-    }
-  };
-
-  const getDataReferral = async () => {
-    try {
-      const res = await fetch(`${base_url_be}/customer/profile`, {
-        headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
-      });
-      if (res.ok) {
-        const { data } = await res.json();
-        setProfile((prev) => ({
-          ...prev,
-          avatar: data.avatar || defaultAvatar,
-          username: data.username ?? "",
-          password: data.password ?? "",
-          userId: data.user_id,
-          firstName: data.first_name ?? "",
-          lastName: data.last_name ?? "",
-          email: data.email ?? "",
-          phone: data.phone ?? "",
-          role: data.role,
-          status: data.verified ? "Aktif" : "Tidak Aktif",
-          referral_code: data.referral_code,
-          is_google: data.is_google,
+          referral_code: data.referral_code ?? "",
+          is_google: !!data.google_id,
         }));
       }
     } catch {
@@ -109,12 +84,6 @@ const ProfileServices = () => {
         }),
       });
       if (res.ok) {
-        // if (profile.email !== session?.user?.email) {
-        //   localStorage.setItem("verify_email", "false");
-        //   localStorage.setItem("token", "");
-        //   router.push("/verify-register");
-        //   return;
-        // }
         showToast("Profile updated successfully.", "success", () =>
           router.push("/profile")
         );
@@ -147,18 +116,10 @@ const ProfileServices = () => {
     }
   };
 
-  const handlePickImage = (e) => {
-    const file = e.target.files[0];
-    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
-
+  const handlePickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
     if (!file) return;
     if (!validateFileSize(file)) return;
-    // Check file size
-    if (file.size > maxSize) {
-      showToast("File size should be less than 1MB", "error");
-      setIsSaveAvatar(false);
-      return;
-    }
 
     const fileURL = URL.createObjectURL(file);
     setNewFile({ file, url: fileURL });
@@ -181,7 +142,7 @@ const ProfileServices = () => {
     }
   };
 
-  const validateFileSize = (file) => {
+  const validateFileSize = (file: File) => {
     const maxSize = 1 * 1024 * 1024; // 1 MB
     if (file.size > maxSize) {
       showToast("Max file size is 1MB. Please select another file.", "error");
@@ -202,7 +163,7 @@ const ProfileServices = () => {
     if (error) throw new Error("Failed to delete old image.");
   };
 
-  const uploadNewAvatar = async (file) => {
+  const uploadNewAvatar = async (file: File) => {
     const extension = file.name.split(".").pop();
     const filePath = `user-${Date.now()}.${extension}`;
     const { error } = await supabase.storage
@@ -212,7 +173,7 @@ const ProfileServices = () => {
     return filePath;
   };
 
-  const updateAvatarInDb = async (filePath) => {
+  const updateAvatarInDb = async (filePath: string) => {
     const res = await fetch(`${base_url_be}/customer/profile/avatar/update`, {
       method: "POST",
       headers: {
@@ -226,15 +187,46 @@ const ProfileServices = () => {
     if (!res.ok) throw new Error("Failed to update avatar in database.");
   };
 
-  const showToast = (message, type, onClose = null) => {
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "info" | "warning",
+    onClose?: (() => void) | null
+  ) => {
     toast.dismiss();
-    toast[type](message, {
-      position: "bottom-right",
-      autoClose: 3000,
-      theme: "colored",
-      hideProgressBar: false,
-      onClose,
-    });
+
+    if (type === "success") {
+      toast.success(message, {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose: onClose || undefined,
+      });
+    } else if (type === "error") {
+      toast.error(message, {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose: onClose || undefined,
+      });
+    } else if (type === "info") {
+      toast.info(message, {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose: onClose || undefined,
+      });
+    } else if (type === "warning") {
+      toast.warning(message, {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose: onClose || undefined,
+      });
+    }
   };
 
   return {

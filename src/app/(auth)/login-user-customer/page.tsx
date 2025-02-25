@@ -9,21 +9,12 @@ import LoginUser from "@/components/login/loginUser";
 import React, { useEffect } from "react";
 import { signIn } from "next-auth/react";
 import { motion } from "framer-motion";
-import {
-  Sparkles,
-  ShieldCheck,
-  Laptop,
-  Store,
-  Headphones,
-} from "lucide-react";
+import { Sparkles, ShieldCheck, Laptop, Store, Headphones } from "lucide-react";
 
 export default function StoreLoginPage() {
   const router = useRouter();
   useEffect(() => {
-    if (
-      !localStorage.getItem("verify_email") &&
-      localStorage.getItem("is_login")
-    ) {
+    if (localStorage.getItem("token")) {
       router.push("/");
     }
   }, [router]);
@@ -86,7 +77,7 @@ export default function StoreLoginPage() {
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="h-[85vh] w-[85vw] rounded-2xl overflow-hidden relative"
+        className="h-[90vh] w-[85vw] rounded-2xl overflow-hidden relative"
       >
         {/* Background Effects */}
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
@@ -167,7 +158,7 @@ export default function StoreLoginPage() {
             transition={{ delay: 0.3, duration: 0.5 }}
             className="w-[70%] flex justify-center items-center bg-white/5 backdrop-blur-md border-l border-white/10"
           >
-            <div className="w-full max-w-[60%] px-8">
+            <div className="w-full px-8">
               <LoginUser
                 onSubmit={handleSubmit}
                 handleGoogleLogin={handlegoogle}

@@ -1,10 +1,11 @@
-"use client"
+"use client";
 import ProfileServices from "@/services/profile/services1";
 import Image from "next/image";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Modal from "../product-management/Modal";
 import FormSetPassword from "./FormSetPassword";
 import { signOut } from "next-auth/react";
+import { useRouter } from "next/router";
 
 const Section1 = () => {
   const {
@@ -19,15 +20,13 @@ const Section1 = () => {
     setPasswordHandle,
     isSaveAvatar,
   } = ProfileServices();
-  const [modalSetPass, setModalSetPass] = useState(false)
-  
+  const [modalSetPass, setModalSetPass] = useState(false);
+  const [modalEnterRefCode, setModalEnterRefCode] = useState(false);
   const handleLogout = () => {
-    if (localStorage.getItem("is_login") && localStorage.getItem("token")) {
-      localStorage.removeItem("is_login");
+    if (localStorage.getItem("token")) {
       localStorage.removeItem("token");
       localStorage.removeItem("exp_token");
-      localStorage.removeItem("user_id")
-      signOut({ callbackUrl: "/" }); 
+      signOut({ callbackUrl: "/" });
     }
   };
   return (
@@ -57,8 +56,12 @@ const Section1 = () => {
           )}
         </div>
         <div>
-          <h1 className="text-2xl text-white font-bold">{profile.username}</h1>
-          <p className="text-gray-600">ID: {profile.userId}</p>
+          <h1 className="text-2xl text-white font-bold">
+            {profile.firstName} {profile.lastName || ""}
+          </h1>
+          <p className="text-gray-600">
+            Referral Code: {profile.referral_code}
+          </p>
         </div>
       </div>
       <div className="flex gap-3">
@@ -86,7 +89,7 @@ const Section1 = () => {
             onChange={(e) => handlePickImage(e)}
           />
         </button>
-        {profile && profile.password === "" ? (
+        {profile && !profile.is_google ? (
           <button
             onClick={() => setModalSetPass(true)}
             className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded mb-6"
@@ -143,8 +146,8 @@ const Section1 = () => {
           <input
             type="number"
             value={profile.phone}
-            onChange={(e) =>
-              setProfile({ ...profile, phone: parseInt(e.target.value, 10) })
+            onChange={
+              (e) => setProfile({ ...profile, phone: e.target.value }) // Remove parseInt
             }
             placeholder="Enter phone"
             className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -180,6 +183,18 @@ const Section1 = () => {
         </div>
       </div>
       {/* modal set password */}
+      {profile && profile.password === "" ? (
+        <Modal
+          isOpen={modalSetPass}
+          onClose={() => setModalSetPass(false)}
+          title="Set Password"
+        >
+          <FormSetPassword onsubmit={setPasswordHandle} />
+        </Modal>
+      ) : (
+        ""
+      )}
+      {/* modal input referral */}
       {profile && profile.password === "" ? (
         <Modal
           isOpen={modalSetPass}

@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import Link from "next/link";
+=======
+import  ProductCard  from "./ProductCard";
+>>>>>>> 363474f74221ef62fc76f6c8ac1ec9ddcb3db94a
 import { Product } from "@/types/product-types";
 import { ProductImageSlider } from "@/components/product-list/ProductImgSlider";
 
