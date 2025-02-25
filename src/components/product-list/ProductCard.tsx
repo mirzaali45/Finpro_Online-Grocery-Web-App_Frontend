@@ -9,14 +9,16 @@ import {
   ShoppingCart,
   ExternalLink,
   Store,
+  MapPin,
 } from "lucide-react";
 import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 
 interface ProductCardProps {
-  product: Product;
+  product: Product & { distance?: number }; // Add distance property
   onCartUpdate?: () => void;
+  showDistance?: boolean; // Add this line
 }
 
 const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
@@ -159,6 +161,14 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
               <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors">
                 {product.store.store_name}
               </p>
+              {product.distance !== undefined && (
+                <div className="flex items-center ml-auto">
+                  <MapPin className="w-4 h-4 text-emerald-500 mr-1" />
+                  <p className="text-sm text-emerald-400">
+                    {product.distance.toFixed(1)} km
+                  </p>
+                </div>
+              )}
             </div>
           </div>
 
