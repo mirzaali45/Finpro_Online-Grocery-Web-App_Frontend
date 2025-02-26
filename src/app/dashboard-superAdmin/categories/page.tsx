@@ -7,6 +7,8 @@ import CategoryCard from "@/components/category-management/CategoryCard";
 import CategoryModal from "@/components/category-management/CategoryModal";
 import { categoryService } from "@/services/category-admin.service";
 import { Category, CategoryFormData } from "@/types/category-types";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 export default function CategoriesAdmin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -17,7 +19,9 @@ export default function CategoriesAdmin() {
   const [formData, setFormData] = useState<CategoryFormData>({
     category_name: "",
     description: "",
+    thumbnail: "",
   });
+  const [categoryImage, setCategoryImage] = useState<File | null>(null);
 
   useEffect(() => {
     fetchCategories();
@@ -47,17 +51,57 @@ export default function CategoriesAdmin() {
     }));
   };
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setCategoryImage(file);
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({
+      category_name: "",
+      description: "",
+      thumbnail: "",
+    });
+    setCategoryImage(null);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      const newCategory = await categoryService.createCategory(formData);
-      setCategories((prev) => [...prev, newCategory]);
+      // Create FormData for multipart/form-data submission
+      const submitData = new FormData();
+      submitData.append("category_name", formData.category_name);
+      submitData.append("description", formData.description);
+
+      // Add image file if it exists
+      if (categoryImage) {
+        submitData.append("image", categoryImage);
+      }
+
+      // Update categoryService to handle FormData
+      const newCategory = await categoryService.createCategoryWithImage(
+        submitData
+      );
+
+      // Show success toast first
+      toast.success("Category created successfully");
+
+      // Reset form and close modal
       setIsModalOpen(false);
-      setFormData({
-        category_name: "",
-        description: "",
-      });
+      resetForm();
+
+      // Delay the page reload to allow toast to be seen
+      setTimeout(() => {
+        window.location.reload();
+      }, 2000); // 2 seconds delay
     } catch (err) {
+      // Show error toast
+      toast.error(
+        err instanceof Error ? err.message : "Failed to create category"
+      );
+
       setError(
         err instanceof Error ? err.message : "Failed to create category"
       );
@@ -69,9 +113,26 @@ export default function CategoriesAdmin() {
     console.log("Edit category:", category);
   };
 
-  const handleDelete = (id: number) => {
-    // Implement delete functionality
-    console.log("Delete category:", id);
+  const handleDelete = async (id: number) => {
+    try {
+      await categoryService.deleteCategory(id);
+      toast.success("Category deleted successfully");
+      setCategories(
+        categories.filter((category) => category.category_id !== id)
+      );
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete category"
+      );
+      setError(
+        err instanceof Error ? err.message : "Failed to delete category"
+      );
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    resetForm();
   };
 
   if (error) {
@@ -126,10 +187,25 @@ export default function CategoriesAdmin() {
 
         <CategoryModal
           isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
+          onClose={handleCloseModal}
           formData={formData}
           onSubmit={handleSubmit}
           onChange={handleInputChange}
+          onFileChange={handleFileChange}
+        />
+
+        {/* ToastContainer for displaying notifications */}
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
         />
       </div>
     </div>

@@ -10,4 +10,5 @@ export interface Category {
 export interface CategoryFormData {
   category_name: string;
   description: string;
+  thumbnail: string
 }

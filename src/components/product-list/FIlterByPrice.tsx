@@ -1,4 +1,3 @@
-// components/product-list/FilterByPrice.tsx
 "use client";
 
 import { useState } from "react";
@@ -14,15 +13,13 @@ interface FilterByPriceProps {
 export function FilterByPrice({
   onPriceChange,
   minPrice = 0,
-  maxPrice = 10000000,
-  initialRange
+  maxPrice = 30000000, 
+  initialRange,
 }: FilterByPriceProps) {
   const [priceRange, setPriceRange] = useState<[number, number]>(
     initialRange || [minPrice, maxPrice]
   );
-  const [isExpanded, setIsExpanded] = useState(false);
-
-  // Format price value to show in rupiah
+  const [isExpanded, setIsExpanded] = useState(true);
   const formatPrice = (value: number) => {
     return `Rp ${value.toLocaleString()}`;
   };
@@ -34,7 +31,6 @@ export function FilterByPrice({
 
   const handleApplyFilter = () => {
     onPriceChange(priceRange);
-    console.log("Applying price filter:", priceRange);
   };
 
   const handleReset = () => {
@@ -45,7 +41,7 @@ export function FilterByPrice({
 
   return (
     <div className="bg-neutral-800 rounded-lg p-4 w-full">
-      <button 
+      <button
         className="flex justify-between items-center w-full text-left text-neutral-200 font-medium"
         onClick={() => setIsExpanded(!isExpanded)}
       >
@@ -60,11 +56,11 @@ export function FilterByPrice({
               <span>Min: {formatPrice(priceRange[0])}</span>
               <span>Max: {formatPrice(priceRange[1])}</span>
             </div>
-            
+
             <Slider
               min={minPrice}
               max={maxPrice}
-              step={10000}
+              step={100000}
               value={priceRange}
               onValueChange={handleRangeChange}
               className="py-4"

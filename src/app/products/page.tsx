@@ -1,7 +1,7 @@
 // app/products/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { Product } from "@/types/product-types";
@@ -13,24 +13,127 @@ import { FilterByPrice } from "@/components/product-list/FIlterByPrice";
 import { useGeolocation } from "@/components/hooks/useGeolocation";
 import { sortByDistance } from "@/utils/distanceCalc";
 import { MapPin, Loader2 } from "lucide-react";
+import { useRouter, useSearchParams } from "next/navigation";
 
 export default function ProductPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+
   const [loading, setLoading] = useState<boolean>(false);
-  const [products, setProducts] = useState<(Product & { distance?: number })[]>([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [products, setProducts] = useState<(Product & { distance?: number })[]>(
+    []
+  );
+  const [currentPage, setCurrentPage] = useState(
+    Number(searchParams.get("page")) || 1
+  );
   const [totalPages, setTotalPages] = useState(0);
-  const [selectedCategory, setSelectedCategory] = useState<number | undefined>();
-  const [priceRange, setPriceRange] = useState<[number, number]>([0, 10000000]);
+  const [selectedCategory, setSelectedCategory] = useState<number | undefined>(
+    searchParams.get("categoryId")
+      ? Number(searchParams.get("categoryId"))
+      : undefined
+  );
+  const [priceRange, setPriceRange] = useState<[number, number]>([
+    Number(searchParams.get("minPrice")) || 0,
+    Number(searchParams.get("maxPrice")) || 30000000,
+  ]);
   const { location, loading: locationLoading } = useGeolocation();
   const [useNearestSort, setUseNearestSort] = useState(false);
 
+  const fetchProducts = useCallback(
+    async (
+      page: number,
+      categoryId?: number,
+      minPrice?: number,
+      maxPrice?: number
+    ) => {
+      setLoading(true);
+      try {
+        const data = await productService.getProducts(
+          page,
+          8,
+          categoryId,
+          minPrice,
+          maxPrice
+        );
+
+        console.log("Fetching products with params:", {
+          page,
+          categoryId,
+          minPrice,
+          maxPrice,
+        });
+
+        setUseNearestSort(false);
+
+        if (location) {
+          const productsWithDistance = sortByDistance(
+            data.products,
+            location.latitude,
+            location.longitude,
+            (product) => ({
+              lat: product.store.latitude,
+              lon: product.store.longitude,
+            })
+          );
+          setProducts(productsWithDistance);
+          setUseNearestSort(true);
+        } else {
+          setProducts(data.products);
+        }
+
+        setTotalPages(data.totalPages);
+      } catch (error) {
+        console.error("Error fetching products:", error);
+        toast.error("Failed to fetch products", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [location]
+  );
+
+  // Update URL and state when filters change
+  const updateURLParams = useCallback(
+    (params: {
+      page?: number;
+      categoryId?: number;
+      minPrice?: number;
+      maxPrice?: number;
+    }) => {
+      const urlParams = new URLSearchParams(searchParams.toString());
+
+      if (params.page !== undefined) {
+        urlParams.set("page", params.page.toString());
+      }
+
+      if (params.categoryId !== undefined) {
+        if (params.categoryId === 0) {
+          urlParams.delete("categoryId");
+        } else {
+          urlParams.set("categoryId", params.categoryId.toString());
+        }
+      }
+
+      if (params.minPrice !== undefined) {
+        urlParams.set("minPrice", params.minPrice.toString());
+      }
+
+      if (params.maxPrice !== undefined) {
+        urlParams.set("maxPrice", params.maxPrice.toString());
+      }
+
+      router.push(`/products?${urlParams.toString()}`);
+    },
+    [router, searchParams]
+  );
+
   useEffect(() => {
     fetchProducts(currentPage, selectedCategory, priceRange[0], priceRange[1]);
-  }, [currentPage, selectedCategory, priceRange]);
+  }, [currentPage, selectedCategory, priceRange, fetchProducts]);
 
-  
-  
-  // Sort products by distance when location is available
   useEffect(() => {
     if (location && products.length > 0 && !loading) {
       const productsWithDistance = sortByDistance(
@@ -39,78 +142,38 @@ export default function ProductPage() {
         location.longitude,
         (product) => ({
           lat: product.store.latitude,
-          lon: product.store.longitude
+          lon: product.store.longitude,
         })
       );
-      
+
       setProducts(productsWithDistance);
       setUseNearestSort(true);
     }
   }, [location, products.length, loading]);
 
-  const fetchProducts = async (
-    page: number, 
-    categoryId?: number,
-    minPrice?: number,
-    maxPrice?: number
-  ) => {
-    setLoading(true);
-    try {
-      const data = await productService.getProducts(
-        page, 
-        8, 
-        categoryId,
-        minPrice,
-        maxPrice
-      );
-
-      console.log("Fetching products with params:", {
-        page,
-        categoryId,
-        minPrice,
-        maxPrice
-      });
-      
-      // Reset nearest sort when fetching new products
-      setUseNearestSort(false);
-      
-      // If we already have location, sort immediately
-      if (location) {
-        const productsWithDistance = sortByDistance(
-          data.products,
-          location.latitude,
-          location.longitude,
-          (product) => ({
-            lat: product.store.latitude,
-            lon: product.store.longitude
-          })
-        );
-        setProducts(productsWithDistance);
-        setUseNearestSort(true);
-      } else {
-        setProducts(data.products);
-      }
-      
-      setTotalPages(data.totalPages);
-    } catch (error) {
-      console.error("Error fetching products:", error);
-      toast.error("Failed to fetch products", {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
-    } finally {
-      setLoading(false);
-    }
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(newPage);
+    updateURLParams({ page: newPage });
+    // No need to call fetchProducts here as it will be triggered by the useEffect
   };
 
   const handleCategoryChange = (categoryId?: number) => {
     setSelectedCategory(categoryId);
     setCurrentPage(1);
+    updateURLParams({
+      page: 1,
+      categoryId: categoryId || 0,
+    });
   };
 
   const handlePriceChange = (newPriceRange: [number, number]) => {
     setPriceRange(newPriceRange);
-    setCurrentPage(1); // Reset to first page when price filter changes
+    setCurrentPage(1);
+    updateURLParams({
+      page: 1,
+      minPrice: newPriceRange[0],
+      maxPrice: newPriceRange[1],
+    });
   };
 
   const handleCartUpdate = () => {
@@ -133,7 +196,7 @@ export default function ProductPage() {
                 Page {currentPage} of {totalPages}
               </p>
             </div>
-            
+
             {useNearestSort ? (
               <div className="flex items-center text-sm text-emerald-500">
                 <MapPin className="w-4 h-4 mr-1" />
@@ -155,11 +218,11 @@ export default function ProductPage() {
               />
             </div>
             <div className="md:col-span-1">
-              <FilterByPrice 
+              <FilterByPrice
                 onPriceChange={handlePriceChange}
                 minPrice={0}
-                maxPrice={10000000}
-                initialRange={[0, 10000000]}
+                maxPrice={30000000}
+                initialRange={priceRange}
               />
             </div>
           </div>
@@ -191,7 +254,7 @@ export default function ProductPage() {
               <Pagination
                 totalPages={totalPages}
                 currentPage={currentPage}
-                onPageChange={setCurrentPage}
+                onPageChange={handlePageChange}
               />
             </div>
           )}
