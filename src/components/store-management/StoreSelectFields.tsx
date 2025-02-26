@@ -1,6 +1,11 @@
 import React from "react";
 import { StoreDataKey } from "@/types/store-types";
 
+interface Option {
+  value: string | number;
+  label: string;
+}
+
 interface SelectFieldProps {
   name: StoreDataKey;
   label: string;
@@ -9,7 +14,7 @@ interface SelectFieldProps {
   error?: string;
   placeholder?: string;
   onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: any[];
+  options: Option[];
 }
 
 export const SelectField: React.FC<SelectFieldProps> = ({

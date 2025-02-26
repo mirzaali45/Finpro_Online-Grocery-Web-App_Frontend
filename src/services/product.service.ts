@@ -19,11 +19,11 @@ export const productService = {
       if (categoryId !== undefined) {
         params.append("categoryId", categoryId.toString());
       }
-      
+
       if (minPrice !== undefined) {
         params.append("minPrice", minPrice.toString());
       }
-      
+
       if (maxPrice !== undefined) {
         params.append("maxPrice", maxPrice.toString());
       }
@@ -97,7 +97,49 @@ export const productService = {
     if (!response.ok) throw new Error("Failed to fetch product");
     return response.json();
   },
+  
+  async getDiscountedProducts(
+    page: number = 1,
+    limit: number = 8,
+    categoryId?: number,
+    minPrice?: number,
+    maxPrice?: number
+  ): Promise<ProductResponse> {
+    try {
+      const params = new URLSearchParams({
+        page: page.toString(),
+        limit: limit.toString(),
+      });
 
+      if (categoryId !== undefined) {
+        params.append("categoryId", categoryId.toString());
+      }
+
+      if (minPrice !== undefined) {
+        params.append("minPrice", minPrice.toString());
+      }
+
+      if (maxPrice !== undefined) {
+        params.append("maxPrice", maxPrice.toString());
+      }
+
+      const response = await fetch(`${BASE_URL}/product/discounted?${params}`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch discounted products");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error fetching discounted products:", error);
+      throw error;
+    }
+  },
   async createProduct(formData: ProductFormData): Promise<Product> {
     const token = localStorage.getItem("token");
     const response = await fetch(`${BASE_URL}/product`, {

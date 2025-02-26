@@ -1,6 +1,4 @@
-// app/products/page.tsx
 "use client";
-
 import { useEffect, useState, useCallback } from "react";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";

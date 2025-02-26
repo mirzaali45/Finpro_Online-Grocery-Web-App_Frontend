@@ -1,4 +1,3 @@
-// ProductCard.tsx
 import Image from "next/image";
 import Link from "next/link";
 import { useState, useEffect } from "react";
@@ -79,14 +78,11 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-
       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl rounded-xl border border-neutral-800/50 transition-all duration-500 group-hover:backdrop-blur-2xl" />
-
 
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative p-4 space-y-4">
-  
         <div className="relative h-52 rounded-lg overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-900/10 z-10" />
 
@@ -169,10 +165,36 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
             </div>
           </div>
 
-          <div className="flex items-center justify-between">
-            <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-              Rp.{product.price.toLocaleString()}
-            </span>
+          <div className="flex flex-col">
+            {product.Discount && product.Discount.length > 0 ? (
+              <>
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium line-through text-neutral-500">
+                    Rp.{product.price.toLocaleString()}
+                  </span>
+                  <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                    Rp.
+                    {(product.Discount[0].discount_type === "percentage"
+                      ? product.price -
+                        (product.price * product.Discount[0].discount_value) /
+                          100
+                      : product.price - product.Discount[0].discount_value
+                    ).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center">
+                  <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full">
+                    {product.Discount[0].discount_type === "percentage"
+                      ? `${product.Discount[0].discount_value}% OFF`
+                      : `Rp.${product.Discount[0].discount_value.toLocaleString()} OFF`}
+                  </span>
+                </div>
+              </>
+            ) : (
+              <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                Rp.{product.price.toLocaleString()}
+              </span>
+            )}
             <span className="text-sm text-neutral-400">Stock: {inventory}</span>
           </div>
 

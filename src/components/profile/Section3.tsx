@@ -11,7 +11,7 @@ const Section3 = () => {
   
   return (
     <>
-    <div className='mt-10 text-center'>
+    <div className='mt-10 text-center text-white'>
         <h1>My Order</h1>
     </div>
     <section className='mt-5 max-w-4xl text-white py-5 mx-auto px-8 pt-8 pb-16 bg-gray-800 rounded-md'>

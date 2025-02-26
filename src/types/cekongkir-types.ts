@@ -1,16 +1,16 @@
 export interface ShippingRateResponseNew {
-    status: number;
-    data?: {
-        courier: string;
-        cost: {
-            service: string;
-            description: string;
-            cost: number;
-            etd: string;
-        }[];
+  status: number;
+  data: {
+    courier: string;
+    cost: {
+      service: string;
+      description: string;
+      cost: number;
+      etd: string;
     }[];
-    error?: string;
+  }[];
 }
+
 export interface ShippingCost {
     code: string;
     price: number;

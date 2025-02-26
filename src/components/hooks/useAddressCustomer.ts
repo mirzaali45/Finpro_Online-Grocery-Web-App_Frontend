@@ -59,31 +59,35 @@ export const useAddressCustomer = {
         is_primary: false,
       }),
     });
-  
+
     if (!response.ok) throw new Error("Failed to create address");
     return response.json();
   },
 
   async updatePrimaryAddress(addressId: number): Promise<void> {
     const token = localStorage.getItem("token");
-    const response = await fetch(`${BASE_URL}/customer/address/primary/${addressId}`, {
-      method: "PUT",
-      headers: {
-        Authorization: `Bearer ${token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        is_primary: true
-      }),
-    });
+    const response = await fetch(
+      `${BASE_URL}/customer/address/primary/${addressId}`,
+      {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          is_primary: true,
+        }),
+      }
+    );
 
     const responseData = await response.json();
-    if (!response.ok) throw new Error(responseData.error || "Failed to set primary address");
-    return responseData
+    if (!response.ok)
+      throw new Error(responseData.error || "Failed to set primary address");
+    return responseData;
   },
 
   async updateAddress(addressId: number, formData: Address): Promise<void> {
-    console.log(formData)
+    console.log(formData);
     const token = localStorage.getItem("token");
     const response = await fetch(`${BASE_URL}/customer/address/${addressId}`, {
       method: "PUT",
@@ -106,8 +110,9 @@ export const useAddressCustomer = {
     });
 
     const responseData = await response.json();
-    if (!response.ok) throw new Error(responseData.error || "Failed to update address");
-    return responseData
+    if (!response.ok)
+      throw new Error(responseData.error || "Failed to update address");
+    return responseData;
   },
 
   async deleteAddress(addressId: number): Promise<void> {
@@ -118,10 +123,7 @@ export const useAddressCustomer = {
         Authorization: `Bearer ${token}`,
       },
     });
-    
-    if (!response.ok) throw new Error("Failed to delete product");
-    
-    return response 
 
+    if (!response.ok) throw new Error("Failed to delete address");
   },
 };

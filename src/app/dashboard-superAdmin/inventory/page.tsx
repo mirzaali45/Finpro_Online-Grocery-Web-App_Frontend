@@ -121,12 +121,11 @@ export default function Inventory() {
       setPreviousInventoryData(newInventoryData);
 
       // Log the inventory refresh
-      createLog("Refresh", {
-        totalItems: newPagination.total,
-        page: newPagination.page,
-        totalPages: newPagination.totalPages,
-        totalCategories: categoriesResponse.length,
-      });
+   createLog("Refresh", {
+     totalItems: newPagination.total,
+     totalCategories: categoriesResponse.length,
+     message: `Inventory refreshed`,
+   });
     } catch (error) {
       console.error("Error fetching inventory or categories:", error);
       toast.error("Failed to fetch inventory or categories");

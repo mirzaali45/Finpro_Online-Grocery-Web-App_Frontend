@@ -15,8 +15,16 @@ export const fetchDiscounts = async (
   };
 }> => {
   try {
+    const queryParams = new URLSearchParams({
+      unassigned: "true",
+      page: String(page),
+      limit: String(limit),
+    });
+
     const response = await fetch(
-      `${process.env.NEXT_PUBLIC_BASE_URL_BE}/discount?page=${page}&limit=${limit}`
+      `${
+        process.env.NEXT_PUBLIC_BASE_URL_BE
+      }/discount?${queryParams.toString()}`
     );
     return await response.json();
   } catch (error) {
