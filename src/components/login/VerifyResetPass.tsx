@@ -3,10 +3,10 @@
 import React, { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import { StoreIcon, Eye, EyeOff, AlertCircle } from "lucide-react";
-import type { VerifyAndResetPassProps, VerifyResetPassValues } from "../../types/auth-types";
+import type { VerifyAndSetPassProps, VerifyResetPassValues } from "../../types/auth-types";
 import { verifyResetPass } from "@/helper/validation-schema-verify-reset-pass";
 
-const VerifyResetPass: React.FC<VerifyAndResetPassProps> = ({ onSubmit }) => {
+const VerifyResetPass: React.FC<VerifyAndSetPassProps> = ({ onSubmit }) => {
   const [showPasswordFields, setShowPasswordFields] = useState({
     oldPassword: false,
     password: false,

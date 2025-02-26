@@ -1,4 +1,3 @@
-
 export interface StoreData {
   store_id?: number;
   store_name: string;
@@ -12,7 +11,17 @@ export interface StoreData {
   user_id?: number;
   description?: string;
 }
-
+export interface EditData {
+  store_name: string;
+  address: string;
+  subdistrict: string;
+  city: string;
+  province: string;
+  postcode: string;
+  latitude: number;
+  longitude: number;
+  user_id?: number | null;
+}
 // Simplified Store interface for list display
 export interface StoreDisplay {
   store_id: number;
@@ -26,12 +35,12 @@ export type StoreDataKey = keyof StoreData;
 
 // Base form errors interface
 export interface FormErrors {
-  store_name: string;
-  address: string;
-  subdistrict: string;
-  city: string;
-  province: string;
-  postcode: string;
+  store_name?: string;
+  address?: string;
+  subdistrict?: string;
+  city?: string;
+  province?: string;
+  postcode?: string;
 }
 
 // Add interface for store admin fetch

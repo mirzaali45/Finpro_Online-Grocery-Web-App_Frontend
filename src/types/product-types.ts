@@ -28,6 +28,20 @@ export interface ProductFormData {
   store_id: string;
   initial_quantity: string;
 }
+export interface Discount {
+  discount_id: number;
+  store_id: number | null;
+  product_id: number | null;
+  thumbnail: string | null;
+  discount_code: string;
+  discount_type: "point" | "percentage";
+  discount_value: number;
+  minimum_order: number | null;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+  userUser_id: number | null;
+}
 
 export interface Product {
   product_id: number;
@@ -48,6 +62,7 @@ export interface Product {
   ProductImage?: {
     url: string;
   }[];
+ Discount?: Discount[];
 }
 
 export interface ModalState {

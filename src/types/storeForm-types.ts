@@ -7,9 +7,7 @@ export interface StoreData {
   address: string;
   subdistrict: string;
   city: string;
-  city_id: string;
   province: string;
-  province_id: string;
   postcode: string;
   latitude?: number;
   longitude?: number;
@@ -22,9 +20,7 @@ export interface FormErrors {
   address: string;
   subdistrict: string;
   city: string;
-  city_id: string;
   province: string;
-  province_id: string;
   postcode: string;
 }
 

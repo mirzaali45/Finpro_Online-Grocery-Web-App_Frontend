@@ -135,10 +135,12 @@ const CheckoutPage = () => {
   };
 
   // Handle map click to update address
-  const handleMapClick = (event: any) => {
+  const handleMapClick = (event: L.LeafletMouseEvent) => {
     setLatitude(event.latlng.lat);
     setLongitude(event.latlng.lng);
-    setNewAddress("Latitude: " + event.latlng.lat + ", Longitude: " + event.latlng.lng);
+    setNewAddress(
+      `Latitude: ${event.latlng.lat}, Longitude: ${event.latlng.lng}`
+    );
   };
 
   if (isLoading) {
@@ -170,15 +172,17 @@ const CheckoutPage = () => {
       {addressModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center z-50 bg-black bg-opacity-50">
           <div className="bg-white p-6 rounded-lg w-96">
-            <h3 className="text-2xl font-semibold mb-4">Ganti Alamat Pengiriman</h3>
+            <h3 className="text-2xl font-semibold mb-4">
+              Ganti Alamat Pengiriman
+            </h3>
 
             {/* Leaflet Map */}
             <MapContainer
               center={[latitude, longitude]}
               zoom={13}
               style={{ height: "300px", width: "100%" }}
-              onClick={handleMapClick}
             >
+              {/* Remove onClick prop */}
               <TileLayer
                 url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -218,9 +222,14 @@ const CheckoutPage = () => {
         <div className="space-y-6">
           {cartData?.items.length ? (
             cartData.items.map((item) => (
-              <div key={item.cartitem_id} className="flex items-center space-x-4 border p-4 rounded-lg shadow-md">
+              <div
+                key={item.cartitem_id}
+                className="flex items-center space-x-4 border p-4 rounded-lg shadow-md"
+              >
                 <Image
-                  src={item.product.ProductImage[0]?.url || "/images/default.jpg"}
+                  src={
+                    item.product.ProductImage[0]?.url || "/images/default.jpg"
+                  }
                   alt={item.product.name}
                   width={80}
                   height={80}
@@ -229,19 +238,27 @@ const CheckoutPage = () => {
                 <div className="flex-1">
                   <p className="font-semibold">{item.product.name}</p>
                   <p className="text-sm text-gray-500">x {item.quantity}</p>
-                  <p className="text-lg font-semibold">Rp {item.product.price * item.quantity}</p>
+                  <p className="text-lg font-semibold">
+                    Rp {item.product.price * item.quantity}
+                  </p>
                 </div>
                 <div className="flex items-center space-x-2">
                   <button
-                    onClick={() => handleUpdateQuantity(item.cartitem_id, item.quantity - 1)}
-                    disabled={isUpdating === item.cartitem_id || item.quantity <= 1}
+                    onClick={() =>
+                      handleUpdateQuantity(item.cartitem_id, item.quantity - 1)
+                    }
+                    disabled={
+                      isUpdating === item.cartitem_id || item.quantity <= 1
+                    }
                     className="p-2 bg-gray-200 rounded-md"
                   >
                     -
                   </button>
                   <span>{item.quantity}</span>
                   <button
-                    onClick={() => handleUpdateQuantity(item.cartitem_id, item.quantity + 1)}
+                    onClick={() =>
+                      handleUpdateQuantity(item.cartitem_id, item.quantity + 1)
+                    }
                     disabled={isUpdating === item.cartitem_id}
                     className="p-2 bg-gray-200 rounded-md"
                   >
@@ -263,10 +280,14 @@ const CheckoutPage = () => {
 
         {/* Delivery Method Section */}
         <div className="bg-white border p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-800">Metode Pengiriman</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Metode Pengiriman
+          </h2>
           <div className="mt-4 space-y-4">
             <div>
-              <label className="block text-gray-700">Pilih Jenis Pengiriman</label>
+              <label className="block text-gray-700">
+                Pilih Jenis Pengiriman
+              </label>
               <div className="flex space-x-4">
                 <div className="flex items-center">
                   <input
@@ -278,7 +299,9 @@ const CheckoutPage = () => {
                     onChange={handleDeliveryChange}
                     className="form-radio"
                   />
-                  <label htmlFor="ekonomi" className="ml-2 text-gray-700">Ekonomi (Rp9.000)</label>
+                  <label htmlFor="ekonomi" className="ml-2 text-gray-700">
+                    Ekonomi (Rp9.000)
+                  </label>
                 </div>
                 <div className="flex items-center">
                   <input
@@ -290,7 +313,9 @@ const CheckoutPage = () => {
                     onChange={handleDeliveryChange}
                     className="form-radio"
                   />
-                  <label htmlFor="express" className="ml-2 text-gray-700">Express (Rp20.000)</label>
+                  <label htmlFor="express" className="ml-2 text-gray-700">
+                    Express (Rp20.000)
+                  </label>
                 </div>
               </div>
             </div>
@@ -303,22 +328,30 @@ const CheckoutPage = () => {
                 onChange={handleShippingInsuranceChange}
                 className="form-checkbox"
               />
-              <label htmlFor="shippingInsurance" className="ml-2 text-gray-700">Pakai Asuransi Pengiriman (Rp2.000)</label>
+              <label htmlFor="shippingInsurance" className="ml-2 text-gray-700">
+                Pakai Asuransi Pengiriman (Rp2.000)
+              </label>
             </div>
           </div>
         </div>
 
         {/* Order Summary */}
         <div className="bg-white border p-6 rounded-lg shadow-md">
-          <h2 className="text-xl font-semibold text-gray-800">Ringkasan Belanja</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Ringkasan Belanja
+          </h2>
           <div className="mt-4 space-y-4">
             <div className="flex justify-between items-center">
               <span>Total Harga</span>
-              <span>Rp {cartData?.summary.totalPrice?.toLocaleString() || 0}</span>
+              <span>
+                Rp {cartData?.summary.totalPrice?.toLocaleString() || 0}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span>Total Ongkos Kirim</span>
-              <span>Rp {deliveryMethod === "Ekonomi" ? "9.000" : "20.000"}</span>
+              <span>
+                Rp {deliveryMethod === "Ekonomi" ? "9.000" : "20.000"}
+              </span>
             </div>
             <div className="flex justify-between items-center">
               <span>Total Asuransi Pengiriman</span>
@@ -328,7 +361,7 @@ const CheckoutPage = () => {
               <span>Total Pembayaran</span>
               <span>
                 Rp{" "}
-                {cartData?.summary.totalPrice +
+                {(cartData?.summary.totalPrice ?? 0) +
                   (deliveryMethod === "Ekonomi" ? 9000 : 20000) +
                   (shippingInsurance ? 2000 : 0)}
               </span>

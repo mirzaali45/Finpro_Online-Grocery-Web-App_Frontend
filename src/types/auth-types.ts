@@ -113,7 +113,7 @@ export interface LoginFormCustomerProps {
 }
 
 export interface VerifyAndSetPassProps {
-  onSubmit: (values: VerifyAndSetPassValues) => Promise<void>;
+  onSubmit: (values: VerifyResetPassValues) => Promise<void>;
 }
 
 export interface LoginFormSuperProps {

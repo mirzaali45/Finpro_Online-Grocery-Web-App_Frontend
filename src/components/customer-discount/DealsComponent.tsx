@@ -3,9 +3,10 @@ import React, { useState, useEffect } from "react";
 import { Discount } from "@/types/discount-types";
 import { formatRupiah } from "@/helper/currencyRp";
 import { productService } from "@/services/product.service";
+import { Product } from "@/types/product-types";
 
 export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
-  const [productData, setProductData] = useState<any>(null);
+  const [productData, setProductData] = useState<Product | null>(null);
   const [productPrice, setProductPrice] = useState<number | null>(null);
   const [discountedPrice, setDiscountedPrice] = useState<number | null>(null);
   const [productImage, setProductImage] = useState<string | null>(null);
@@ -19,26 +20,25 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
 
   const fetchProductDetails = async () => {
     if (!discount.product_id) return;
-
+    
     try {
       setLoading(true);
       const product = await productService.getProductById(discount.product_id);
-
+      
       setProductData(product);
-
-      if (product && typeof product.price === "number") {
+      
+      if (product && typeof product.price === 'number') {
         setProductPrice(product.price);
-
+        
         // Calculate the discounted price
         if (discount.discount_type === "percentage") {
-          const discountAmount =
-            (product.price * discount.discount_value) / 100;
+          const discountAmount = (product.price * discount.discount_value) / 100;
           setDiscountedPrice(product.price - discountAmount);
         } else {
           setDiscountedPrice(product.price - discount.discount_value);
         }
       }
-
+      
       // Get product image from the product data if available
       if (product && product.ProductImage && product.ProductImage.length > 0) {
         setProductImage(product.ProductImage[0].url);
@@ -63,7 +63,7 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
             className="w-full h-full object-contain p-4"
           />
         );
-      }
+      } 
       // If product has no image but discount has thumbnail, use that
       else if (discount.thumbnail) {
         return (
@@ -87,25 +87,15 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
         return (
           <div className="w-full h-full flex items-center justify-center">
             <div className="text-gray-400 text-center px-4">
-              <svg
-                className="mx-auto h-12 w-12 text-gray-500"
-                fill="none"
-                viewBox="0 0 24 24"
-                stroke="currentColor"
-              >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={1}
-                  d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
-                />
+              <svg className="mx-auto h-12 w-12 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
               </svg>
               <p className="mt-2">No image available</p>
             </div>
           </div>
         );
       }
-    }
+    } 
     // For store-wide discount, always use the discount thumbnail
     else if (discount.thumbnail) {
       return (
@@ -165,9 +155,7 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
         ) : discount.product_id ? (
           <div className="mb-3 text-gray-400 text-sm">Price unavailable</div>
         ) : (
-          <div className="mb-3 text-purple-400 text-sm">
-            Store-wide discount
-          </div>
+          <div className="mb-3 text-purple-400 text-sm">Store-wide discount</div>
         )}
 
         <div className="space-y-1 text-xs sm:text-sm text-gray-400 mb-3 sm:mb-4 pb-2 sm:pb-3 border-b border-gray-700 mt-auto">
