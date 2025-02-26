@@ -16,9 +16,9 @@ import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 
 interface ProductCardProps {
-  product: Product & { distance?: number }; // Add distance property
+  product: Product & { distance?: number }; 
   onCartUpdate?: () => void;
-  showDistance?: boolean; // Add this line
+  showDistance?: boolean; 
 }
 
 const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
@@ -65,7 +65,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
     });
   };
 
-  // Auto-rotate images when hovered
+
   useEffect(() => {
     if (isHovered && hasMultipleImages) {
       const timer = setInterval(() => handleImageNavigation("next"), 3000);
@@ -79,14 +79,14 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Background */}
+
       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl rounded-xl border border-neutral-800/50 transition-all duration-500 group-hover:backdrop-blur-2xl" />
 
-      {/* Hover Effect Border */}
+
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
 
       <div className="relative p-4 space-y-4">
-        {/* Image Section */}
+  
         <div className="relative h-52 rounded-lg overflow-hidden">
           <div className="absolute inset-0 bg-gradient-to-b from-transparent to-neutral-900/10 z-10" />
 
@@ -104,7 +104,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
             onLoadingComplete={() => setIsImageLoading(false)}
           />
 
-          {/* Image Navigation */}
           {hasMultipleImages && isHovered && (
             <div className="absolute inset-0 flex items-center justify-between z-20 px-2">
               <button
@@ -128,7 +127,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
             </div>
           )}
 
-          {/* Image Indicators */}
           {hasMultipleImages && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 flex gap-1.5 z-20">
               {images.map((_, index) => (
@@ -150,7 +148,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
           )}
         </div>
 
-        {/* Product Info */}
         <div className="space-y-3">
           <div>
             <h3 className="text-lg font-medium text-neutral-100">
@@ -179,7 +176,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
             <span className="text-sm text-neutral-400">Stock: {inventory}</span>
           </div>
 
-          {/* Action Buttons */}
           <div className="flex gap-2 pt-2">
             <Link
               href={`/products/${generateSlug(product.name)}`}
