@@ -1,12 +1,14 @@
 "use client";
 
 import StoreSideBar from "@/components/sidebarStoreAdmin";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard"; // Import the HOC
+import { ReactNode } from "react";
 
-export default function DashboardLayout({
-  children,
-}: {
-  children: React.ReactNode;
-}) {
+interface DashboardLayoutProps {
+  children: ReactNode;
+}
+
+function DashboardLayout({ children }: DashboardLayoutProps) {
   return (
     <div className="min-h-screen bg-gray-50">
       <StoreSideBar />
@@ -25,3 +27,9 @@ export default function DashboardLayout({
     </div>
   );
 }
+
+export default withAuth(DashboardLayout, {
+  allowedRoles: ["store_admin"],
+  redirectPath: "/not-authorized-storeadmin", 
+});
+

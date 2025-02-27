@@ -6,16 +6,27 @@ import Sidebar from "@/components/sidebarSuperAdmin";
 import CategoryCard from "@/components/category-management/CategoryCard";
 import CategoryModal from "@/components/category-management/CategoryModal";
 import { categoryService } from "@/services/category-admin.service";
-import { Category, CategoryFormData } from "@/types/category-types";
+import {
+  Category,
+  CategoryFormData,
+  PaginatedResponse,
+} from "@/types/category-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function CategoriesAdmin() {
+function CategoriesAdmin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+  });
   const [formData, setFormData] = useState<CategoryFormData>({
     category_name: "",
     description: "",
@@ -24,14 +35,15 @@ export default function CategoriesAdmin() {
   const [categoryImage, setCategoryImage] = useState<File | null>(null);
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(1);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const data = await categoryService.getCategories();
-      setCategories(data);
+      const response = await categoryService.getCategories(page);
+      setCategories(response.data);
+      setPagination(response.pagination);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch categories"
@@ -39,6 +51,10 @@ export default function CategoriesAdmin() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchCategories(page);
   };
 
   const handleInputChange = (
@@ -92,10 +108,8 @@ export default function CategoriesAdmin() {
       setIsModalOpen(false);
       resetForm();
 
-      // Delay the page reload to allow toast to be seen
-      setTimeout(() => {
-        window.location.reload();
-      }, 2000); // 2 seconds delay
+      // Fetch the first page to show the new category
+      fetchCategories(1);
     } catch (err) {
       // Show error toast
       toast.error(
@@ -117,9 +131,9 @@ export default function CategoriesAdmin() {
     try {
       await categoryService.deleteCategory(id);
       toast.success("Category deleted successfully");
-      setCategories(
-        categories.filter((category) => category.category_id !== id)
-      );
+
+      // Re-fetch the current page after deletion
+      fetchCategories(pagination.currentPage);
     } catch (err) {
       toast.error(
         err instanceof Error ? err.message : "Failed to delete category"
@@ -140,7 +154,10 @@ export default function CategoriesAdmin() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
         <div className="text-red-600 dark:text-red-400">Error: {error}</div>
         <button
-          onClick={() => setError(null)}
+          onClick={() => {
+            setError(null);
+            fetchCategories(1);
+          }}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Try Again
@@ -173,16 +190,69 @@ export default function CategoriesAdmin() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category) => (
-              <CategoryCard
-                key={category.category_id}
-                category={category}
-                onEdit={handleEdit}
-                onDelete={handleDelete}
-              />
-            ))}
-          </div>
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categories.map((category) => (
+                <CategoryCard
+                  key={category.category_id}
+                  category={category}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
+
+            {/* Display total number of categories */}
+            <div className="mt-6 text-gray-600 dark:text-gray-400">
+              Showing {categories.length} of {pagination.totalItems} categories
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center mt-6 space-x-2">
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                  className={`px-3 py-1 rounded ${
+                    pagination.currentPage === 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  Previous
+                </button>
+
+                {Array.from(
+                  { length: pagination.totalPages },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 rounded-full ${
+                      pagination.currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  className={`px-3 py-1 rounded ${
+                    pagination.currentPage === pagination.totalPages
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  Next
+                </button>
+              </div>
+            )}
+          </>
         )}
 
         <CategoryModal
@@ -211,3 +281,9 @@ export default function CategoriesAdmin() {
     </div>
   );
 }
+
+
+export default withAuth(CategoriesAdmin, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});

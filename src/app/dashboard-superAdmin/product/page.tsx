@@ -11,8 +11,9 @@ import { Product, ProductFormData } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
 import { Pagination } from "@/components/product-list/Pagination";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function ProductAdmin() {
+function ProductAdmin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
@@ -283,3 +284,8 @@ export default function ProductAdmin() {
     </div>
   );
 }
+export default withAuth(ProductAdmin, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});
+

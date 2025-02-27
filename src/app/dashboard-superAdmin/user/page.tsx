@@ -4,8 +4,9 @@ import React from "react";
 import UserManagement from "@/components/user-management/UserManagement";
 import Sidebar from "@/components/sidebarSuperAdmin";
 import { useState } from "react";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function UserAdmin() {
+function UserAdmin() {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
@@ -21,3 +22,8 @@ export default function UserAdmin() {
     </div>
   );
 }
+export default withAuth(UserAdmin, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});
+

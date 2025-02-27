@@ -7,6 +7,16 @@ export interface Category {
   Product?: string;
 }
 
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: {
+    currentPage: number;
+    totalPages: number;
+    totalItems: number;
+    itemsPerPage: number;
+  };
+}
+
 export interface CategoryFormData {
   category_name: string;
   description: string;

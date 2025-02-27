@@ -1,4 +1,3 @@
-// app/products/[slug]/page.tsx
 import { notFound } from "next/navigation";
 import { productService } from "@/services/product.service";
 import ProductDetailClient from "@/components/product-detail/ProductDetail";
