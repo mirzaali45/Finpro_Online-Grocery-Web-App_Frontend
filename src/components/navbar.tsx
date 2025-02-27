@@ -33,10 +33,9 @@ export default function Navbar({ className }: NavbarProps) {
     }
     setIsLoading(true);
     try {
-      const response = await productService.getProducts(); // This returns ProductResponse
-      const filtered = response.products // Access the products array from the response
+      const response = await productService.getProducts(); 
+      const filtered = response.products 
         .filter((product: Product) => {
-          // Explicitly type the product parameter
           const name = product.name.toLowerCase();
           const searchTerm = term.toLowerCase();
           if (name.includes(searchTerm)) {
@@ -148,25 +147,19 @@ export default function Navbar({ className }: NavbarProps) {
             onHoverEnd={() => setIsHovered(false)}
             className={`fixed top-0 left-0 right-0 z-40 ${className ?? ""}`}
           >
-            {/* Animated Gradient Line */}
             <motion.div
               initial={{ scaleX: 0 }}
               animate={{ scaleX: 1 }}
               transition={{ duration: 0.5, delay: 0.2 }}
               className="h-[1px] w-full origin-left bg-gradient-to-r from-rose-500/50 via-purple-500/50 to-blue-500/50"
             />
-
-            {/* Navbar content with enhanced glass effect */}
             <div className="relative">
-              {/* Animated Background Glow */}
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isHovered ? 0.2 : 0.1 }}
                 transition={{ duration: 0.3 }}
                 className="absolute inset-0 bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-blue-500/10 blur-2xl"
               />
-
-              {/* Glass Background */}
               <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-lg" />
 
               <div className="relative max-w-6xl mx-auto px-6">

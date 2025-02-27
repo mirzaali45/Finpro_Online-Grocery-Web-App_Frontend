@@ -16,8 +16,9 @@ import InventoryTable from "@/components/inventory-management/InventoryTable";
 import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";
 import { toast } from "sonner";
 import { LogDetails } from "@/types/log-types";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function Inventory() {
+function Inventory() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
   const [pagination, setPagination] = useState<PaginationMetadata>({
@@ -70,7 +71,8 @@ export default function Inventory() {
       ]);
 
       // Extract inventory data and pagination info
-      const { data: newInventoryData, pagination: newPagination } = inventoryResponse;
+      const { data: newInventoryData, pagination: newPagination } =
+        inventoryResponse;
 
       // Detect added and deleted items (only when staying on same page)
       if (pagination.page === page) {
@@ -115,17 +117,20 @@ export default function Inventory() {
         }
       }
 
+      // Fix: Access the data property from categoriesResponse
+      const categoriesData = categoriesResponse.data || [];
+
       setInventoryData(newInventoryData);
       setPagination(newPagination);
-      setCategoriesCount(categoriesResponse.length);
+      setCategoriesCount(categoriesData.length);
       setPreviousInventoryData(newInventoryData);
 
       // Log the inventory refresh
-   createLog("Refresh", {
-     totalItems: newPagination.total,
-     totalCategories: categoriesResponse.length,
-     message: `Inventory refreshed`,
-   });
+      createLog("Refresh", {
+        totalItems: newPagination.total,
+        totalCategories: categoriesData.length,
+        message: `Inventory refreshed`,
+      });
     } catch (error) {
       console.error("Error fetching inventory or categories:", error);
       toast.error("Failed to fetch inventory or categories");
@@ -463,3 +468,7 @@ export default function Inventory() {
     </>
   );
 }
+export default withAuth(Inventory, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});

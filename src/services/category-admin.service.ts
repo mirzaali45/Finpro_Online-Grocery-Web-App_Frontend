@@ -1,10 +1,10 @@
-import { Category, CategoryFormData } from "@/types/category-types";
+import { Category, CategoryFormData,PaginatedResponse } from "@/types/category-types";
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export const categoryService = {
-  async getCategories(): Promise<Category[]> {
+  async getCategories(page: number = 1, limit: number = 8): Promise<PaginatedResponse<Category>> {
     try {
-      const response = await fetch(`${BASE_URL}/category`, {
+      const response = await fetch(`${BASE_URL}/category?page=${page}&limit=${limit}`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -18,6 +18,28 @@ export const categoryService = {
       return await response.json();
     } catch (error) {
       console.error("Error fetching categories:", error);
+      throw error;
+    }
+  },
+  
+  // If you still need the original non-paginated function
+  async getAllCategories(): Promise<Category[]> {
+    try {
+      const response = await fetch(`${BASE_URL}/category?limit=999`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to fetch categories");
+      }
+
+      const result = await response.json();
+      return result.data;
+    } catch (error) {
+      console.error("Error fetching all categories:", error);
       throw error;
     }
   },

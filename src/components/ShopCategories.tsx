@@ -4,23 +4,30 @@ import React from "react";
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { categoryService } from "@/services/category-admin.service";
-import { Category } from "@/types/category-types";
+import { Category, PaginatedResponse } from "@/types/category-types";
 import Image from "next/image";
 
 export default function ShopCategories() {
   const [categories, setCategories] = useState<Category[]>([]);
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+  });
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(pagination.currentPage);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const data = await categoryService.getCategories();
-      setCategories(data);
+      const response = await categoryService.getCategories(page);
+      setCategories(response.data);
+      setPagination(response.pagination);
     } catch (err) {
       console.error(err);
       setError(
@@ -29,6 +36,10 @@ export default function ShopCategories() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchCategories(page);
   };
 
   if (isLoading) {
@@ -67,7 +78,7 @@ export default function ShopCategories() {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
           {categories.map((category) => (
             <Link
-              key={category.category_name}
+              key={category.category_id}
               href={`/category/${category.category_name.toLowerCase()}`}
               className="group relative rounded-xl overflow-hidden aspect-square animate-fadeIn"
             >
@@ -129,6 +140,51 @@ export default function ShopCategories() {
         {categories.length === 0 && (
           <div className="text-center mt-12 bg-clip-text text-transparent bg-gradient-to-r from-neutral-400 to-neutral-600">
             No categories available
+          </div>
+        )}
+
+        {/* Pagination Controls */}
+        {pagination.totalPages > 1 && (
+          <div className="flex justify-center mt-12 space-x-2">
+            <button
+              onClick={() => handlePageChange(pagination.currentPage - 1)}
+              disabled={pagination.currentPage === 1}
+              className={`px-4 py-2 rounded-lg ${
+                pagination.currentPage === 1
+                  ? "bg-neutral-800 text-neutral-500"
+                  : "bg-neutral-800 text-neutral-200 hover:bg-neutral-700"
+              } transition-colors`}
+            >
+              Previous
+            </button>
+
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+              (page) => (
+                <button
+                  key={page}
+                  onClick={() => handlePageChange(page)}
+                  className={`w-10 h-10 rounded-lg ${
+                    pagination.currentPage === page
+                      ? "bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 text-white"
+                      : "bg-neutral-800 text-neutral-200 hover:bg-neutral-700"
+                  } transition-colors`}
+                >
+                  {page}
+                </button>
+              )
+            )}
+
+            <button
+              onClick={() => handlePageChange(pagination.currentPage + 1)}
+              disabled={pagination.currentPage === pagination.totalPages}
+              className={`px-4 py-2 rounded-lg ${
+                pagination.currentPage === pagination.totalPages
+                  ? "bg-neutral-800 text-neutral-500"
+                  : "bg-neutral-800 text-neutral-200 hover:bg-neutral-700"
+              } transition-colors`}
+            >
+              Next
+            </button>
           </div>
         )}
       </div>

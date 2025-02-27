@@ -70,7 +70,7 @@ export const productService = {
     }
   },
 
-  // Rest of your service methods remain unchanged
+
   async getProductBySlug(slug: string): Promise<Product> {
     try {
       const response = await fetch(`${BASE_URL}/product/slug/${slug}`);
@@ -85,7 +85,6 @@ export const productService = {
       const product: Product = await response.json();
       return product;
     } catch (error) {
-      // Re-throw the error with a more specific message
       throw error instanceof Error
         ? error
         : new Error("An error occurred while fetching the product");

@@ -166,14 +166,13 @@ export class AuthService {
   static async login(
     credentials: LoginFormCustomerValues
   ): Promise<LoginResponse> {
-    // console.log(credentials)
     try {
       const response = await fetch(`${base_url_be}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // Important for cookies
         body: JSON.stringify(credentials),
       });
 
@@ -185,16 +184,16 @@ export class AuthService {
       const data = (await response.json()) as LoginResponse;
 
       if (data.token) {
+        // Explicitly log token storage for debugging
+        console.log("Token received:", data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
       }
 
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error("An unexpected error occurred");
+      console.error("Login error:", error);
+      throw error;
     }
   }
 

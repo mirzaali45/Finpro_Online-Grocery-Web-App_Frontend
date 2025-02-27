@@ -12,10 +12,12 @@ import { useGeolocation } from "@/components/hooks/useGeolocation";
 import { sortByDistance } from "@/utils/distanceCalc";
 import { MapPin, Loader2 } from "lucide-react";
 import { useRouter, useSearchParams } from "next/navigation";
+import EnhancedTechEliteBanner from "@/components/product-list/TechLiteBanner";
 
 export default function ProductPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const [isMobile, setIsMobile] = useState(false);
 
   const [loading, setLoading] = useState<boolean>(false);
   const [products, setProducts] = useState<(Product & { distance?: number })[]>(
@@ -37,6 +39,17 @@ export default function ProductPage() {
   const { location, loading: locationLoading } = useGeolocation();
   const [useNearestSort, setUseNearestSort] = useState(false);
 
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const fetchProducts = useCallback(
     async (
       page: number,
@@ -48,18 +61,11 @@ export default function ProductPage() {
       try {
         const data = await productService.getProducts(
           page,
-          8,
+          isMobile ? 6 : 8, // Fewer products per page on mobile
           categoryId,
           minPrice,
           maxPrice
         );
-
-        console.log("Fetching products with params:", {
-          page,
-          categoryId,
-          minPrice,
-          maxPrice,
-        });
 
         setUseNearestSort(false);
 
@@ -90,10 +96,9 @@ export default function ProductPage() {
         setLoading(false);
       }
     },
-    [location]
+    [location, isMobile]
   );
 
-  // Update URL and state when filters change
   const updateURLParams = useCallback(
     (params: {
       page?: number;
@@ -152,7 +157,12 @@ export default function ProductPage() {
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage);
     updateURLParams({ page: newPage });
-    // No need to call fetchProducts here as it will be triggered by the useEffect
+
+    // Scroll to top on page change
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
   };
 
   const handleCategoryChange = (categoryId?: number) => {
@@ -183,8 +193,9 @@ export default function ProductPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-neutral-950 to-neutral-900 pt-20">
-      <div className="container mx-auto px-4 py-16">
-        <div className="space-y-8">
+      <div className="container mx-auto px-4 py-8 md:py-16">
+        <EnhancedTechEliteBanner />
+        <div className="space-y-6 md:space-y-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
             <div className="space-y-2">
               <h2 className="text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
@@ -194,7 +205,6 @@ export default function ProductPage() {
                 Page {currentPage} of {totalPages}
               </p>
             </div>
-
             {useNearestSort ? (
               <div className="flex items-center text-sm text-emerald-500">
                 <MapPin className="w-4 h-4 mr-1" />
@@ -225,14 +235,14 @@ export default function ProductPage() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 md:gap-6">
             {loading
-              ? Array.from({ length: 8 }).map((_, index) => (
+              ? Array.from({ length: isMobile ? 6 : 8 }).map((_, index) => (
                   <div
                     key={index}
-                    className="animate-pulse bg-neutral-800 rounded-lg p-4 h-72"
+                    className="animate-pulse bg-neutral-800 rounded-lg p-4 h-64 md:h-72"
                   >
-                    <div className="bg-neutral-700 h-40 rounded-lg mb-4"></div>
+                    <div className="bg-neutral-700 h-32 md:h-40 rounded-lg mb-4"></div>
                     <div className="bg-neutral-700 h-6 w-3/4 rounded mb-2"></div>
                     <div className="bg-neutral-700 h-6 w-1/2 rounded"></div>
                   </div>
@@ -248,7 +258,7 @@ export default function ProductPage() {
           </div>
 
           {totalPages > 1 && !loading && (
-            <div className="mt-12 flex justify-center">
+            <div className="mt-8 md:mt-12 flex justify-center">
               <Pagination
                 totalPages={totalPages}
                 currentPage={currentPage}

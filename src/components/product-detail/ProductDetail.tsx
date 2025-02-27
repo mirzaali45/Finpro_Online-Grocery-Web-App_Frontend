@@ -1,7 +1,6 @@
-// app/products/[slug]/ProductDetailClient.tsx
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
@@ -30,6 +29,50 @@ export default function ProductDetailClient({
 }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+
+  // Debug logger
+  useEffect(() => {
+    if (product.Discount && product.Discount.length > 0) {
+      console.log("Discount info:", {
+        type: product.Discount[0].discount_type,
+        typeToString: String(product.Discount[0].discount_type),
+        value: product.Discount[0].discount_value,
+        isPercentage: product.Discount[0].discount_type === "percentage",
+      });
+    }
+  }, [product]);
+
+  const calculateDiscountedPrice = () => {
+    if (!product.Discount || product.Discount.length === 0) {
+      return product.price;
+    }
+
+    const discount = product.Discount[0];
+    const discountType = String(discount.discount_type).toLowerCase();
+
+    if (discountType === "percentage") {
+      return Math.round(
+        product.price - (product.price * discount.discount_value) / 100
+      );
+    } else {
+      return product.price - discount.discount_value;
+    }
+  };
+
+  const getDiscountLabel = () => {
+    if (!product.Discount || product.Discount.length === 0) {
+      return "";
+    }
+
+    const discount = product.Discount[0];
+    const discountType = String(discount.discount_type).toLowerCase();
+
+    if (discountType === "percentage") {
+      return `${discount.discount_value}% OFF`;
+    } else {
+      return `Rp.${discount.discount_value.toLocaleString()} OFF`;
+    }
+  };
 
   const handleAddToCart = async () => {
     try {
@@ -126,9 +169,23 @@ export default function ProductDetailClient({
         <div className="space-y-4 py-6 border-y border-neutral-800">
           <div className="flex justify-between items-center">
             <span className="text-neutral-400">Price</span>
-            <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-              Rp.{product.price.toLocaleString()}
-            </span>
+            {product.Discount && product.Discount.length > 0 ? (
+              <div className="flex flex-col items-end">
+                <span className="text-sm font-medium line-through text-neutral-500">
+                  Rp.{product.price.toLocaleString()}
+                </span>
+                <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                  Rp.{calculateDiscountedPrice().toLocaleString()}
+                </span>
+                <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full mt-1">
+                  {getDiscountLabel()}
+                </span>
+              </div>
+            ) : (
+              <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                Rp.{product.price.toLocaleString()}
+              </span>
+            )}
           </div>
 
           <div className="flex justify-between items-center">

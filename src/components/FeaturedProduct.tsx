@@ -13,8 +13,14 @@ import { sortByDistance } from "@/utils/distanceCalc";
 export default function FeaturedProducts() {
   const [loading, setLoading] = useState(true);
   const [products, setProducts] = useState<Product[]>([]);
-  const [sortedProducts, setSortedProducts] = useState<(Product & { distance?: number })[]>([]);
-  const { location, loading: locationLoading, error: locationError } = useGeolocation();
+  const [sortedProducts, setSortedProducts] = useState<
+    (Product & { distance?: number })[]
+  >([]);
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+  } = useGeolocation();
 
   // Fetch products on component mount
   useEffect(() => {
@@ -30,10 +36,10 @@ export default function FeaturedProducts() {
         location.longitude,
         (product) => ({
           lat: product.store.latitude,
-          lon: product.store.longitude
+          lon: product.store.longitude,
         })
       );
-      
+
       setSortedProducts(sorted);
     } else {
       setSortedProducts(products);
@@ -45,7 +51,6 @@ export default function FeaturedProducts() {
     try {
       const featuredProducts = await productService.getFeaturedProducts();
       setProducts(featuredProducts);
-      // Initialize with unsorted products
       setSortedProducts(featuredProducts);
     } catch (error) {
       console.error("Error fetching featured products:", error);
@@ -54,7 +59,24 @@ export default function FeaturedProducts() {
     }
   };
 
-  // Show loading state when either products or location is loading
+  // Calculate discounted price
+  const calculateDiscountedPrice = (product: Product) => {
+    if (!product.Discount || product.Discount.length === 0) {
+      return product.price;
+    }
+
+    const discount = product.Discount[0];
+    const discountType = String(discount.discount_type).toLowerCase();
+
+    if (discountType === "percentage") {
+      return Math.round(
+        product.price - (product.price * discount.discount_value) / 100
+      );
+    } else {
+      return product.price - discount.discount_value;
+    }
+  };
+
   if (loading) {
     return (
       <div className="bg-gradient-to-b from-neutral-950 to-neutral-900 py-16">
@@ -72,7 +94,7 @@ export default function FeaturedProducts() {
           <h2 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400">
             Featured Products
           </h2>
-          
+
           {location ? (
             <p className="text-neutral-400 mt-2">
               Showing products from stores nearest to you
@@ -86,8 +108,14 @@ export default function FeaturedProducts() {
               <span className="text-neutral-400">Finding nearby stores</span>
               <span className="ml-2 flex space-x-1">
                 <span className="animate-pulse h-2 w-2 bg-neutral-400 rounded-full"></span>
-                <span className="animate-pulse h-2 w-2 bg-neutral-400 rounded-full" style={{ animationDelay: "0.2s" }}></span>
-                <span className="animate-pulse h-2 w-2 bg-neutral-400 rounded-full" style={{ animationDelay: "0.4s" }}></span>
+                <span
+                  className="animate-pulse h-2 w-2 bg-neutral-400 rounded-full"
+                  style={{ animationDelay: "0.2s" }}
+                ></span>
+                <span
+                  className="animate-pulse h-2 w-2 bg-neutral-400 rounded-full"
+                  style={{ animationDelay: "0.4s" }}
+                ></span>
               </span>
             </div>
           ) : null}
@@ -128,7 +156,7 @@ export default function FeaturedProducts() {
                   <p className="text-sm text-neutral-400">
                     {product.store.store_name}
                   </p>
-                  
+
                   {/* Show distance if available */}
                   {product.distance !== undefined && (
                     <p className="text-sm text-emerald-400">
@@ -137,9 +165,29 @@ export default function FeaturedProducts() {
                   )}
 
                   <div className="flex items-center justify-between">
-                    <span className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                      {formatRupiah(product.price)}
-                    </span>
+                    {product.Discount && product.Discount.length > 0 ? (
+                      <div className="flex flex-col">
+                        <span className="text-sm line-through text-neutral-500">
+                          {formatRupiah(product.price)}
+                        </span>
+                        <span className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                          {formatRupiah(calculateDiscountedPrice(product))}
+                        </span>
+                        <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full mt-1">
+                          {String(
+                            product.Discount[0].discount_type
+                          ).toLowerCase() === "percentage"
+                            ? `${product.Discount[0].discount_value}% OFF`
+                            : `${formatRupiah(
+                                product.Discount[0].discount_value
+                              )} OFF`}
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="text-lg font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                        {formatRupiah(product.price)}
+                      </span>
+                    )}
 
                     <button className="relative px-4 py-2 group/button">
                       <div className="absolute inset-0 bg-gradient-to-r from-rose-500/80 via-purple-500/80 to-blue-500/80 rounded-lg opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />

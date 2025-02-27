@@ -18,6 +18,11 @@ class VoucherService {
         },
       });
 
+      // If we get a 404, it means no vouchers found - return empty array
+      if (response.status === 404) {
+        return { success: true, data: [], message: "No vouchers found" };
+      }
+
       if (!response.ok) {
         throw new Error("Failed to fetch vouchers");
       }
@@ -25,6 +30,68 @@ class VoucherService {
       return await response.json();
     } catch (error) {
       console.error("Error fetching vouchers:", error);
+      // Return empty vouchers array instead of throwing error
+      return { success: false, data: [], message: "Failed to fetch vouchers" };
+    }
+  }
+
+  async claimDiscount(discount_id: number): Promise<VoucherResponse> {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const response = await fetch(`${this.baseUrl}/voucher/`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ discount_id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to claim discount");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error claiming discount:", error);
+      throw error;
+    }
+  }
+
+  async deleteVoucher(
+    voucher_id: number
+  ): Promise<{ success: boolean; message: string }> {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const response = await fetch(`${this.baseUrl}/voucher/${voucher_id}`, {
+        method: "DELETE",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to delete voucher");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error deleting voucher:", error);
       throw error;
     }
   }

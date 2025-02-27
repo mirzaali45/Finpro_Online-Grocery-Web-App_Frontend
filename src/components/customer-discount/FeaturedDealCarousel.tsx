@@ -19,7 +19,6 @@ export default function FeaturedDiscountCarousel() {
   const loadDiscounts = async () => {
     setIsLoading(true);
     try {
-      // Get featured discounts (first 3-5 from API)
       const data = await fetchDiscounts(1, 5);
 
       if (data.success) {
@@ -33,8 +32,6 @@ export default function FeaturedDiscountCarousel() {
       setIsLoading(false);
     }
   };
-
-  // Auto slide
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -48,8 +45,6 @@ export default function FeaturedDiscountCarousel() {
 
     return () => clearInterval(interval);
   }, [isHovering, discounts.length]);
-
-  // Format time remaining
   const getTimeRemaining = (expires: Date) => {
     const now = new Date();
     const diff = new Date(expires).getTime() - now.getTime();
@@ -88,8 +83,6 @@ export default function FeaturedDiscountCarousel() {
       </div>
     );
   }
-
-  // Generate a color based on index
   const getBackgroundColor = (index: number) => {
     const colors = [
       "from-blue-600 to-purple-600",
@@ -118,7 +111,6 @@ export default function FeaturedDiscountCarousel() {
               index
             )} relative`}
           >
-            {/* Use discount thumbnail if available */}
             <div className="absolute inset-0 flex items-center justify-center">
               {discount.thumbnail ? (
                 <Image

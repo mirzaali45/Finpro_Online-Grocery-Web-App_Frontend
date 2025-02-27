@@ -6,8 +6,9 @@ import { storeService } from "@/services/store-admin.service";
 import { StoreData } from "@/types/store-types";
 import StoreList from "@/components/store-management/StoreList";
 import AddStoreModal from "@/components/store-management/AddStoreModal";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function StoreDashboard() {
+function StoreDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
@@ -40,9 +41,6 @@ export default function StoreDashboard() {
       console.error("Error deleting store:", error);
     }
   };
-
-  // Remove formData state and resetForm since they're not used
-
   if (loading) {
     return (
       <div className="min-h-screen flex justify-center items-center">
@@ -88,3 +86,8 @@ export default function StoreDashboard() {
     </div>
   );
 }
+export default withAuth(StoreDashboard, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});
+
