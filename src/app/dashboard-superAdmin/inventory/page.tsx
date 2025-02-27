@@ -2,7 +2,13 @@
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebarSuperAdmin";
-import { RefreshCw, ArrowUpDown, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  ArrowUpDown,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import type {
   Inventory,
   UpdateInventoryRequest,
@@ -10,7 +16,7 @@ import type {
 } from "@/types/inventory-types";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { categoryService } from "@/services/category-admin.service";
-import { LogService } from "@/services/log.service";
+import LogService from "@/services/log.service"; // Fixed import
 import { LogViewer } from "@/components/inventory-management/LogViewer";
 import InventoryTable from "@/components/inventory-management/InventoryTable";
 import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";
@@ -27,7 +33,7 @@ function Inventory() {
     pageSize: 10,
     totalPages: 0,
     hasNextPage: false,
-    hasPrevPage: false
+    hasPrevPage: false,
   });
   const [categoriesCount, setCategoriesCount] = useState(0);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -47,7 +53,6 @@ function Inventory() {
     inventory?: Inventory
   ) => {
     if (action === "Update") {
-      // Create a more descriptive log message
       const logDescription = inventory
         ? `Updated ${inventory.product.name} at ${inventory.store.store_name}. 
           Quantity ${details.updates?.operation}: ${details.updates?.qty}`
@@ -56,6 +61,14 @@ function Inventory() {
       LogService.createLog({
         action,
         description: logDescription,
+        module: "Inventory Management",
+        timestamp: new Date(),
+      });
+    } else {
+      // For other action types (Add, Delete, Refresh, Error, Edit)
+      LogService.createLog({
+        action,
+        description: JSON.stringify(details),
         module: "Inventory Management",
         timestamp: new Date(),
       });
@@ -69,12 +82,8 @@ function Inventory() {
         InventoryService.getInventory({ page }),
         categoryService.getCategories(),
       ]);
-
-      // Extract inventory data and pagination info
       const { data: newInventoryData, pagination: newPagination } =
         inventoryResponse;
-
-      // Detect added and deleted items (only when staying on same page)
       if (pagination.page === page) {
         const addedItems = newInventoryData.filter(
           (newItem) =>
@@ -89,8 +98,6 @@ function Inventory() {
               (newItem) => newItem.inv_id === oldItem.inv_id
             )
         );
-
-        // Log added items
         if (addedItems.length > 0) {
           createLog("Add", {
             items: addedItems.map((item) => ({
@@ -102,8 +109,6 @@ function Inventory() {
             totalAddedItems: addedItems.length,
           });
         }
-
-        // Log deleted items
         if (deletedItems.length > 0) {
           createLog("Delete", {
             items: deletedItems.map((item) => ({
@@ -116,16 +121,12 @@ function Inventory() {
           });
         }
       }
-
-      // Fix: Access the data property from categoriesResponse
       const categoriesData = categoriesResponse.data || [];
 
       setInventoryData(newInventoryData);
       setPagination(newPagination);
       setCategoriesCount(categoriesData.length);
       setPreviousInventoryData(newInventoryData);
-
-      // Log the inventory refresh
       createLog("Refresh", {
         totalItems: newPagination.total,
         totalCategories: categoriesData.length,
@@ -134,8 +135,6 @@ function Inventory() {
     } catch (error) {
       console.error("Error fetching inventory or categories:", error);
       toast.error("Failed to fetch inventory or categories");
-
-      // Log the error
       createLog("Error", {
         message: "Failed to refresh inventory and categories",
       });
@@ -156,13 +155,9 @@ function Inventory() {
     try {
       await InventoryService.updateInventory(invId, formData);
       toast.success("Inventory updated successfully");
-
-      // Find the specific inventory item to include in the log
       const updatedInventory = inventoryData.find(
         (item) => item.inv_id === invId
       );
-
-      // Log the inventory update with detailed information
       createLog(
         "Update",
         {
@@ -177,8 +172,6 @@ function Inventory() {
     } catch (error) {
       console.error("Error updating inventory:", error);
       toast.error("Failed to update inventory");
-
-      // Log the update error
       createLog("Update", {
         itemId: invId,
         message: "Failed to update inventory item",
@@ -191,13 +184,10 @@ function Inventory() {
       return;
 
     try {
-      // Find the item details before deletion
       const itemToDelete = inventoryData.find((item) => item.inv_id === invId);
 
       await InventoryService.deleteInventory(invId);
       toast.success("Inventory deleted successfully");
-
-      // Log the inventory deletion with detailed information
       if (itemToDelete) {
         createLog("Delete", {
           item: {
@@ -208,19 +198,15 @@ function Inventory() {
           },
         });
       }
-
-      // Reload current page or go to previous page if this was the only item
-      const nextPage = 
-        inventoryData.length === 1 && pagination.page > 1 
-          ? pagination.page - 1 
+      const nextPage =
+        inventoryData.length === 1 && pagination.page > 1
+          ? pagination.page - 1
           : pagination.page;
-      
+
       fetchInventoryAndCategories(nextPage);
     } catch (error) {
       console.error("Error deleting inventory:", error);
       toast.error("Failed to delete inventory");
-
-      // Log the deletion error
       createLog("Error", {
         itemId: invId,
         message: "Failed to delete inventory item",
@@ -232,7 +218,6 @@ function Inventory() {
     setSelectedInventory(inventory);
     setIsUpdateModalOpen(true);
 
-    // Log the edit action with item details
     createLog("Edit", {
       itemId: inventory.inv_id,
       productName: inventory.product.name,
@@ -258,7 +243,6 @@ function Inventory() {
           />
 
           <main className="p-8 ml-[10vw]">
-            {/* Page Header with Cards */}
             <div className="mb-8">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
@@ -292,7 +276,6 @@ function Inventory() {
                 </div>
               </div>
 
-              {/* Statistics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                   <div className="flex justify-between items-start">
@@ -356,8 +339,6 @@ function Inventory() {
                 </div>
               </div>
             </div>
-
-            {/* Main Content */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -413,15 +394,16 @@ function Inventory() {
                         onEdit={handleEdit}
                         onDelete={handleDeleteInventory}
                       />
-                      
-                      {/* Pagination Controls */}
                       <div className="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Showing {inventoryData.length} of {pagination.total} items
+                          Showing {inventoryData.length} of {pagination.total}{" "}
+                          items
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => handlePageChange(pagination.page - 1)}
+                            onClick={() =>
+                              handlePageChange(pagination.page - 1)
+                            }
                             disabled={!pagination.hasPrevPage}
                             className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Previous page"
@@ -432,7 +414,9 @@ function Inventory() {
                             Page {pagination.page} of {pagination.totalPages}
                           </span>
                           <button
-                            onClick={() => handlePageChange(pagination.page + 1)}
+                            onClick={() =>
+                              handlePageChange(pagination.page + 1)
+                            }
                             disabled={!pagination.hasNextPage}
                             className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Next page"
@@ -446,8 +430,6 @@ function Inventory() {
                 </div>
               )}
             </div>
-
-            {/* Update Inventory Modal */}
             <UpdateInventoryModal
               isOpen={isUpdateModalOpen}
               onClose={() => {
@@ -460,8 +442,6 @@ function Inventory() {
           </main>
         </div>
       </div>
-
-      {/* Log Viewer Modal */}
       {isLogViewerOpen && (
         <LogViewer onClose={() => setIsLogViewerOpen(false)} />
       )}
