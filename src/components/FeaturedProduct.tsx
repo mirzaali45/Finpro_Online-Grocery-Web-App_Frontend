@@ -2,30 +2,41 @@
 
 import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import { productService } from "@/services/product.service";
 import { Product } from "@/types/product-types";
 import { formatRupiah } from "@/helper/currencyRp";
+import { generateSlug } from "@/utils/slugUtils";
 
 export default function FeaturedProducts() {
   const [loading, setLoading] = useState(false);
   const [products, setProducts] = useState<Product[]>([]);
 
   useEffect(() => {
-    fetchProducts();
+    fetchFeaturedProducts();
   }, []);
 
-  const fetchProducts = async () => {
+  const fetchFeaturedProducts = async () => {
     setLoading(true);
     try {
-      const data = await productService.getProducts();
-      const sortedProducts = data.sort((a, b) => b.price - a.price).slice(0, 4);
-      setProducts(sortedProducts);
+      const featuredProducts = await productService.getFeaturedProducts();
+      setProducts(featuredProducts);
     } catch (error) {
-      console.error("Error fetching products:", error);
+      console.error("Error fetching featured products:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="bg-gradient-to-b from-neutral-950 to-neutral-900 py-16">
+        <div className="container mx-auto px-4 text-center">
+          <p className="text-neutral-400">Loading featured products...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-gradient-to-b from-neutral-950 to-neutral-900 py-16">
@@ -37,9 +48,10 @@ export default function FeaturedProducts() {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-          {products.map((product, index) => (
-            <div
-              key={index}
+          {products.map((product) => (
+            <Link
+              href={`/products/${generateSlug(product.name)}`}
+              key={product.product_id}
               className="group relative rounded-xl overflow-hidden"
             >
               {/* Glass background with gradient */}
@@ -74,20 +86,17 @@ export default function FeaturedProducts() {
                     </span>
 
                     <button className="relative px-4 py-2 group/button">
-                      {/* Button gradient background */}
                       <div className="absolute inset-0 bg-gradient-to-r from-rose-500/80 via-purple-500/80 to-blue-500/80 rounded-lg opacity-0 group-hover/button:opacity-100 transition-opacity duration-300" />
-
-                      {/* Button base style */}
                       <div className="relative px-4 py-2 bg-neutral-800 rounded-lg group-hover/button:bg-transparent transition-colors duration-300">
                         <span className="text-sm font-medium text-neutral-100">
-                          Add to Cart
+                          View Details
                         </span>
                       </div>
                     </button>
                   </div>
                 </div>
               </div>
-            </div>
+            </Link>
           ))}
         </div>
       </div>

@@ -37,8 +37,8 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
         className="absolute inset-0 bg-black bg-opacity-50"
         onClick={onClose}
       />
-      <div className="relative bg-white dark:bg-gray-800 rounded-lg w-full max-w-md mx-4 p-6">
-        <div className="flex justify-between items-center mb-4">
+      <div className="relative bg-white dark:bg-gray-800 rounded-lg w-full max-w-md mx-4 max-h-[90vh] flex flex-col">
+        <div className="flex justify-between items-center p-6 border-b border-gray-200 dark:border-gray-700">
           <h2 className="text-xl font-semibold dark:text-white">{title}</h2>
           <button
             onClick={onClose}
@@ -47,7 +47,7 @@ export default function Modal({ isOpen, onClose, title, children }: ModalProps) 
             <X className="h-5 w-5" />
           </button>
         </div>
-        {children}
+        <div className="overflow-y-auto p-6 flex-1">{children}</div>
       </div>
     </div>
   );
