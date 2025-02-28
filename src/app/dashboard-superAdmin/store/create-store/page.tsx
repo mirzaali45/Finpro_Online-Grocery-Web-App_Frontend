@@ -6,16 +6,13 @@ import { useStoreForm } from "@/helper/use-store-form";
 import { InputField } from "@/components/storeInputFields";
 import { StoreService } from "@/services/store.service";
 import Swal from "sweetalert2";
-import {
-  MapContainer,
-  TileLayer,
-  Marker,
-  Popup,
-  useMapEvents,
-} from "react-leaflet";
-import L from "leaflet";
+import dynamic from "next/dynamic";
 import Sidebar from "@/components/sidebarSuperAdmin";
-import { StoreData } from "@/types/store-types";
+
+const LeafletComponents = dynamic(
+  () => import("@/components/LeafleatMapComponent"),
+  { ssr: false }
+);
 
 export default function CreateStore() {
   const router = useRouter();
@@ -83,20 +80,13 @@ export default function CreateStore() {
 
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
 
-  // Map event handling
-  function MapClickHandler() {
-    useMapEvents({
-      click(e) {
-        const { lat, lng } = e.latlng;
-        setFormData((prev) => ({
-          ...prev,
-          latitude: lat,
-          longitude: lng,
-        }));
-      },
-    });
-    return null;
-  }
+  const handleMapClick = (lat: number, lng: number) => {
+    setFormData((prev) => ({
+      ...prev,
+      latitude: lat,
+      longitude: lng,
+    }));
+  };
 
   return (
     <div className="min-h-screen bg-gray-100 p-6">
@@ -188,27 +178,11 @@ export default function CreateStore() {
           </div>
 
           <div className="mb-6">
-            <MapContainer
-              center={[formData.latitude || 0, formData.longitude || 0]}
-              zoom={13}
-              style={{ height: "300px", width: "100%" }}
-            >
-              <TileLayer
-                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              />
-              {formData.latitude && formData.longitude && (
-                <Marker
-                  position={[formData.latitude, formData.longitude]}
-                  icon={new L.Icon.Default()}
-                >
-                  <Popup>
-                    <span>Store Location</span>
-                  </Popup>
-                </Marker>
-              )}
-              <MapClickHandler />
-            </MapContainer>
+            <LeafletComponents
+              latitude={formData.latitude}
+              longitude={formData.longitude}
+              onMapClick={handleMapClick}
+            />
           </div>
 
           <div className="flex justify-end">

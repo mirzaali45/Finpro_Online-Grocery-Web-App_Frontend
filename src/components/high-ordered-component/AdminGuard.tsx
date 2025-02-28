@@ -11,10 +11,12 @@ export type UserRole = "customer" | "store_admin" | "super_admin";
 
 // Dynamic imports for unauthorized pages
 const NotAuthorizedSuperAdmin = dynamic(
-  () => import("@/app/not-authorized-superadmin/page")
+  () => import("@/app/not-authorized-superadmin/page"),
+  { ssr: false }
 );
 const NotAuthorizedStoreAdmin = dynamic(
-  () => import("@/app/not-authorized-storeadmin/page")
+  () => import("@/app/not-authorized-storeadmin/page"),
+  { ssr: false }
 );
 
 // Authentication configuration interface
@@ -44,7 +46,7 @@ const LoadingComponent: React.FC = () => (
   </div>
 );
 
-// Higher-Order Component for Authentication
+// Higher-Order Component for Authentication - modified to be SSR-safe
 export const withAuth = <P extends object>(
   WrappedComponent: ComponentType<P>,
   config: AuthConfig = {}
@@ -54,6 +56,7 @@ export const withAuth = <P extends object>(
     redirectPath = "/login-user-customer",
   } = config;
 
+  // Create the Auth Wrapper
   const AuthWrapper: React.FC<P> = (props) => {
     const router = useRouter();
     const [authState, setAuthState] = useState({
@@ -63,57 +66,79 @@ export const withAuth = <P extends object>(
     });
 
     useEffect(() => {
+      // This function will only run on the client
       const checkAuthorization = () => {
-        // Get token from storage
-        const token = AuthService.getToken();
+        try {
+          // Get token from storage
+          const token = AuthService.getToken();
 
-        // No token found
-        if (!token) {
+          // No token found
+          if (!token) {
+            setAuthState({
+              isLoading: false,
+              isAuthorized: false,
+              role: null,
+            });
+            router.push(redirectPath);
+            return;
+          }
+
+          // Parse token
+          const decodedToken = AuthService.parseToken();
+
+          // Invalid token
+          if (!decodedToken) {
+            setAuthState({
+              isLoading: false,
+              isAuthorized: false,
+              role: null,
+            });
+            router.push(redirectPath);
+            return;
+          }
+
+          // Check if user's role is allowed
+          const userRole = decodedToken.role as UserRole;
+          const isRoleAllowed = allowedRoles.includes(userRole);
+
+          if (!isRoleAllowed) {
+            setAuthState({
+              isLoading: false,
+              isAuthorized: false,
+              role: userRole,
+            });
+            return;
+          }
+
+          // Authorized
           setAuthState({
             isLoading: false,
-            isAuthorized: false,
-            role: null,
-          });
-          router.push(redirectPath);
-          return;
-        }
-
-        // Parse token
-        const decodedToken = AuthService.parseToken();
-
-        // Invalid token
-        if (!decodedToken) {
-          setAuthState({
-            isLoading: false,
-            isAuthorized: false,
-            role: null,
-          });
-          router.push(redirectPath);
-          return;
-        }
-
-        // Check if user's role is allowed
-        const userRole = decodedToken.role as UserRole;
-        const isRoleAllowed = allowedRoles.includes(userRole);
-
-        if (!isRoleAllowed) {
-          setAuthState({
-            isLoading: false,
-            isAuthorized: false,
+            isAuthorized: true,
             role: userRole,
           });
-          return;
+        } catch (error) {
+          console.error("Authorization check failed:", error);
+          setAuthState({
+            isLoading: false,
+            isAuthorized: false,
+            role: null,
+          });
+          router.push(redirectPath);
         }
-
-        // Authorized
-        setAuthState({
-          isLoading: false,
-          isAuthorized: true,
-          role: userRole,
-        });
       };
 
-      checkAuthorization();
+      // Only run on client-side
+      if (typeof window !== "undefined") {
+        checkAuthorization();
+      } else {
+        // For SSR, just show loading initially
+        // This branch should never actually run with "use client" directive
+        setAuthState({
+          isLoading: true,
+          isAuthorized: false,
+          role: null,
+        });
+      }
     }, [router]);
 
     // Loading state
@@ -146,13 +171,17 @@ export const withAuth = <P extends object>(
   return AuthWrapper;
 };
 
-// Utility function to get current user role
+// Utility function to get current user role - made SSR-safe
 export const getCurrentUserRole = (): UserRole | null => {
-  const token = AuthService.getToken();
-
-  if (!token) return null;
+  // Only run on client-side
+  if (typeof window === "undefined") {
+    return null;
+  }
 
   try {
+    const token = AuthService.getToken();
+    if (!token) return null;
+
     const decoded = AuthService.parseToken();
     return decoded?.role as UserRole;
   } catch (error) {

@@ -1,4 +1,3 @@
-// helper/validation-schema-login.ts
 import * as Yup from "yup";
 
 export const verifyResetPass = Yup.object().shape({
@@ -9,6 +8,6 @@ export const verifyResetPass = Yup.object().shape({
     .min(6, "New Password must be at least 6 characters")
     .required("New Password is required"),
   confirmPassword: Yup.string()
-    .oneOf([Yup.ref("password"), null], "Passwords must match")
+    .oneOf([Yup.ref("password")], "Passwords must match")
     .required("Confirm Password is required"),
 });

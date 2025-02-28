@@ -9,38 +9,46 @@ export interface LogEntry {
   timestamp: string | Date; // Accept either string or Date
 }
 
-// Generic interface for log details (can contain any properties)
-export interface LogDetails {
+// Define a type for update operations
+export type UpdateOperation = "add" | "subtract";
+
+// Define updates interface
+export interface LogUpdates {
+  operation?: UpdateOperation;
+  qty?: number;
+  [key: string]: unknown;
+}
+
+// Define item interface
+export interface LogItem {
+  id: number;
+  name: string;
+  store: string;
+  quantity: number;
+}
+
+// Generic interface for log details without index signature
+export interface LogDetailsBase {
   // For Update actions
   itemId?: number;
-  updates?: {
-    operation?: "add" | "subtract";
-    qty?: number;
-    [key: string]: any;
-  };
+  updates?: LogUpdates;
 
   // For Delete actions
-  item?: {
-    id: number;
-    name: string;
-    store: string;
-    quantity: number;
-  };
+  item?: LogItem;
 
   // For batch Delete actions
-  items?: Array<{
-    id: number;
-    name: string;
-    store: string;
-    quantity: number;
-  }>;
+  items?: LogItem[];
 
   // For Add actions
   totalAddedItems?: number;
 
   // For other actions
   message?: string;
-  [key: string]: any;
+}
+
+// Extended interface with index signature
+export interface LogDetails extends LogDetailsBase {
+  [key: string]: unknown;
 }
 
 // Filter options for fetching logs

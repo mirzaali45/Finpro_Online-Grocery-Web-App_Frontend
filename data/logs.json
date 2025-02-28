@@ -20,6 +20,69 @@
       "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
       "module": "Inventory Management",
       "timestamp": "2025-02-28T08:10:10.900Z"
+    },
+    {
+      "id": 4,
+      "action": "Refresh",
+      "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:17.837Z"
+    },
+    {
+      "id": 5,
+      "action": "Add",
+      "description": "{\"items\":[{\"id\":1,\"name\":\"iPhone 15\",\"store\":\"Store 2\",\"quantity\":120},{\"id\":2,\"name\":\"Iphone 14 Pro Max\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":3,\"name\":\"Asus ROG 13\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":4,\"name\":\"Samsung Galaxy S22\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":5,\"name\":\"Samsung Galaxy S25\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":6,\"name\":\"Oppo A3X\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":7,\"name\":\"Oppo A60\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":8,\"name\":\"Vivo Y28\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":9,\"name\":\"Samsung Galaxy Note 20 Ultra\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":10,\"name\":\"Iphone XR\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20}],\"totalAddedItems\":10}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:17.836Z"
+    },
+    {
+      "id": 6,
+      "action": "Add",
+      "description": "{\"items\":[{\"id\":1,\"name\":\"iPhone 15\",\"store\":\"Store 2\",\"quantity\":120},{\"id\":2,\"name\":\"Iphone 14 Pro Max\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":3,\"name\":\"Asus ROG 13\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":4,\"name\":\"Samsung Galaxy S22\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":5,\"name\":\"Samsung Galaxy S25\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":6,\"name\":\"Oppo A3X\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":7,\"name\":\"Oppo A60\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":8,\"name\":\"Vivo Y28\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":9,\"name\":\"Samsung Galaxy Note 20 Ultra\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20},{\"id\":10,\"name\":\"Iphone XR\",\"store\":\"Tech Elite Cimahi Mall 2\",\"quantity\":20}],\"totalAddedItems\":10}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:18.453Z"
+    },
+    {
+      "id": 7,
+      "action": "Refresh",
+      "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:18.453Z"
+    },
+    {
+      "id": 8,
+      "action": "Refresh",
+      "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:20.212Z"
+    },
+    {
+      "id": 9,
+      "action": "Refresh",
+      "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:22.675Z"
+    },
+    {
+      "id": 10,
+      "action": "Edit",
+      "description": "{\"itemId\":1,\"productName\":\"iPhone 15\",\"storeName\":\"Store 2\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:28.474Z"
+    },
+    {
+      "id": 11,
+      "action": "Update",
+      "description": "Updated iPhone 15 at Store 2. \n          Quantity add: 10",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:34.037Z"
+    },
+    {
+      "id": 12,
+      "action": "Refresh",
+      "description": "{\"totalItems\":12,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-02-28T17:15:34.741Z"
     }
   ]
 }

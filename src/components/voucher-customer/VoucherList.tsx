@@ -136,7 +136,7 @@ export const VoucherList: React.FC = () => {
           </div>
           <div className="space-y-3">
             <h3 className="text-xl font-semibold text-white">
-              You don't have any vouchers
+              You don&apos;t have any vouchers
             </h3>
             <p className="text-gray-400 max-w-md mx-auto">
               Claim discount vouchers from your favorite stores and see them

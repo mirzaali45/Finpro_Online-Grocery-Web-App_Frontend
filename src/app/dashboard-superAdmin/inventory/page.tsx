@@ -148,6 +148,7 @@ function Inventory() {
     fetchInventoryAndCategories();
   }, []);
 
+  // Modify the handleUpdateInventory function to properly format the updates object
   const handleUpdateInventory = async (
     invId: number,
     formData: UpdateInventoryRequest
@@ -158,11 +159,18 @@ function Inventory() {
       const updatedInventory = inventoryData.find(
         (item) => item.inv_id === invId
       );
+
+      // Create a properly formatted LogUpdates object from formData
+      const logUpdates = {
+        operation: formData.operation, // Assuming operation exists in UpdateInventoryRequest
+        qty: formData.qty, // Assuming qty exists in UpdateInventoryRequest
+      };
+
       createLog(
         "Update",
         {
           itemId: invId,
-          updates: formData,
+          updates: logUpdates,
         },
         updatedInventory
       );
