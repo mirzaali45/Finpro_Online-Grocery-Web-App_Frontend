@@ -82,6 +82,9 @@ function Inventory() {
         InventoryService.getInventory({ page }),
         categoryService.getCategories(),
       ]);
+      console.log("Inventory Response:", inventoryResponse);
+      console.log("Inventory Data:", inventoryResponse.data);
+      console.log("Pagination:", inventoryResponse.pagination);
       const { data: newInventoryData, pagination: newPagination } =
         inventoryResponse;
       if (pagination.page === page) {

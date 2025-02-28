@@ -16,18 +16,28 @@ export const categoryService = {
     if (!token) {
       throw new Error("Authentication required");
     }
+
+    const apiFormData = new FormData();
+    apiFormData.append("category_name", formData.category_name);
+    apiFormData.append("description", formData.description);
+
+    if (formData.thumbnail) {
+      apiFormData.append("thumbnail", formData.thumbnail);
+    }
+
     const response = await fetch(`${BASE_URL}/category`, {
       method: "POST",
       headers: {
-        "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
       },
-      body: JSON.stringify(formData),
+      body: apiFormData,
     });
+
     if (!response.ok) {
       const errorData = await response.json().catch(() => null);
       throw new Error(errorData?.message || "Failed to create category");
     }
+
     return response.json();
   },
 };
