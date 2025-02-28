@@ -18,7 +18,7 @@ const getUserIdFromToken = () => {
   const decoded = decode(token) as JwtPayload & { id: number };
   if (!decoded) throw new Error("Invalid token");
   
-  return decoded.id;
+  return decoded.id;  
 };
 
 const axiosInstance = axios.create({
