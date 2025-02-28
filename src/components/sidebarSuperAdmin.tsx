@@ -129,11 +129,13 @@ export default function Sidebar({
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 mt-10 sm:mt-10 md:mt-10 lg:mt-0 xl:mt-0 2xl:mt-0">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                 SA
               </div>
-              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">Super Admin</h2>
+              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">
+                Super Admin
+              </h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -160,11 +162,13 @@ export default function Sidebar({
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
-                <div className={`transition-transform duration-300 ${
-                  activeLink === link.href 
-                    ? "text-white transform -translate-x-1" 
-                    : "group-hover:transform group-hover:-translate-x-1"
-                }`}>
+                <div
+                  className={`transition-transform duration-300 ${
+                    activeLink === link.href
+                      ? "text-white transform -translate-x-1"
+                      : "group-hover:transform group-hover:-translate-x-1"
+                  }`}
+                >
                   {link.icon}
                 </div>
                 <span className="font-medium">{link.title}</span>

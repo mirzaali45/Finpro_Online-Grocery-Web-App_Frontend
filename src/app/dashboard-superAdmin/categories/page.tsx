@@ -67,11 +67,8 @@ function CategoriesAdmin() {
     }));
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      setCategoryImage(file);
-    }
+  const handleFileChange = (file: File | null) => {
+    setCategoryImage(file);
   };
 
   const resetForm = () => {
@@ -86,44 +83,28 @@ function CategoriesAdmin() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
-      // Create FormData for multipart/form-data submission
       const submitData = new FormData();
       submitData.append("category_name", formData.category_name);
       submitData.append("description", formData.description);
 
-      // Add image file if it exists
       if (categoryImage) {
-        submitData.append("image", categoryImage);
+        submitData.append("thumbnail", categoryImage);
       }
 
-      // Update categoryService to handle FormData
-      const newCategory = await categoryService.createCategoryWithImage(
-        submitData
-      );
+      const newCategory = await categoryService.createCategory(submitData);
 
-      // Show success toast first
       toast.success("Category created successfully");
-
-      // Reset form and close modal
       setIsModalOpen(false);
       resetForm();
-
-      // Fetch the first page to show the new category
       fetchCategories(1);
     } catch (err) {
-      // Show error toast
       toast.error(
-        err instanceof Error ? err.message : "Failed to create category"
-      );
-
-      setError(
-        err instanceof Error ? err.message : "Failed to create category"
+        err instanceof Error ? err.message : "A Category Has Already Exist"
       );
     }
   };
 
   const handleEdit = (category: Category) => {
-    // Implement edit functionality
     console.log("Edit category:", category);
   };
 
@@ -131,8 +112,6 @@ function CategoriesAdmin() {
     try {
       await categoryService.deleteCategory(id);
       toast.success("Category deleted successfully");
-
-      // Re-fetch the current page after deletion
       fetchCategories(pagination.currentPage);
     } catch (err) {
       toast.error(
@@ -263,8 +242,6 @@ function CategoriesAdmin() {
           onChange={handleInputChange}
           onFileChange={handleFileChange}
         />
-
-        {/* ToastContainer for displaying notifications */}
         <ToastContainer
           position="bottom-right"
           autoClose={5000}

@@ -44,25 +44,32 @@ export const categoryService = {
     }
   },
 
-  async createCategory(formData: CategoryFormData): Promise<Category> {
-    const token = localStorage.getItem("token");
-    if (!token) {
-      throw new Error("Authentication required");
+ async createCategory(formData: FormData): Promise<Category> {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    throw new Error("Authentication required");
+  }
+
+  const response = await fetch(`${BASE_URL}/category`, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+    body: formData,
+  });
+
+  const errorData = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    // Specifically check for duplicate category error
+    if (errorData?.error === "A category with this name already exists") {
+      throw new Error("A category with this name already exists");
     }
-    const response = await fetch(`${BASE_URL}/category`, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(formData),
-    });
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => null);
-      throw new Error(errorData?.message || "Failed to create category");
-    }
-    return response.json();
-  },
+    throw new Error(errorData?.error || "Failed to create category");
+  }
+
+  return errorData;
+},
 
   async createCategoryWithImage(formData: FormData): Promise<Category> {
     const token = localStorage.getItem("token");

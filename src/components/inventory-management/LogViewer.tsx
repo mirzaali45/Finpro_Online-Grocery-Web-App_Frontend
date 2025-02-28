@@ -138,27 +138,40 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
           const operation =
             data.updates.operation === "add" ? "increased by" : "decreased by";
           const inventoryItem = inventoryMap.get(data.itemId);
+          console.log("Inventory Map:", inventoryMap);
+          console.log("Inventory Item:", inventoryItem);
+          if (log.action === "Update" && data.updates) {
+            const operation =
+              data.updates.operation === "add"
+                ? "increased by"
+                : "decreased by";
+            const inventoryItem = inventoryMap.get(data.itemId);
 
-          if (inventoryItem) {
-            return (
-              <div>
-                <span className="font-medium">
-                  {inventoryItem.product.name}
-                </span>
-                <div className="text-xs text-gray-500">ID: {data.itemId}</div>
-                <div className="mt-1">
-                  <span className="text-gray-600 dark:text-gray-400">
-                    Store:
-                  </span>{" "}
-                  {inventoryItem.store.store_name} |
-                  <span className="text-gray-600 dark:text-gray-400">
-                    {" "}
-                    Quantity:
-                  </span>{" "}
-                  {operation} {data.updates.qty || "N/A"}
+            if (inventoryItem) {
+              return (
+                <div>
+                  <span className="font-medium">
+                    {inventoryItem.product.name}
+                  </span>
+                  <div className="text-xs text-gray-500">ID: {data.itemId}</div>
+                  <div className="mt-1">
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Store:
+                    </span>{" "}
+                    {inventoryItem.store.store_name} |
+                    <span className="text-gray-600 dark:text-gray-400">
+                      {" "}
+                      Quantity:
+                    </span>{" "}
+                    {operation} {data.updates.qty || "N/A"}
+                    <span className="text-gray-600 dark:text-gray-400">
+                      Total Now:
+                    </span>{" "}
+                    {inventoryItem.total_qty}
+                  </div>
                 </div>
-              </div>
-            );
+              );
+            }
           } else {
             // Fallback if inventory item not found in map
             return (
