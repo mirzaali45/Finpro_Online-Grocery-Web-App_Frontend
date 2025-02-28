@@ -16,7 +16,7 @@ import type {
 } from "@/types/inventory-types";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { categoryService } from "@/services/category-admin.service";
-import LogService from "@/services/log.service"; // Fixed import
+import LogService from "@/services/log.service"; 
 import { LogViewer } from "@/components/inventory-management/LogViewer";
 import InventoryTable from "@/components/inventory-management/InventoryTable";
 import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";

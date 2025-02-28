@@ -43,8 +43,6 @@ export class InventoryService {
   static async getInventory(params?: GetInventoryParams): Promise<PaginatedResponse<Inventory>> {
     try {
       const token = localStorage.getItem('token');
-      
-      // Build query parameters
       const queryParams = new URLSearchParams();
       if (params?.page) {
         queryParams.append('page', params.page.toString());
