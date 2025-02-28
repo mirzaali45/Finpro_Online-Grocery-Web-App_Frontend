@@ -1,59 +1,70 @@
 // types/log-types.ts
 
+// Main log entry interface
+export interface LogEntry {
+  id: number;
+  action: string;
+  module: string;
+  description: string;
+  timestamp: string | Date; // Accept either string or Date
+}
+
+// Generic interface for log details (can contain any properties)
 export interface LogDetails {
-  [key: string]: any;
-  items?: Array<{
-    id: number;
-    name: string;
-    store: string;
-    quantity: number;
-  }>;
+  // For Update actions
+  itemId?: number;
+  updates?: {
+    operation?: "add" | "subtract";
+    qty?: number;
+    [key: string]: any;
+  };
+
+  // For Delete actions
   item?: {
     id: number;
     name: string;
     store: string;
     quantity: number;
   };
-  updates?: {
-    operation: string;
-    qty: number;
-  };
-  message?: string;
-  itemId?: number;
+
+  // For batch Delete actions
+  items?: Array<{
+    id: number;
+    name: string;
+    store: string;
+    quantity: number;
+  }>;
+
+  // For Add actions
   totalAddedItems?: number;
-  totalDeletedItems?: number;
-  totalItems?: number;
-  totalCategories?: number;
-  productName?: string;
-  storeName?: string;
+
+  // For other actions
+  message?: string;
+  [key: string]: any;
 }
 
-export interface LogEntry {
-  id: number;
-  action: string;
-  description: string;
-  module: string;
-  timestamp: string | Date;
-  details?: LogDetails;
-}
-
+// Filter options for fetching logs
 export interface LogFilterOptions {
   module?: string;
   action?: string;
+  startDate?: string;
+  endDate?: string;
   page?: number;
   pageSize?: number;
-  startDate?: string | Date;
-  endDate?: string | Date;
 }
 
+// Pagination metadata
+export interface PaginationMetadata {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+// Paginated response wrapper
 export interface PaginatedResponse<T> {
   data: T[];
-  pagination: {
-    total: number;
-    page: number;
-    pageSize: number;
-    totalPages: number;
-    hasNextPage: boolean;
-    hasPrevPage: boolean;
-  };
+  pagination: PaginationMetadata;
 }

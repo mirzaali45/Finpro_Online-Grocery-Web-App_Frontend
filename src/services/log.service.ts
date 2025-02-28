@@ -1,187 +1,106 @@
-// services/log.service.ts
-import {
-  LogEntry,
-  LogDetails,
-  LogFilterOptions,
-  PaginatedResponse,
-} from "@/types/log-types";
+import { LogEntry, LogFilterOptions } from "@/types/log-types";
 
-const LOGS_STORAGE_KEY = "inventory_logs";
-
-// Helper function to safely access localStorage (only in browser)
-const getLocalStorage = () => {
-  if (typeof window !== "undefined") {
-    return window.localStorage;
-  }
-  return null;
-};
-
-const LogService = {
+class LogService {
   /**
-   * Get all logs with optional filtering and pagination
-   * @param {LogFilterOptions} options - Filter and pagination options
-   * @returns {Promise<LogEntry[] | PaginatedResponse<LogEntry>>} Logs or paginated logs
+   * Get all logs
+   * @returns {Promise<LogEntry[]>} All logs
    */
-  getLogs: async (
-    options: LogFilterOptions = {}
-  ): Promise<LogEntry[] | PaginatedResponse<LogEntry>> => {
+  static async getLogs(options?: LogFilterOptions): Promise<LogEntry[]> {
     try {
-      const localStorage = getLocalStorage();
-      if (!localStorage) return [];
-
-      const logsString =
-        localStorage.getItem(LOGS_STORAGE_KEY) || '{"logs":[]}';
-      let { logs } = JSON.parse(logsString) as { logs: LogEntry[] };
-
-      // Apply filters
-      if (options.module) {
-        logs = logs.filter(
-          (log) => log.module.toLowerCase() === options.module!.toLowerCase()
-        );
+      const response = await fetch("/api/inventory-logs");
+      if (!response.ok) {
+        throw new Error("Failed to fetch logs");
       }
 
-      if (options.action) {
-        logs = logs.filter(
-          (log) => log.action.toLowerCase() === options.action!.toLowerCase()
-        );
-      }
+      let logs = await response.json();
 
-      if (options.startDate && options.endDate) {
-        const startDate = new Date(options.startDate);
-        const endDate = new Date(options.endDate);
+      // Apply client-side filtering if options are provided
+      if (options) {
+        if (options.module) {
+          logs = logs.filter(
+            (log: LogEntry) =>
+              log.module.toLowerCase() === options.module!.toLowerCase()
+          );
+        }
 
-        logs = logs.filter((log) => {
-          const logDate = new Date(log.timestamp);
-          return logDate >= startDate && logDate <= endDate;
-        });
+        if (options.action) {
+          logs = logs.filter(
+            (log: LogEntry) =>
+              log.action.toLowerCase() === options.action!.toLowerCase()
+          );
+        }
+
+        if (options.startDate && options.endDate) {
+          const startDate = new Date(options.startDate);
+          const endDate = new Date(options.endDate);
+
+          logs = logs.filter((log: LogEntry) => {
+            const logDate = new Date(log.timestamp);
+            return logDate >= startDate && logDate <= endDate;
+          });
+        }
       }
 
       // Sort by timestamp (newest first)
-      logs.sort(
-        (a, b) =>
+      logs.sort((a: LogEntry, b: LogEntry) => {
+        return (
           new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
-      );
+        );
+      });
 
-      // Apply pagination if requested
-      if (options.page && options.pageSize) {
-        const page = options.page;
-        const pageSize = options.pageSize;
-        const startIndex = (page - 1) * pageSize;
-
-        const paginatedLogs = logs.slice(startIndex, startIndex + pageSize);
-
-        // Return with pagination metadata
-        return {
-          data: paginatedLogs,
-          pagination: {
-            total: logs.length,
-            page,
-            pageSize,
-            totalPages: Math.ceil(logs.length / pageSize),
-            hasNextPage: page < Math.ceil(logs.length / pageSize),
-            hasPrevPage: page > 1,
-          },
-        };
-      }
-
-      // Return all logs if no pagination requested
       return logs;
     } catch (error) {
       console.error("Error getting logs:", error);
       return [];
     }
-  },
+  }
 
   /**
    * Create a new log entry
    * @param {Omit<LogEntry, 'id'>} logData - Log data
    * @returns {Promise<LogEntry>} Created log entry
    */
-  createLog: async (logData: Omit<LogEntry, "id">): Promise<LogEntry> => {
+  static async createLog(logData: Omit<LogEntry, "id">): Promise<LogEntry> {
     try {
-      const localStorage = getLocalStorage();
-      if (!localStorage) {
-        throw new Error("localStorage not available");
-      }
+      // Ensure timestamp is a string
+      const timestamp =
+        logData.timestamp instanceof Date
+          ? logData.timestamp.toISOString()
+          : logData.timestamp || new Date().toISOString();
 
-      const logsString =
-        localStorage.getItem(LOGS_STORAGE_KEY) || '{"logs":[]}';
-      const { logs } = JSON.parse(logsString) as { logs: LogEntry[] };
-
-      // Generate a new ID
-      const newId =
-        logs.length > 0 ? Math.max(...logs.map((log) => log.id)) + 1 : 1;
-
-      // Create new log entry
-      const newLog: LogEntry = {
-        id: newId,
+      // Prepare the data
+      const data = {
         ...logData,
-        timestamp: logData.timestamp || new Date().toISOString(),
+        timestamp,
       };
 
-      // Add to logs array
-      logs.push(newLog);
+      // Make API request
+      const response = await fetch("/api/inventory-logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
 
-      // Save back to localStorage
-      localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify({ logs }));
-
-      return newLog;
-    } catch (error) {
-      console.error("Error creating log:", error);
-      throw new Error("Failed to create log");
-    }
-  },
-
-  /**
-   * Delete a log by ID
-   * @param {number} id - Log ID to delete
-   * @returns {Promise<boolean>} Success or failure
-   */
-  deleteLog: async (id: number): Promise<boolean> => {
-    try {
-      const localStorage = getLocalStorage();
-      if (!localStorage) return false;
-
-      const logsString =
-        localStorage.getItem(LOGS_STORAGE_KEY) || '{"logs":[]}';
-      const { logs } = JSON.parse(logsString) as { logs: LogEntry[] };
-
-      const filteredLogs = logs.filter((log) => log.id !== id);
-
-      // If no logs were removed, the ID didn't exist
-      if (filteredLogs.length === logs.length) {
-        return false;
+      if (!response.ok) {
+        throw new Error("Failed to create log");
       }
 
-      // Save back to localStorage
-      localStorage.setItem(
-        LOGS_STORAGE_KEY,
-        JSON.stringify({ logs: filteredLogs })
-      );
-
-      return true;
+      return await response.json();
     } catch (error) {
-      console.error("Error deleting log:", error);
-      return false;
+      console.error("Error creating log:", error);
+      // Return a mock response if we couldn't save it
+      return {
+        id: -1,
+        ...logData,
+        timestamp:
+          typeof logData.timestamp === "string"
+            ? logData.timestamp
+            : logData.timestamp?.toISOString() || new Date().toISOString(),
+      };
     }
-  },
-
-  /**
-   * Clear all logs
-   * @returns {Promise<boolean>} Success or failure
-   */
-  clearLogs: async (): Promise<boolean> => {
-    try {
-      const localStorage = getLocalStorage();
-      if (!localStorage) return false;
-
-      localStorage.setItem(LOGS_STORAGE_KEY, JSON.stringify({ logs: [] }));
-      return true;
-    } catch (error) {
-      console.error("Error clearing logs:", error);
-      return false;
-    }
-  },
-};
+  }
+}
 
 export default LogService;
