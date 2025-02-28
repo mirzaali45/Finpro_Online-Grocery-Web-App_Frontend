@@ -1,6 +1,12 @@
 import { Formik, Field, Form, ErrorMessage } from "formik";
 import { useState, useEffect } from "react";
-import { MapContainer, TileLayer, Marker, useMapEvents, Popup } from "react-leaflet";
+import {
+  MapContainer,
+  TileLayer,
+  Marker,
+  useMapEvents,
+  Popup,
+} from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { addressSchema } from "@/helper/validation-schema-edit-address";
@@ -33,7 +39,11 @@ interface LocationPickerProps {
   markerPosition: [number, number];
 }
 
-const LocationPicker: React.FC<LocationPickerProps> = ({ setFieldValue, setMarkerPosition, markerPosition }) => {
+const LocationPicker: React.FC<LocationPickerProps> = ({
+  setFieldValue,
+  setMarkerPosition,
+  markerPosition,
+}) => {
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -46,19 +56,18 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ setFieldValue, setMarke
   return markerPosition ? <Marker position={markerPosition} /> : null;
 };
 
-
 // Formulir Edit Address
 interface onsubmit {
-  address_name: string,
-  address: string,
-  subdistrict: string,
-  city: string,
-  city_id: string,
-  province: string,
-  province_id: string,
-  postcode: string,
-  latitude: number,
-  longitude: number,
+  address_name: string;
+  address: string;
+  subdistrict: string;
+  city: string;
+  city_id: string;
+  province: string;
+  province_id: string;
+  postcode: string;
+  latitude: number;
+  longitude: number;
 }
 interface FormAddressEditProps {
   formData: {
@@ -78,10 +87,17 @@ interface FormAddressEditProps {
   setPrimaryAddress: (id: number) => void;
 }
 
-const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, setPrimaryAddress }) => {
-  // State untuk menyimpan posisi marker
-  const [markerPosition, setMarkerPosition] = useState([formData.latitude || -6.19676128457438, formData.longitude || 106.83754574840799]);
-  const [addressId, setAddressId] = useState(0)
+const FormAddressEdit: React.FC<FormAddressEditProps> = ({
+  formData,
+  onSubmit,
+  setPrimaryAddress,
+}) => {
+  // State untuk menyimpan posisi marker - explicitly typed as a tuple
+  const [markerPosition, setMarkerPosition] = useState<[number, number]>([
+    formData.latitude || -6.19676128457438,
+    formData.longitude || 106.83754574840799,
+  ]);
+  const [addressId, setAddressId] = useState(0);
   // State untuk initial values
   const [initialValues, setInitialValues] = useState({
     address_name: "",
@@ -99,7 +115,7 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
   // Efek untuk mengatur default values saat formData berubah
   useEffect(() => {
     if (formData) {
-      setAddressId(formData.address_id)
+      setAddressId(formData.address_id);
       setInitialValues({
         address_name: formData.address_name || "",
         address: formData.address || "",
@@ -112,7 +128,11 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
         latitude: String(formData.latitude) || String(-6.19676128457438),
         longitude: String(formData.longitude) || String(106.83754574840799),
       });
-      setMarkerPosition([formData.latitude || -6.19676128457438, formData.longitude || 106.83754574840799]);
+      // Ensure we're using a proper tuple for markerPosition
+      setMarkerPosition([
+        formData.latitude || -6.19676128457438,
+        formData.longitude || 106.83754574840799,
+      ]);
     }
   }, [formData]);
 
@@ -123,15 +143,22 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
       validationSchema={addressSchema}
       onSubmit={(values) => {
         console.log("Updated Data:", values);
-        console.log(addressId)
-        onSubmit(addressId, {...values, latitude: Number(values.latitude), longitude: Number(values.longitude) });
+        console.log(addressId);
+        onSubmit(addressId, {
+          ...values,
+          latitude: Number(values.latitude),
+          longitude: Number(values.longitude),
+        });
       }}
     >
       {({ isSubmitting, setFieldValue }) => (
         <Form className="space-y-4">
           {fields.map((field) => (
             <div key={field.name}>
-              <label htmlFor={field.name} className="block text-sm font-medium text-gray-500">
+              <label
+                htmlFor={field.name}
+                className="block text-sm font-medium text-gray-500"
+              >
                 {field.label}
               </label>
               <Field
@@ -140,13 +167,19 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
                 type={field.type}
                 className="mt-1 block w-full px-3 py-2 bg-gray-700 text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
               />
-              <ErrorMessage name={field.name} component="p" className="mt-1 text-sm text-red-600" />
+              <ErrorMessage
+                name={field.name}
+                component="p"
+                className="mt-1 text-sm text-red-600"
+              />
             </div>
           ))}
 
           {/* Map Section */}
           <div className="mt-5">
-            <h3 className="text-sm font-medium text-gray-500">Select Location on Map</h3>
+            <h3 className="text-sm font-medium text-gray-500">
+              Select Location on Map
+            </h3>
             <MapContainer
               center={markerPosition}
               zoom={8}
@@ -161,7 +194,11 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
                   <span>Your Selected Address</span>
                 </Popup>
               </Marker>
-              <LocationPicker setFieldValue={setFieldValue} setMarkerPosition={setMarkerPosition} markerPosition={markerPosition} />
+              <LocationPicker
+                setFieldValue={setFieldValue}
+                setMarkerPosition={setMarkerPosition}
+                markerPosition={markerPosition}
+              />
             </MapContainer>
           </div>
 
@@ -177,7 +214,11 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({ formData, onSubmit, s
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full py-2 px-4 bg-blue-600 text-white rounded-md ${isSubmitting ? "bg-blue-400 cursor-not-allowed" : "hover:bg-blue-700"}`}
+              className={`w-full py-2 px-4 bg-blue-600 text-white rounded-md ${
+                isSubmitting
+                  ? "bg-blue-400 cursor-not-allowed"
+                  : "hover:bg-blue-700"
+              }`}
             >
               {isSubmitting ? "Updating..." : "Update Address"}
             </button>

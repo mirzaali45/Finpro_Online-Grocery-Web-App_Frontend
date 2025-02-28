@@ -6,6 +6,25 @@ import LogService from "@/services/log.service";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { LogEntry } from "@/types/log-types";
 import { Inventory } from "@/types/inventory-types";
+interface InventoryLogItem {
+  id: number;
+  name: string;
+  store: string;
+  quantity: number;
+}
+
+interface UpdateLogData {
+  itemId: number;
+  updates: {
+    operation: "add" | "decrease";
+    qty: number;
+  };
+}
+
+interface DeleteLogData {
+  item?: InventoryLogItem;
+  items?: InventoryLogItem[];
+}
 
 export const LogViewer = ({ onClose }: { onClose: () => void }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
@@ -207,7 +226,7 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
               </span>
               <div className="mt-1">
                 {data.items
-                  .map((item: any, index: number) => {
+                  .map((item: InventoryLogItem, index: number) => {
                     // Try to get more details from inventory (unlikely for deleted items)
                     const inventoryItem = inventoryMap.get(item.id);
                     const displayName = inventoryItem
