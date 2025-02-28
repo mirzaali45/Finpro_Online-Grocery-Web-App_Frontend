@@ -7,8 +7,9 @@ import Section1 from "@/components/profile/Section1";
 import Section2 from "@/components/profile/Section2";
 import Section3 from "@/components/profile/Section3";
 import { VoucherList } from "@/components/voucher-customer/VoucherList";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-export default function ProfileContent() {
+function ProfileContent() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(true);
 
@@ -57,3 +58,7 @@ export default function ProfileContent() {
     </div>
   );
 }
+export default withAuth(ProfileContent, {
+  allowedRoles: ["customer"],
+  redirectPath: "/not-authorized-customer",
+});
