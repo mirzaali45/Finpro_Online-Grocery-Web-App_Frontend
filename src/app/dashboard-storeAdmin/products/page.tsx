@@ -15,15 +15,22 @@ import Services1 from "@/services/products/services1";
 export default function ProductAdmin() {
   const {
     loading,
-    isSidebarOpen, setIsSidebarOpen,
-    isProfileDropdownOpen, setIsProfileDropdownOpen,
+    isSidebarOpen,
+    setIsSidebarOpen,
+    isProfileDropdownOpen,
+    setIsProfileDropdownOpen,
     products,
-    showAddModal, setShowAddModal,
-    showEditModal, setShowEditModal,
-    showImageUploadModal, setShowImageUploadModal,
+    showAddModal,
+    setShowAddModal,
+    showEditModal,
+    setShowEditModal,
+    showImageUploadModal,
+    setShowImageUploadModal,
     setSelectedProduct,
-    selectedFiles, setSelectedFiles,
-    formData, setFormData,
+    selectedFiles,
+    setSelectedFiles,
+    formData,
+    setFormData,
     FetchProducts,
     handleSubmit,
     handleImageUpload,
@@ -101,7 +108,11 @@ export default function ProductAdmin() {
           isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
         />
-        <HeaderSuperAdmin setIsSidebarOpen={setIsSidebarOpen} setIsProfileDropdownOpen={setIsProfileDropdownOpen} isProfileDropdownOpen={isProfileDropdownOpen} />
+        <HeaderSuperAdmin
+          isProfileDropdownOpen={isProfileDropdownOpen}
+          setIsProfileDropdownOpen={setIsProfileDropdownOpen}
+          // Removing the setIsSidebarOpen prop since it's not in the component's interface
+        />
         <div className="p-4">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
             <h1 className="text-2xl font-bold">Products Management</h1>
@@ -124,8 +135,8 @@ export default function ProductAdmin() {
           )}
 
           {/* Add Product Modal */}
-          <Modal 
-            isOpen={showAddModal} 
+          <Modal
+            isOpen={showAddModal}
             onClose={() => {
               setShowAddModal(false);
               resetForm();

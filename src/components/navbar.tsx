@@ -4,7 +4,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { productService } from "@/services/product.service";
 import debounce from "lodash/debounce";
-import { NavbarProps, ModalState, Product } from "@/types/product-types";
+import { NavbarProps, ModalState, Product, } from "@/types/product-types";
 import { SearchModal } from "@/components/navbar-comp/SearchModal";
 import { CartModal } from "@/components/navbar-comp/CartModal";
 import { generateSlug } from "../utils/slugUtils";
@@ -12,6 +12,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavLogo } from "./navbar-comp/NavbarLogo";
 import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
+
 
 export default function Navbar({ className }: NavbarProps) {
   const [modalState, setModalState] = useState<ModalState>({
@@ -32,9 +33,10 @@ export default function Navbar({ className }: NavbarProps) {
     }
     setIsLoading(true);
     try {
-      const products = await productService.getProducts();
-      const filtered = products
-        .filter((product) => {
+      const response = await productService.getProducts(); // This returns ProductResponse
+      const filtered = response.products // Access the products array from the response
+        .filter((product: Product) => {
+          // Explicitly type the product parameter
           const name = product.name.toLowerCase();
           const searchTerm = term.toLowerCase();
           if (name.includes(searchTerm)) {
