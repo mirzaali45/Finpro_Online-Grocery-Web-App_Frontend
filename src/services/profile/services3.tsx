@@ -1,47 +1,58 @@
-"use client"
-import { ordersCust } from '@/components/hooks/OrdersCust';
-import { Orders } from '@/types/orders-types';
-import { useEffect, useState } from 'react'
-import { toast } from 'react-toastify';
+"use client";
+import { ordersCust } from "@/components/hooks/OrdersCust";
+import { Orders } from "@/types/orders-types";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Services3 = () => {
-  const [ordersData, setOrdersData] = useState<Orders[]>([])
-  const [load, setLoad] = useState(false)
+  const [ordersData, setOrdersData] = useState<Orders[]>([]);
+  const [load, setLoad] = useState(false);
 
   useEffect(() => {
     GetOrders();
   }, []);
-    
-  const showToast = (message, type, closeTime = 3000, onClose = null) => {
-  toast.dismiss();
-  toast[type](message, {
+
+  const showToast = (
+    message: string,
+    type: "success" | "error" | "info" | "warning",
+    closeTime = 3000,
+    onClose?: () => void
+  ) => {
+    toast.dismiss();
+    toast[type](message, {
       position: "bottom-right",
       autoClose: closeTime,
       theme: "colored",
       hideProgressBar: false,
       onClose,
-  });
+    });
   };
 
   const GetOrders = async () => {
-    setLoad(true)
+    setLoad(true);
     try {
-        const data = await ordersCust.getOrders()
-        console.log(data)
-        if (data) {
-        setLoad(false)
-        setOrdersData(data);
+      const response = await ordersCust.getOrders();
+      console.log(response);
+
+      if (response && Array.isArray(response)) {
+        setOrdersData(response);
+      } else {
+        setOrdersData([]);
       }
-    } catch {
+    } catch (error) {
+      console.error("Error fetching orders:", error);
       showToast("Failed to get orders data.", "error");
+      setOrdersData([]);
+    } finally {
+      setLoad(false);
     }
-  }
-  
+  };
+
   return {
     load,
     ordersData,
     setOrdersData,
-  }
-}
+  };
+};
 
-export default Services3
+export default Services3;

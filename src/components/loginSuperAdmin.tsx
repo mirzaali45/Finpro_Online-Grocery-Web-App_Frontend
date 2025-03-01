@@ -4,20 +4,23 @@ import React, { useState } from "react";
 import { Formik, Form, Field, FormikHelpers } from "formik";
 import { Shield, Eye, EyeOff, AlertCircle } from "lucide-react";
 import { loginSchema } from "../helper/validation-schema-login";
-import type { LoginFormValues, LoginFormProps } from "../types/auth-types";
+import type {
+  LoginFormSuperValues,
+  LoginFormSuperProps,
+} from "../types/auth-types";
 
-const LoginForm: React.FC<LoginFormProps> = ({ onSubmit }) => {
+const LoginForm: React.FC<LoginFormSuperProps> = ({ onSubmit }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [serverError, setServerError] = useState("");
 
-  const initialValues: LoginFormValues = {
+  const initialValues: LoginFormSuperValues = {
     email: "",
     password: "",
   };
 
   const handleSubmit = async (
-    values: LoginFormValues,
-    { setSubmitting }: FormikHelpers<LoginFormValues>
+    values: LoginFormSuperValues,
+    { setSubmitting }: FormikHelpers<LoginFormSuperValues>
   ) => {
     try {
       await onSubmit(values);

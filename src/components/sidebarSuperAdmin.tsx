@@ -44,7 +44,7 @@ export default function Sidebar({
     {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: profile?.role == "super_admin" ? "/dashboard-superAdmin" : "/dashboard-storeAdmin",
+      href: "/dashboard-superAdmin/",
     },
     {
       title: "My Store",
@@ -133,7 +133,7 @@ export default function Sidebar({
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
           <div className="flex items-center justify-between p-6 border-b border-gray-200 dark:border-gray-700">
-            <div className="flex items-center space-x-3">
+            <div className="flex items-center space-x-3 mt-10 sm:mt-10 md:mt-10 lg:mt-0 xl:mt-0 2xl:mt-0">
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                 SA
               </div>

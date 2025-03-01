@@ -26,7 +26,6 @@ export function ProductImageSlider({ images }: ProductImageSliderProps) {
 
   return (
     <div className="relative w-full h-48 overflow-hidden group">
-      {/* Main Image */}
       <Image
         src={images[currentImageIndex].url}
         alt={`Product image ${currentImageIndex + 1}`}
@@ -34,8 +33,6 @@ export function ProductImageSlider({ images }: ProductImageSliderProps) {
         className="object-cover transition-opacity duration-300"
         priority
       />
-
-      {/* Navigation Buttons */}
       {images.length > 1 && (
         <>
           <button
@@ -56,8 +53,6 @@ export function ProductImageSlider({ images }: ProductImageSliderProps) {
           </button>
         </>
       )}
-
-      {/* Image Indicator */}
       {images.length > 1 && (
         <div
           className="absolute bottom-2 left-1/2 -translate-x-1/2 

@@ -15,8 +15,8 @@ export default function ProductList() {
   const fetchProducts = async () => {
     setLoading(true);
     try {
-      const data = await productService.getProducts();
-      setProducts(data);
+      const response = await productService.getProducts();
+      setProducts(Array.isArray(response) ? response : []);
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {

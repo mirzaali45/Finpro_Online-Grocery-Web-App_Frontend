@@ -11,7 +11,6 @@ import { Product } from "@/types/product-types";
 import { formatRupiah } from "@/helper/currencyRp";
 import HeaderSuperAdmin from "@/components/headerSuperAdmin";
 import Services1 from "@/services/products/services1";
-import StoreSideBar from "@/components/sidebarStoreAdmin";
 
 export default function ProductAdmin() {
   const {
@@ -105,13 +104,16 @@ export default function ProductAdmin() {
   return (
     <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
       <div className={`${isSidebarOpen ? "" : ""}`}>
-        <StoreSideBar />
-        <HeaderSuperAdmin
+        <Sidebar
+          isSidebarOpen={isSidebarOpen}
           setIsSidebarOpen={setIsSidebarOpen}
-          setIsProfileDropdownOpen={setIsProfileDropdownOpen}
-          isProfileDropdownOpen={isProfileDropdownOpen}
         />
-        <div className="p-4 ml-[20rem]">
+        <HeaderSuperAdmin
+          isProfileDropdownOpen={isProfileDropdownOpen}
+          setIsProfileDropdownOpen={setIsProfileDropdownOpen}
+          // Removing the setIsSidebarOpen prop since it's not in the component's interface
+        />
+        <div className="p-4">
           <div className="flex flex-col md:flex-row justify-between items-start gap-4 mb-6">
             <h1 className="text-2xl font-bold">Products Management</h1>
             <button

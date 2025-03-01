@@ -4,6 +4,7 @@ import Modal from "../product-management/Modal";
 import FormAddressAdd from "./FormAddressAdd";
 import FormAddressEdit from "./FormAddressEdit";
 import { HouseIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { Address, AddressFormData, Location } from "@/types/address-types";
 
 const Section2 = () => {
   const {
@@ -15,26 +16,76 @@ const Section2 = () => {
     editAddress,
     deleteAddress,
   } = services2();
+
   const [modalAdd, setModalAdd] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
-  const [formEditData, setFormEditData] = useState({
+
+  const [formEditData, setFormEditData] = useState<Address>({
+    address_id: 0,
     address_name: "",
     address: "",
     subdistrict: "",
     city: "",
-    city_id: 0,
+    city_id: "",
     province: "",
-    province_id: 0,
-    postcode: 0,
+    province_id: "",
+    postcode: "",
     latitude: 0,
     longitude: 0,
+    is_primary: false,
   });
 
-  const [location, setLocation] = useState<any>({
+  const [location, setLocation] = useState<Location>({
     province: null,
     city: null,
     subdistrict: null,
   });
+
+  // Wrapper function to handle add address
+  const handleAddAddress = (values: {
+    address_name: string;
+    address: string;
+    postcode: string;
+    latitude: string;
+    longitude: string;
+  }) => {
+    const payload: {
+      address_name: string;
+      address: string;
+      postcode: string;
+      latitude: string;
+      longitude: string;
+      subdistrict: string;
+      city: string;
+      city_id: string;
+      province: string;
+      province_id: string;
+    } = {
+      address_name: values.address_name,
+      address: values.address,
+      postcode: values.postcode,
+      latitude: values.latitude,
+      longitude: values.longitude,
+      subdistrict: location.subdistrict?.label || "",
+      city: location.city?.label || "",
+      city_id: String(location.city?.value || ""),
+      province: location.province?.label || "",
+      province_id: String(location.province?.value || ""),
+    };
+    return addAddress(payload);
+  };
+
+  // Wrapper function to handle edit address with correct type
+  const handleEditAddress = (id: number, values: AddressFormData) => {
+    const addressPayload: Address = {
+      ...values,
+      address_id: id,
+      city_id: String(values.city_id),
+      province_id: String(values.province_id),
+      postcode: String(values.postcode),
+    };
+    return editAddress(id, addressPayload);
+  };
 
   return (
     <>
@@ -115,7 +166,7 @@ const Section2 = () => {
           title="Add address"
         >
           <FormAddressAdd
-            onsubmit={addAddress}
+            onsubmit={handleAddAddress}
             location={location}
             setLocation={setLocation}
           />
@@ -128,7 +179,7 @@ const Section2 = () => {
         >
           <FormAddressEdit
             formData={formEditData}
-            onSubmit={editAddress}
+            onSubmit={handleEditAddress}
             setPrimaryAddress={setPrimaryAddressEdit}
             location={location}
             setLocation={setLocation}

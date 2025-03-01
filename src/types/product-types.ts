@@ -1,7 +1,17 @@
+import React from "react";
+
 export interface Store {
   store_id: number;
   store_name: string;
+  latitude: number;
+  longitude: number;
   city: string;
+}
+
+export interface ProductResponse {
+  products: Product[];
+  totalPages: number;
+  currentPage: number;
 }
 
 export interface Category {
@@ -17,6 +27,20 @@ export interface ProductFormData {
   category_id: string;
   store_id: string;
   initial_quantity: string;
+}
+export interface Discount {
+  discount_id: number;
+  store_id: number | null;
+  product_id: number | null;
+  thumbnail: string | null;
+  discount_code: string;
+  discount_type: "point" | "percentage";
+  discount_value: number;
+  minimum_order: number | null;
+  expires_at: string;
+  created_at: string;
+  updated_at: string;
+  userUser_id: number | null;
 }
 
 export interface Product {
@@ -38,6 +62,7 @@ export interface Product {
   ProductImage?: {
     url: string;
   }[];
+ Discount?: Discount[];
 }
 
 export interface ModalState {
