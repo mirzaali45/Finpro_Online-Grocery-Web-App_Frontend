@@ -1,4 +1,3 @@
-// app/dashboard-superAdmin/store/StoreDashboardContent.tsx
 "use client";
 
 import { useState, useEffect } from "react";
@@ -76,7 +75,12 @@ function StoreDashboard() {
             </div>
           </header>
 
-          <StoreList stores={stores} onDeleteStore={handleDeleteStore} />
+          <StoreList
+            stores={stores}
+            onDeleteStore={handleDeleteStore}
+            handleSuccess={handleSuccess}
+            users={[]} 
+          />
 
           <AddStoreModal
             isOpen={isModalOpen}

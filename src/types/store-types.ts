@@ -1,3 +1,5 @@
+// @/types/store-types.ts
+
 export interface StoreData {
   store_id?: number;
   store_name: string;
@@ -11,6 +13,7 @@ export interface StoreData {
   user_id?: number;
   description?: string;
 }
+
 export interface EditData {
   store_name: string;
   address: string;
@@ -22,6 +25,7 @@ export interface EditData {
   longitude: number;
   user_id?: number | null;
 }
+
 // Simplified Store interface for list display
 export interface StoreDisplay {
   store_id: number;
@@ -53,3 +57,11 @@ export interface StoreAdmin {
 export type FormErrorsWithIndex = FormErrors & {
   [K in StoreDataKey]?: string;
 };
+
+// User interface for store management
+export interface User {
+  user_id: number;
+  username: string;
+  email?: string;
+  role?: string;
+}

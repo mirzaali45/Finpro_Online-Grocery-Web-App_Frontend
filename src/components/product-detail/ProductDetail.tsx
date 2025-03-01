@@ -77,7 +77,8 @@ export default function ProductDetailClient({
   const handleAddToCart = async () => {
     try {
       setIsAddingToCart(true);
-      await addToCart(product.product_id, 1);
+      const userId = localStorage.getItem("userId") || "";
+      await addToCart(product.product_id, 1, userId);
       toast.success("Product added to cart successfully");
       onCartUpdate?.();
     } catch (error) {
