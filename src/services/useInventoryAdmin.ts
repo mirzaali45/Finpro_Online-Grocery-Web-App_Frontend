@@ -1,20 +1,5 @@
 import { CreateInventoryRequest, GetInventoryParams, GetLowStockParams, Inventory, UpdateInventoryRequest } from "@/types/inventory-types";
 
-// Define pagination interfaces
-export interface PaginationMetadata {
-  total: number;
-  page: number;
-  pageSize: number;
-  totalPages: number;
-  hasNextPage: boolean;
-  hasPrevPage: boolean;
-}
-
-export interface PaginatedResponse<T> {
-  data: T[];
-  pagination: PaginationMetadata;
-}
-
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export class InventoryService {
@@ -40,20 +25,10 @@ export class InventoryService {
     }
   }
 
-  static async getInventory(params?: GetInventoryParams): Promise<PaginatedResponse<Inventory>> {
+  static async getInventory(): Promise<Inventory[]> {
     try {
       const token = localStorage.getItem('token');
-      
-      // Build query parameters
-      const queryParams = new URLSearchParams();
-      if (params?.page) {
-        queryParams.append('page', params.page.toString());
-      }
-      if (params?.store_id) {
-        queryParams.append('store_id', params.store_id.toString());
-      }
-      
-      const response = await fetch(`${BASE_URL}/inventory?${queryParams}`, {
+      const response = await fetch(`${BASE_URL}/inventory`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
@@ -70,25 +45,9 @@ export class InventoryService {
     }
   }
 
-  // Legacy method for backward compatibility
-  static async getAllInventory(): Promise<Inventory[]> {
-    try {
-      const response = await this.getInventory();
-      return response.data;
-    } catch (error) {
-      throw error;
-    }
-  }
-
   static async getInventoryById(invId: number): Promise<Inventory> {
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch(`${BASE_URL}/inventory/${invId}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${BASE_URL}/inventory/${invId}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch inventory');
@@ -149,43 +108,23 @@ export class InventoryService {
     }
   }
 
-  static async getLowStockProducts(params?: GetLowStockParams): Promise<PaginatedResponse<Inventory>> {
+  static async getLowStockProducts(params?: GetLowStockParams): Promise<Inventory[]> {
     try {
-      const token = localStorage.getItem('token');
       const queryParams = new URLSearchParams();
-      
       if (params?.store_id) {
         queryParams.append('store_id', params.store_id.toString());
       }
       if (params?.threshold) {
         queryParams.append('threshold', params.threshold.toString());
       }
-      if (params?.page) {
-        queryParams.append('page', params.page.toString());
-      }
 
-      const response = await fetch(`${BASE_URL}/inventory/low-stock?${queryParams}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(`${BASE_URL}/inventory/low-stock?${queryParams}`);
 
       if (!response.ok) {
         throw new Error('Failed to fetch low stock products');
       }
 
       return response.json();
-    } catch (error) {
-      throw error;
-    }
-  }
-
-  // Legacy method for backward compatibility
-  static async getAllLowStockProducts(params?: Omit<GetLowStockParams, 'page'>): Promise<Inventory[]> {
-    try {
-      const response = await this.getLowStockProducts(params);
-      return response.data;
     } catch (error) {
       throw error;
     }

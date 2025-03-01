@@ -5,9 +5,9 @@ import "react-toastify/dist/ReactToastify.css";
 import "sweetalert2/dist/sweetalert2.css";
 import NavbarWrapper from "@/components/navbarWrapper";
 import "leaflet/dist/leaflet.css";
+import Footer from "@/components/footer";
 import { SearchProvider } from "@/components/searchContext";
 import "leaflet/dist/leaflet.css";
-import FooterWrapper from "@/components/footerWrapper";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -39,7 +39,7 @@ export default function RootLayout({
         <SearchProvider>
         <NavbarWrapper />
         {children}
-        <FooterWrapper />
+        <Footer />
         </SearchProvider>
       </body>
     </html>

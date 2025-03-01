@@ -8,30 +8,46 @@ import {
 } from "@/services/cart.service";
 import { formatRupiah } from "@/helper/currencyRp";
 import { CartModalProps, CartData } from "@/types/cart-types";
-import Link from "next/link";
+import ProfileServices from "@/services/profile/services1";
+import { toast, ToastOptions } from "react-toastify";
+import { useRouter } from "next/navigation";
 
 export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
+  const {profile} = ProfileServices();
+  const router = useRouter();
+  const showToast = (
+    message: string,
+    type: keyof typeof toast,
+    onClose: any = null
+  ) => {
+    toast.dismiss();
+    (toast[type] as (content: string, options?: ToastOptions) => void)(
+      message,
+      {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose,
+      }
+    );
+  };
 
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Please login to view your cart");
+      // const userId = localStorage.getItem("user_id");
+      // if (!userId) throw new Error("Please login to view your cart");
 
-      const response = await fetchCartId();
+      const response = await fetchCartId(profile?.userId);
       setCartData(response.data);
       setError("");
     } catch (error) {
       setError(error instanceof Error ? error.message : "Failed to load cart");
-      if (error instanceof Error && error.message.includes("login")) {
-        // Handle authentication error
-        localStorage.removeItem("token");
-        // You might want to trigger a redirect or show a login modal
-      }
     } finally {
       setIsLoading(false);
     }
@@ -76,14 +92,12 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
           },
         });
       }
-      loadCart(); // Refresh cart data after update
+      loadCart();
+      showToast("Updated item", "success");
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to update quantity"
       );
-      if (error instanceof Error && error.message.includes("login")) {
-        localStorage.removeItem("token");
-      }
       loadCart();
     } finally {
       setIsUpdating(null);
@@ -95,13 +109,11 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       setIsUpdating(cartItemId);
       await removeFromCart(cartItemId);
       await loadCart();
+      showToast("Deleted item from cart", "success");
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to remove item"
       );
-      if (error instanceof Error && error.message.includes("login")) {
-        localStorage.removeItem("token");
-      }
     } finally {
       setIsUpdating(null);
     }
@@ -250,19 +262,19 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
                 <span>{cartData?.summary.totalItems || 0} items</span>
               </div>
             </div>
-            <Link href={`/checkout`}>
-              <button
-                className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!cartData?.items.length}
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
-                <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
-                  <span className="text-neutral-200 font-medium">
-                    Proceed to Checkout
-                  </span>
-                </div>
-              </button>
-            </Link>
+
+            <button
+              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!cartData?.items.length}
+              onClick={()=>{router.push('/checkout')}}
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
+              <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
+                <span className="text-neutral-200 font-medium">
+                  Proceed to Checkout
+                </span>
+              </div>
+            </button>
           </div>
         </div>
       </div>
