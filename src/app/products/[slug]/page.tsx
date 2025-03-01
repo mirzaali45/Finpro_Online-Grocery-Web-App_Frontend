@@ -1,7 +1,10 @@
 import { notFound } from "next/navigation";
 import { productService } from "@/services/product.service";
 import ProductDetailClient from "@/components/product-detail/ProductDetail";
-import "react-toastify/dist/ReactToastify.css";
+
+import ToastProvider from "@/components/product-detail/ToastContainer"; // Adjust path as needed
+
+
 
 interface ProductDetailProps {
   params: {
@@ -21,6 +24,8 @@ export default async function ProductDetailPage({
 
     return (
       <div className="min-h-screen bg-gradient-to-b from-neutral-950 to-neutral-900 pt-24 pb-12">
+        {/* Client-side only Toast provider */}
+        <ToastProvider />
         <div className="container mx-auto px-4">
           <div className="relative overflow-hidden rounded-2xl">
             <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl border border-neutral-800/50" />
