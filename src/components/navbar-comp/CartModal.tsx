@@ -72,13 +72,29 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const loadCart = async () => {
     try {
       setIsLoading(true);
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
       const response = await fetchCartId(profile?.userId);
+
+      if (!response || !response.data) {
+        throw new Error("Invalid cart data");
+      }
+
       setCartData(response.data);
       setError("");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to load cart");
-      if (error instanceof Error && error.message.includes("login")) {
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load cart";
+
+      setError(errorMessage);
+
+      if (errorMessage.includes("login")) {
         localStorage.removeItem("token");
+        router.push("/login-user-customer");
       }
     } finally {
       setIsLoading(false);
