@@ -7,7 +7,10 @@ import { Product } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
+<<<<<<< HEAD
 import { ShoppingCart, Store } from "lucide-react";
+=======
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 import "react-toastify/dist/ReactToastify.css";
 
 interface ProductDetailProps {
@@ -17,6 +20,7 @@ interface ProductDetailProps {
   onCartUpdate?: () => void;
 }
 
+<<<<<<< HEAD
 const RichTextContent = ({ content }: { content: string }) => {
   return (
     <div
@@ -28,6 +32,8 @@ const RichTextContent = ({ content }: { content: string }) => {
   );
 };
 
+=======
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 export default function ProductDetail({
   params,
   onCartUpdate,
@@ -125,7 +131,11 @@ export default function ProductDetail({
 
               {/* Thumbnail Gallery */}
               {product.ProductImage && product.ProductImage.length > 1 && (
+<<<<<<< HEAD
                 <div className="flex gap-3 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-neutral-700 scrollbar-track-neutral-900">
+=======
+                <div className="flex gap-3 overflow-x-auto pb-2">
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
                   {product.ProductImage.map((image, index) => (
                     <button
                       key={image.url}
@@ -159,6 +169,7 @@ export default function ProductDetail({
                 <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400 mb-4">
                   {product.name}
                 </h1>
+<<<<<<< HEAD
                 <div className="flex items-center gap-4">
                   <div className="inline-block">
                     <div className="relative px-4 py-1.5 rounded-full overflow-hidden group">
@@ -171,13 +182,27 @@ export default function ProductDetail({
                   <div className="flex items-center gap-2 text-neutral-400">
                     <Store className="w-4 h-4" />
                     <span>{product.store.store_name}</span>
+=======
+                <div className="inline-block">
+                  <div className="relative px-4 py-1.5 rounded-full overflow-hidden group">
+                    <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 opacity-75" />
+                    <span className="relative text-sm font-medium text-white">
+                      {product.category.category_name}
+                    </span>
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
                   </div>
                 </div>
               </div>
 
+<<<<<<< HEAD
               <div className="text-white text-lg leading-relaxed">
                 <RichTextContent content={product.description} />
               </div>
+=======
+              <p className="text-neutral-300 text-lg leading-relaxed">
+                {product.description}
+              </p>
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 
               <div className="space-y-4 py-6 border-y border-neutral-800">
                 <div className="flex justify-between items-center">
@@ -187,26 +212,42 @@ export default function ProductDetail({
                   </span>
                 </div>
 
+<<<<<<< HEAD
                 <div className="flex justify-between items-center">
                   <span className="text-neutral-400">Stock</span>
                   <span className="text-neutral-200">
                     {product.Inventory?.[0]?.total_qty || 0} units available
                   </span>
                 </div>
+=======
+                {product.store && (
+                  <div className="flex justify-between items-center">
+                    <span className="text-neutral-400">Store</span>
+                    <span className="text-neutral-200">
+                      {product.store.store_name}
+                    </span>
+                  </div>
+                )}
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
               </div>
 
               <div className="mt-auto">
                 <button
                   onClick={handleAddToCart}
+<<<<<<< HEAD
                   disabled={
                     isAddingToCart ||
                     (product.Inventory?.[0]?.total_qty || 0) === 0
                   }
+=======
+                  disabled={isAddingToCart}
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
                   className="relative w-full group/btn disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover/btn:opacity-100 transition duration-300" />
                   <div className="relative flex items-center justify-center gap-2 px-6 py-3 bg-neutral-900 rounded-lg">
                     <span className="text-neutral-200 font-medium">
+<<<<<<< HEAD
                       {isAddingToCart
                         ? "Adding to Cart..."
                         : (product.Inventory?.[0]?.total_qty || 0) === 0
@@ -217,6 +258,25 @@ export default function ProductDetail({
                       (product.Inventory?.[0]?.total_qty || 0) > 0 && (
                         <ShoppingCart className="w-5 h-5 text-neutral-300" />
                       )}
+=======
+                      {isAddingToCart ? "Adding to Cart..." : "Add to Cart"}
+                    </span>
+                    {!isAddingToCart && (
+                      <svg
+                        className="w-5 h-5 stroke-neutral-300"
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        xmlns="http://www.w3.org/2000/svg"
+                      >
+                        <path
+                          d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"
+                          strokeWidth="2"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
                   </div>
                 </button>
               </div>

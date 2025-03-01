@@ -1,15 +1,7 @@
-import React from "react";
-
 export interface Store {
   store_id: number;
   store_name: string;
   city: string;
-}
-
-export interface ProductResponse {
-  products: Product[];
-  totalPages: number;
-  currentPage: number;
 }
 
 export interface Category {

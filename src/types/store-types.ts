@@ -34,12 +34,6 @@ export interface FormErrors {
   postcode: string;
 }
 
-// Add interface for store admin fetch
-export interface StoreAdmin {
-  user_id: number;
-  username: string;
-}
-
 // Extended form errors type with optional store data keys
 export type FormErrorsWithIndex = FormErrors & {
   [K in StoreDataKey]?: string;
