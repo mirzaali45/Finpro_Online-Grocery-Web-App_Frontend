@@ -6,6 +6,7 @@ import "sweetalert2/dist/sweetalert2.css";
 import NavbarWrapper from "@/components/navbarWrapper";
 import "leaflet/dist/leaflet.css";
 import { SearchProvider } from "@/components/searchContext";
+
 import FooterWrapper from "@/components/footerWrapper";
 import { ToastContainer } from "react-toastify";
 
@@ -37,6 +38,7 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SearchProvider>
+
           <NavbarWrapper />
           {children}
           <FooterWrapper />

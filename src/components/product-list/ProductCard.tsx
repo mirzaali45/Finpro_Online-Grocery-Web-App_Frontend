@@ -35,10 +35,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
     try {
       setIsLoading(true);
-
-      // Use the improved addToCart function that gets userId from JWT automatically
       await addToCart(product.product_id, 1);
-
       toast.success(`${product.name} added to cart!`, {
         position: "bottom-right",
         autoClose: 3000,
@@ -47,6 +44,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
         pauseOnHover: true,
         draggable: true,
       });
+
 
       onCartUpdate?.();
     } catch (error) {
@@ -65,6 +63,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
           autoClose: 3000,
         });
       }
+
       console.error("Failed to add to cart:", error);
     } finally {
       setIsLoading(false);
