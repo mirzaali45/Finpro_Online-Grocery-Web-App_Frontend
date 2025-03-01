@@ -46,23 +46,16 @@ const DiscountProductCard = ({
 
     try {
       setIsLoading(true);
-      // Add a third argument (empty string or null) if required by addToCart
-      await addToCart(product.product_id, 1, "");
-      toast.success(`${product.name} added to cart!`, {
-        position: "bottom-right",
-        autoClose: 3000,
-        hideProgressBar: false,
-        closeOnClick: true,
-        pauseOnHover: true,
-        draggable: true,
-      });
+
+      const userId = localStorage.getItem("userId") || "";
+      await addToCart(product.product_id, 1, userId);
+
+      // Using toast without inline configuration - relies on global ToastContainer
+      toast.success(`${product.name} added to cart!`);
       onCartUpdate?.();
     } catch (error) {
-      toast.error("Failed to add product to cart", {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
       console.error("Failed to add to cart:", error);
+      toast.error("Failed to add product to cart");
     } finally {
       setIsLoading(false);
     }
