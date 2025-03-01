@@ -13,18 +13,6 @@ interface InventoryLogItem {
   quantity: number;
 }
 
-interface UpdateLogData {
-  itemId: number;
-  updates: {
-    operation: "add" | "decrease";
-    qty: number;
-  };
-}
-
-interface DeleteLogData {
-  item?: InventoryLogItem;
-  items?: InventoryLogItem[];
-}
 
 export const LogViewer = ({ onClose }: { onClose: () => void }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);

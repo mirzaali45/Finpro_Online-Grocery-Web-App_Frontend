@@ -15,9 +15,9 @@ import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 
 interface ProductCardProps {
-  product: Product & { distance?: number }; 
+  product: Product & { distance?: number };
   onCartUpdate?: () => void;
-  showDistance?: boolean; 
+  showDistance?: boolean;
 }
 
 const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
@@ -63,7 +63,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
       return (prev - 1 + images.length) % images.length;
     });
   };
-
 
   useEffect(() => {
     if (isHovered && hasMultipleImages) {

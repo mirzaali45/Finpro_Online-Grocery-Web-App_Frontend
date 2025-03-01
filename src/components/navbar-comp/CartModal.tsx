@@ -8,6 +8,9 @@ import {
 } from "@/services/cart.service";
 import { formatRupiah } from "@/helper/currencyRp";
 import { CartModalProps, CartData } from "@/types/cart-types";
+import ProfileServices from "@/services/profile/services1";
+import { toast, ToastOptions } from "react-toastify";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 
 // Update your CartItem type in cart-types.ts to include Discount
@@ -48,14 +51,33 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
+  const {profile} = ProfileServices();
+  const router = useRouter();
+  const showToast = (
+    message: string,
+    type: keyof typeof toast,
+    onClose: any = null
+  ) => {
+    toast.dismiss();
+    (toast[type] as (content: string, options?: ToastOptions) => void)(
+      message,
+      {
+        position: "bottom-right",
+        autoClose: 3000,
+        theme: "colored",
+        hideProgressBar: false,
+        onClose,
+      }
+    );
+  };
 
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      const token = localStorage.getItem("token");
-      if (!token) throw new Error("Please login to view your cart");
+      // const userId = localStorage.getItem("user_id");
+      // if (!userId) throw new Error("Please login to view your cart");
 
-      const response = await fetchCartId();
+      const response = await fetchCartId(profile?.userId);
       setCartData(response.data);
       setError("");
     } catch (error) {
@@ -98,13 +120,11 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       setIsUpdating(cartItemId);
       await removeFromCart(cartItemId);
       await loadCart();
+      showToast("Deleted item from cart", "success");
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to remove item"
       );
-      if (error instanceof Error && error.message.includes("login")) {
-        localStorage.removeItem("token");
-      }
     } finally {
       setIsUpdating(null);
     }

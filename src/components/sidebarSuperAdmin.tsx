@@ -11,13 +11,15 @@ import {
   Menu,
   FolderKanban,
   Boxes,
-  PackageOpen 
+  PackageOpen,
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.css";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { getSession } from "next-auth/react";
+import ProfileServices from "@/services/profile/services1";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -30,6 +32,8 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { profile } = ProfileServices();
+
   const [activeLink, setActiveLink] = useState(pathname);
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function Sidebar({
     {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/dashboard-superAdmin",
+      href: profile?.role == "super_admin" ? "/dashboard-superAdmin" : "/dashboard-storeAdmin",
     },
     {
       title: "My Store",
@@ -67,7 +71,7 @@ export default function Sidebar({
       icon: <PackageOpen className="h-5 w-5" />,
       href: "/dashboard-superAdmin/inventory",
     },
-  ];
+  ]?.filter((v: any) => v !== false);
 
   const handleLogout = () => {
     Swal.fire({
@@ -148,7 +152,7 @@ export default function Sidebar({
 
           {/* Sidebar Links */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {sidebarLinks.map((link) => (
+            {sidebarLinks.map((link: any) => (
               <Link
                 key={link.title}
                 href={link.href}

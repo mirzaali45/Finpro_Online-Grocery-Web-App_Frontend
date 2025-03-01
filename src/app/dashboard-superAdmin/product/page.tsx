@@ -288,4 +288,3 @@ export default withAuth(ProductAdmin, {
   allowedRoles: ["super_admin"],
   redirectPath: "/not-authorized-superadmin",
 });
-

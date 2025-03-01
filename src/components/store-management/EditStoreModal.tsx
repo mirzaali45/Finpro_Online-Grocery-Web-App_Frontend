@@ -5,13 +5,24 @@ import { storeService } from "@/components/hooks/useStoreAdmin";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
+<<<<<<< HEAD
 import { StoreData, EditData } from "@/types/store-types"; // Import EditData from store-types
+=======
+import { StoreDataV2 } from "@/types/store-types";
+import { User } from "@/types/user-types";
+
+>>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
 
 interface EditStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
+<<<<<<< HEAD
   dataStore: StoreData;
+=======
+  dataStore: StoreDataV2;
+  users: User[]
+>>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
 }
 
 export default function EditStoreModal({
@@ -19,6 +30,10 @@ export default function EditStoreModal({
   onClose,
   onSuccess,
   dataStore,
+<<<<<<< HEAD
+=======
+  users
+>>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { formData, errors, handleChange, validateForm, setFormData } =
@@ -114,6 +129,7 @@ export default function EditStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            users={users}
           />
         </div>
       </div>
