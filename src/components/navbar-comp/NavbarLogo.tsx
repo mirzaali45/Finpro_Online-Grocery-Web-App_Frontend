@@ -40,7 +40,7 @@ export const NavLogo = () => {
           }}
           className="text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400"
         >
-          TechElite
+          TechLite
         </motion.span>
       </Link>
     </div>

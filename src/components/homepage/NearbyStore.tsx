@@ -13,6 +13,8 @@ import {
 import { StoreData } from "@/types/store-types";
 import { storeService } from "@/services/store-admin.service";
 import { Icon, DivIcon } from "leaflet";
+import { useGeolocation } from "@/components/hooks/useGeolocation";
+import { sortByDistance } from "@/utils/distanceCalc";
 
 // Dynamically import Leaflet components and CSS
 const MapContainer = dynamic(
@@ -31,12 +33,6 @@ const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
   ssr: false,
 });
 
-interface Location {
-  latitude: number;
-  longitude: number;
-  address?: string;
-}
-
 interface StoreWithDistance extends StoreData {
   distance?: number;
   created_at?: string;
@@ -44,16 +40,12 @@ interface StoreWithDistance extends StoreData {
 }
 
 export default function NearbyStore() {
-  const [userLocation, setUserLocation] = useState<Location | null>(null);
+  const { location, loading: locationLoading, error: locationError } = useGeolocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [stores, setStores] = useState<StoreWithDistance[]>([]);
-  const [storesWithDistance, setStoresWithDistance] = useState<
-    StoreWithDistance[]
-  >([]);
- const [storeMarkerIcon, setStoreMarkerIcon] = useState<
-   Icon | DivIcon | undefined
- >(undefined);
+  const [nearestStores, setNearestStores] = useState<StoreWithDistance[]>([]);
+  const [storeMarkerIcon, setStoreMarkerIcon] = useState<Icon | DivIcon | undefined>(undefined);
 
   // Ensure this only runs on client
   useEffect(() => {
@@ -76,128 +68,72 @@ export default function NearbyStore() {
     loadLeaflet();
   }, []);
 
-  // Calculate distance between two points using Haversine formula
-  const calculateDistance = (
-    lat1: number,
-    lon1: number,
-    lat2: number,
-    lon2: number
-  ) => {
-    const R = 6371; // Earth's radius in km
-    const dLat = ((lat2 - lat1) * Math.PI) / 180;
-    const dLon = ((lon2 - lon1) * Math.PI) / 180;
-    const a =
-      Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-      Math.cos((lat1 * Math.PI) / 180) *
-        Math.cos((lat2 * Math.PI) / 180) *
-        Math.sin(dLon / 2) *
-        Math.sin(dLon / 2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-    return R * c; // Distance in km
-  };
-
   // Fetch stores from database
-  const fetchStores = async () => {
-    try {
-      const fetchedStores = await storeService.getStores();
-
-      // Filter out stores without coordinates
-      const validStores = fetchedStores.filter(
-        (store) => store.latitude && store.longitude
-      );
-
-      return validStores;
-    } catch (error) {
-      setError(
-        error instanceof Error
-          ? error.message
-          : "Unable to fetch store locations"
-      );
-      return [];
-    }
-  };
-
   useEffect(() => {
-    // Fetch stores first
-    const initializeStores = async () => {
-      const fetchedStores = await fetchStores();
-
-      // Check if geolocation is available
-      if ("geolocation" in navigator) {
-        navigator.geolocation.getCurrentPosition(
-          async (position) => {
-            const { latitude, longitude } = position.coords;
-
-            try {
-              const response = await fetch(
-                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}`
-              );
-              const data = await response.json();
-
-              setUserLocation({
-                latitude,
-                longitude,
-                address: data.display_name,
-              });
-
-              // Calculate distances for all stores
-              const storesWithDist: StoreWithDistance[] = fetchedStores.map(
-                (store) => ({
-                  ...store,
-                  distance: calculateDistance(
-                    latitude,
-                    longitude,
-                    store.latitude || 0,
-                    store.longitude || 0
-                  ),
-                })
-              );
-
-              // Sort stores by distance
-              const sortedStores = storesWithDist.sort(
-                (a, b) => (a.distance || 0) - (b.distance || 0)
-              );
-
-              // Select 3 nearest stores
-              const nearestStores = sortedStores.slice(0, 3);
-
-              setStores(nearestStores);
-              setStoresWithDistance(nearestStores);
-            } catch (error) {
-               console.error("Error occurred:", error);
-              setUserLocation({ latitude, longitude });
-              // If address fetch fails, still set the stores
-              setStoresWithDistance(fetchedStores.slice(0, 3));
-            }
-
-            setLoading(false);
-          },
-          (error) => {
-             console.error("Error occurred:", error);
-            setError(
-              "Unable to retrieve your location. Please enable location services."
-            );
-            // If geolocation fails, still set the stores
-            setStoresWithDistance(fetchedStores.slice(0, 3));
-            setLoading(false);
-          }
+    const fetchStoreData = async () => {
+      setLoading(true);
+      try {
+        const fetchedStores = await storeService.getStores();
+        
+        // Filter out stores without coordinates
+        const validStores = fetchedStores.filter(
+          (store) => store.latitude && store.longitude
         );
-      } else {
-        setError("Geolocation is not supported by your browser.");
-        // If geolocation is not supported, still set the stores
-        setStoresWithDistance(fetchedStores.slice(0, 3));
+        
+        setStores(validStores);
+        
+        // If we already have location, sort stores by distance
+        if (location) {
+          const sorted = sortByDistance(
+            validStores,
+            location.latitude,
+            location.longitude,
+            (store) => ({
+              lat: store.latitude,
+              lon: store.longitude
+            })
+          );
+          
+          // Select 3 nearest stores
+          setNearestStores(sorted.slice(0, 3));
+        } else {
+          // Without location, just show some stores
+          setNearestStores(validStores.slice(0, 3));
+        }
+      } catch (error) {
+        setError(
+          error instanceof Error
+            ? error.message
+            : "Unable to fetch store locations"
+        );
+      } finally {
         setLoading(false);
       }
     };
 
-    // Only run on client
-    if (typeof window !== "undefined") {
-      initializeStores();
-    }
+    fetchStoreData();
   }, []);
 
+  // Sort stores when location is available
+  useEffect(() => {
+    if (location && stores.length > 0) {
+      const sorted = sortByDistance(
+        stores,
+        location.latitude,
+        location.longitude,
+        (store) => ({
+          lat: store.latitude,
+          lon: store.longitude
+        })
+      );
+      
+      // Select 3 nearest stores
+      setNearestStores(sorted.slice(0, 3));
+    }
+  }, [location, stores]);
+
   // Render loading state
-  if (loading) {
+  if (loading || locationLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-black to-gray-900 flex items-center justify-center">
         <Loader2 className="w-8 h-8 text-purple-500 animate-spin" />
@@ -206,7 +142,7 @@ export default function NearbyStore() {
   }
 
   // Render error state
-  if (error || stores.length === 0) {
+  if ((error || locationError) || stores.length === 0) {
     return (
       <div className="h-auto bg-gradient-to-br from-black to-gray-900 flex items-center justify-center px-4">
         <div className="text-center bg-gray-800/50 backdrop-blur-lg rounded-xl p-8 shadow-lg border border-gray-700/50">
@@ -215,7 +151,7 @@ export default function NearbyStore() {
             {stores.length === 0 ? "No Stores Found" : "Error"}
           </h2>
           <p className="text-gray-300 mb-6">
-            {error || "Unable to retrieve store information"}
+            {error || locationError || "Unable to retrieve store information"}
           </p>
           <button
             onClick={() => {
@@ -248,7 +184,7 @@ export default function NearbyStore() {
           </p>
         </motion.div>
 
-        {userLocation && (
+        {location && (
           <>
             <motion.div
               initial={{ opacity: 0, y: 20 }}
@@ -257,7 +193,7 @@ export default function NearbyStore() {
               style={{ height: "400px" }}
             >
               <MapContainer
-                center={[userLocation.latitude, userLocation.longitude]}
+                center={[location.latitude, location.longitude]}
                 zoom={13}
                 style={{ height: "100%", width: "100%" }}
               >
@@ -267,18 +203,21 @@ export default function NearbyStore() {
                 />
                 {/* User location marker */}
                 <Marker
-                  position={[userLocation.latitude, userLocation.longitude]}
+                  position={[location.latitude, location.longitude]}
                 >
                   <Popup>
                     <div className="font-semibold">Your Location</div>
-                    <div className="text-sm">{userLocation.address}</div>
+                    <div className="text-sm">{location.address}</div>
                   </Popup>
                 </Marker>
                 {/* Store markers */}
-                {storesWithDistance.map((store) => (
+                {nearestStores.map((store) => (
                   <Marker
                     key={store.store_id}
-                    position={[store.latitude || 0, store.longitude || 0]}
+                    position={[
+                      typeof store.latitude === 'string' ? parseFloat(store.latitude) : (store.latitude || 0), 
+                      typeof store.longitude === 'string' ? parseFloat(store.longitude) : (store.longitude || 0)
+                    ]}
                     icon={storeMarkerIcon}
                   >
                     <Popup>
@@ -307,7 +246,7 @@ export default function NearbyStore() {
                   <h2 className="text-xl font-semibold text-white mb-2">
                     Your Current Location
                   </h2>
-                  <p className="text-gray-300">{userLocation.address}</p>
+                  <p className="text-gray-300">{location.address}</p>
                 </div>
               </div>
             </motion.div>
@@ -315,7 +254,7 @@ export default function NearbyStore() {
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-          {storesWithDistance.map((store, index) => (
+          {nearestStores.map((store, index) => (
             <motion.div
               key={store.store_id}
               initial={{ opacity: 0, y: 20 }}

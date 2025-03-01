@@ -1,34 +1,78 @@
-import { UpdateInventoryRequest } from "./inventory-types";
+// types/log-types.ts
 
-export interface Log {
-  id?: number;
+// Main log entry interface
+export interface LogEntry {
+  id: number;
   action: string;
-  description: string;
   module: string;
-  timestamp: Date;
-  userId?: number; // Optional, depending on your authentication
+  description: string;
+  timestamp: string | Date; // Accept either string or Date
 }
 
-export type LogDetails = {
-    itemId?: number;
-    updates?: UpdateInventoryRequest;
-    items?: Array<{
-      id: number;
-      name: string;
-      store: string;
-      quantity: number;
-    }>;
-    totalAddedItems?: number;
-    totalDeletedItems?: number;
-    totalItems?: number;
-    totalCategories?: number;
-    message?: string;
-    productName?: string;
-    storeName?: string;
-    item?: {
-      id: number;
-      name: string;
-      store: string;
-      quantity: number;
-    };
-  };
+// Define a type for update operations
+export type UpdateOperation = "add" | "subtract";
+
+// Define updates interface
+export interface LogUpdates {
+  operation?: UpdateOperation;
+  qty?: number;
+  [key: string]: unknown;
+}
+
+// Define item interface
+export interface LogItem {
+  id: number;
+  name: string;
+  store: string;
+  quantity: number;
+}
+
+// Generic interface for log details without index signature
+export interface LogDetailsBase {
+  // For Update actions
+  itemId?: number;
+  updates?: LogUpdates;
+
+  // For Delete actions
+  item?: LogItem;
+
+  // For batch Delete actions
+  items?: LogItem[];
+
+  // For Add actions
+  totalAddedItems?: number;
+
+  // For other actions
+  message?: string;
+}
+
+// Extended interface with index signature
+export interface LogDetails extends LogDetailsBase {
+  [key: string]: unknown;
+}
+
+// Filter options for fetching logs
+export interface LogFilterOptions {
+  module?: string;
+  action?: string;
+  startDate?: string;
+  endDate?: string;
+  page?: number;
+  pageSize?: number;
+}
+
+// Pagination metadata
+export interface PaginationMetadata {
+  total: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+  hasNextPage: boolean;
+  hasPrevPage: boolean;
+}
+
+// Paginated response wrapper
+export interface PaginatedResponse<T> {
+  data: T[];
+  pagination: PaginationMetadata;
+}

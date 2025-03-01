@@ -14,6 +14,7 @@ import ReactSelect from "react-select";
 import { DISTRICTS } from "@/data/district";
 import { REGENCIES } from "@/data/regency";
 import { PROVINCES } from "@/data/province";
+import { LatLngTuple } from "leaflet";
 
 // Konfigurasi ikon Leaflet
 L.Icon.Default.mergeOptions({
@@ -77,8 +78,8 @@ const fields = [
 // Komponen untuk memilih lokasi di peta
 interface LocationPickerProps {
   setFieldValue: (field: string, value: number) => void;
-  setMarkerPosition: (position: [number, number]) => void;
-  markerPosition: [number, number];
+  setMarkerPosition: (position: LatLngTuple) => void;
+  markerPosition: LatLngTuple;
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -89,7 +90,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
-      setMarkerPosition([Number(lat), Number(lng)]);
+      setMarkerPosition([Number(lat), Number(lng)] as LatLngTuple);
       setFieldValue("latitude", lat);
       setFieldValue("longitude", lng);
     },
@@ -131,6 +132,9 @@ interface FormAddressEditProps {
   setLocation: any;
 }
 
+const DEFAULT_LATITUDE = -6.19676128457438;
+const DEFAULT_LONGITUDE = 106.83754574840799;
+
 const FormAddressEdit: React.FC<FormAddressEditProps> = ({
   formData,
   onSubmit,
@@ -139,9 +143,9 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
   setLocation,
 }) => {
   // State untuk menyimpan posisi marker
-  const [markerPosition, setMarkerPosition] = useState([
-    formData.latitude || -6.19676128457438,
-    formData.longitude || 106.83754574840799,
+  const [markerPosition, setMarkerPosition] = useState<LatLngTuple>([
+    formData.latitude || DEFAULT_LATITUDE,
+    formData.longitude || DEFAULT_LONGITUDE,
   ]);
   const [addressId, setAddressId] = useState(0);
   // State untuk initial values
@@ -171,13 +175,17 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
         province: formData.province || "",
         province_id: formData.province_id || "",
         postcode: formData.postcode || "",
-        latitude: String(formData.latitude) || String(-6.19676128457438),
-        longitude: String(formData.longitude) || String(106.83754574840799),
+        latitude: String(formData.latitude) || String(DEFAULT_LATITUDE),
+        longitude: String(formData.longitude) || String(DEFAULT_LONGITUDE),
       });
-      setMarkerPosition([
-        formData.latitude || -6.19676128457438,
-        formData.longitude || 106.83754574840799,
-      ]);
+
+      // Explicitly cast to LatLngTuple
+      const newMarkerPosition: LatLngTuple = [
+        formData.latitude || DEFAULT_LATITUDE,
+        formData.longitude || DEFAULT_LONGITUDE,
+      ];
+
+      setMarkerPosition(newMarkerPosition);
       setLocation({
         province: { value: formData?.province_id, label: formData?.province },
         city: {
@@ -337,7 +345,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
             <button
               type="button"
               onClick={() => setPrimaryAddress(addressId)}
-              // disabled={isSubmitting}
               className={`w-full py-2 px-4 bg-orange-500 text-white rounded-md hover:bg-orange-700}`}
             >
               {"Jadikan Alamat Utama"}

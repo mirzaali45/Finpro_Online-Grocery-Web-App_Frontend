@@ -1,23 +1,18 @@
-<<<<<<< HEAD
-<<<<<<< HEAD
 import Link from "next/link";
-=======
-import  ProductCard  from "./ProductCard";
->>>>>>> 363474f74221ef62fc76f6c8ac1ec9ddcb3db94a
 import { Product } from "@/types/product-types";
 import { ProductImageSlider } from "@/components/product-list/ProductImgSlider";
-=======
-import  ProductCard  from "./ProductCard";
-import { Product } from "@/types/product-types";
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
+import { MapPin } from "lucide-react";
 
 interface ProductListProps {
-  products: Product[];
+  products: (Product & { distance?: number })[];
+  showDistance?: boolean;
 }
 
-export function ProductList({ products }: ProductListProps) {
+export function ProductList({
+  products,
+  showDistance = false,
+}: ProductListProps) {
   return (
-<<<<<<< HEAD
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {products.map((product) => (
         <Link
@@ -57,14 +52,18 @@ export function ProductList({ products }: ProductListProps) {
                   {product.category.category_name}
                 </span>
               </div>
+
+              {showDistance && product.distance !== undefined && (
+                <div className="mt-2 flex items-center text-emerald-500">
+                  <MapPin className="w-4 h-4 mr-1" />
+                  <span className="text-sm">
+                    {product.distance.toFixed(1)} km away
+                  </span>
+                </div>
+              )}
             </div>
           </div>
         </Link>
-=======
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-      {products.map((product) => (
-        <ProductCard key={product.product_id} product={product} />
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
       ))}
     </div>
   );

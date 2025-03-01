@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { productService } from "@/services/product.service";
 import debounce from "lodash/debounce";
-import { NavbarProps, ModalState, Product } from "@/types/product-types";
+import { NavbarProps, ModalState, Product, } from "@/types/product-types";
 import { SearchModal } from "@/components/navbar-comp/SearchModal";
 import { CartModal } from "@/components/navbar-comp/CartModal";
 import { generateSlug } from "../utils/slugUtils";
@@ -12,6 +12,7 @@ import { NavLogo } from "./navbar-comp/NavbarLogo";
 import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
 import { Menu, X } from "lucide-react"; // Icon untuk mobile menu
+
 
 export default function Navbar({ className }: NavbarProps) {
   const [modalState, setModalState] = useState<ModalState>({
@@ -33,9 +34,9 @@ export default function Navbar({ className }: NavbarProps) {
     }
     setIsLoading(true);
     try {
-      const products = await productService.getProducts();
-      const filtered = products
-        .filter((product) => {
+      const response = await productService.getProducts(); 
+      const filtered = response.products 
+        .filter((product: Product) => {
           const name = product.name.toLowerCase();
           const searchTerm = term.toLowerCase();
           if (name.includes(searchTerm)) {
@@ -136,8 +137,12 @@ export default function Navbar({ className }: NavbarProps) {
             onHoverEnd={() => setIsHovered(false)}
             className={`fixed top-0 left-0 right-0 z-50 ${className ?? ""}`}
           >
-            <motion.div className="h-[1px] w-full origin-left bg-gradient-to-r from-rose-500/50 via-purple-500/50 to-blue-500/50" />
-
+            <motion.div
+              initial={{ scaleX: 0 }}
+              animate={{ scaleX: 1 }}
+              transition={{ duration: 0.5, delay: 0.2 }}
+              className="h-[1px] w-full origin-left bg-gradient-to-r from-rose-500/50 via-purple-500/50 to-blue-500/50"
+            />
             <div className="relative">
               <motion.div
                 initial={{ opacity: 0 }}

@@ -99,12 +99,6 @@ const Section1 = () => {
         ) : (
           ""
         )}
-        {/* <button
-          onClick={() => handleLogout()}
-          className="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded mb-6"
-        >
-          Logout
-        </button> */}
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -145,11 +139,9 @@ const Section1 = () => {
         <div>
           <label className="block text-gray-400">Phone:</label>
           <input
-            type="number"
-            value={profile.phone}
-            onChange={(e) =>
-              setProfile({ ...profile, phone: parseInt(e.target.value, 10) })
-            }
+            type="text"
+            value={profile.phone || ""}
+            onChange={(e) => setProfile({ ...profile, phone: e.target.value })}
             placeholder="Enter phone"
             className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
@@ -160,7 +152,6 @@ const Section1 = () => {
             type="text"
             value={profile.role}
             disabled
-            // onChange={(e) => setProfile({ ...profile, role: e.target.value })}
             className="w-full border border-gray-800 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -170,7 +161,6 @@ const Section1 = () => {
             type="text"
             value={profile.status}
             disabled
-            // onChange={(e) => setProfile({ ...profile, status: e.target.value })}
             className="w-full border border-gray-800 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
         </div>
@@ -195,18 +185,6 @@ const Section1 = () => {
       ) : (
         ""
       )}
-      {/* modal input referral
-      {profile && profile.password === "" ? (
-        <Modal
-          isOpen={modalSetPass}
-          onClose={() => setModalSetPass(false)}
-          title="Set Password"
-        >
-          <FormSetPassword onsubmit={setPasswordHandle} />
-        </Modal>
-      ) : (
-        ""
-      )} */}
     </section>
   );
 };

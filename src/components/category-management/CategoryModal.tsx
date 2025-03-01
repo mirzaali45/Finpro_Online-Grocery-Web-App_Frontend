@@ -1,5 +1,5 @@
-
 import { CategoryFormData } from "@/types/category-types";
+import { useState, useRef } from "react";
 
 interface CategoryModalProps {
   isOpen: boolean;
@@ -9,6 +9,7 @@ interface CategoryModalProps {
   onChange: (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => void;
+  onFileChange?: (file: File | null) => void;
 }
 
 export default function CategoryModal({
@@ -17,11 +18,64 @@ export default function CategoryModal({
   formData,
   onSubmit,
   onChange,
+  onFileChange,
 }: CategoryModalProps) {
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
   if (!isOpen) return null;
 
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+
+    if (file) {
+      // Validate file size (max 3MB)
+      if (file.size > 3 * 1024 * 1024) {
+        alert("File size should not exceed 3MB");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Clear the file input
+        }
+        return;
+      }
+
+      // Validate file type
+      const allowedTypes = ["image/jpeg", "image/png", "image/webp"];
+      if (!allowedTypes.includes(file.type)) {
+        alert("Please upload a valid image (JPG, PNG, WebP)");
+        if (fileInputRef.current) {
+          fileInputRef.current.value = ""; // Clear the file input
+        }
+        return;
+      }
+
+      const previewUrl = URL.createObjectURL(file);
+      setImagePreview(previewUrl);
+
+      // Call onFileChange prop with the file
+      if (onFileChange) {
+        onFileChange(file);
+      }
+    } else {
+      // If no file is selected, reset the preview and call onFileChange with null
+      setImagePreview(null);
+      if (onFileChange) {
+        onFileChange(null);
+      }
+    }
+  };
+
+  const handleRemoveImage = () => {
+    setImagePreview(null);
+    if (fileInputRef.current) {
+      fileInputRef.current.value = ""; // Clear the file input
+    }
+    if (onFileChange) {
+      onFileChange(null);
+    }
+  };
+
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
       <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
         <div className="flex justify-between items-center mb-4">
           <h2 className="text-xl font-bold">Add New Category</h2>
@@ -61,6 +115,40 @@ export default function CategoryModal({
               rows={3}
             />
           </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-1">
+              Category Image
+            </label>
+            <input
+              ref={fileInputRef}
+              type="file"
+              name="image"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFileChange}
+              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            {imagePreview && (
+              <div className="mt-2 relative">
+                <img
+                  src={imagePreview}
+                  alt="Category preview"
+                  className="h-32 w-full object-contain rounded-md"
+                />
+                <button
+                  type="button"
+                  onClick={handleRemoveImage}
+                  className="absolute top-1 right-1 bg-red-500 text-white rounded-full p-1 text-xs hover:bg-red-600"
+                >
+                  ✕
+                </button>
+              </div>
+            )}
+            <p className="text-xs text-gray-500 mt-1">
+              Recommended: Square image (JPG, PNG, WebP), max 3MB
+            </p>
+          </div>
+
           <div className="flex justify-end gap-2 mt-6">
             <button
               type="button"

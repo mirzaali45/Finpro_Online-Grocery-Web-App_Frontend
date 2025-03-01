@@ -11,18 +11,50 @@ import { CartModalProps, CartData } from "@/types/cart-types";
 import ProfileServices from "@/services/profile/services1";
 import { toast, ToastOptions } from "react-toastify";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+
+interface ProductWithDiscount {
+  product_id: string;
+  name: string;
+  price: number;
+  ProductImage: { url: string }[];
+  Discount?: {
+    discount_id: number;
+    discount_type: "point" | "percentage";
+    discount_value: number;
+    expires_at: string;
+  }[];
+}
+
+const calculateDiscountedPrice = (product: ProductWithDiscount): number => {
+  if (!product.Discount || product.Discount.length === 0) {
+    return product.price;
+  }
+
+  const discount = product.Discount[0];
+
+  if (discount.discount_type === "percentage") {
+    return (
+      product.price -
+      Math.floor((product.price * discount.discount_value) / 100)
+    );
+  } else {
+    return product.price - discount.discount_value;
+  }
+};
 
 export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const [cartData, setCartData] = useState<CartData | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
-  const {profile} = ProfileServices();
+  const { profile } = ProfileServices();
   const router = useRouter();
+
   const showToast = (
     message: string,
     type: keyof typeof toast,
-    onClose: any = null
+    onClose?: () => void
   ) => {
     toast.dismiss();
     (toast[type] as (content: string, options?: ToastOptions) => void)(
@@ -40,14 +72,30 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      // const userId = localStorage.getItem("user_id");
-      // if (!userId) throw new Error("Please login to view your cart");
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
 
       const response = await fetchCartId(profile?.userId);
+
+      if (!response || !response.data) {
+        throw new Error("Invalid cart data");
+      }
+
       setCartData(response.data);
       setError("");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to load cart");
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to load cart";
+
+      setError(errorMessage);
+
+      if (errorMessage.includes("login")) {
+        localStorage.removeItem("token");
+        router.push("/login-user-customer");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -65,40 +113,14 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     try {
       setIsUpdating(cartItemId);
       await updateCartItem(cartItemId, newQuantity);
-      if (cartData) {
-        const updatedItems = cartData.items.map((item) => {
-          if (item.cartitem_id === cartItemId) {
-            return { ...item, quantity: newQuantity };
-          }
-          return item;
-        });
-
-        const totalQuantity = updatedItems.reduce(
-          (sum, item) => sum + item.quantity,
-          0
-        );
-        const totalPrice = updatedItems.reduce(
-          (sum, item) => sum + item.quantity * item.product.price,
-          0
-        );
-
-        setCartData({
-          ...cartData,
-          items: updatedItems,
-          summary: {
-            ...cartData.summary,
-            totalQuantity,
-            totalPrice,
-          },
-        });
-      }
-      loadCart();
-      showToast("Updated item", "success");
+      await loadCart(); // Refresh cart data after update
     } catch (error) {
       setError(
         error instanceof Error ? error.message : "Failed to update quantity"
       );
-      loadCart();
+      if (error instanceof Error && error.message.includes("login")) {
+        localStorage.removeItem("token");
+      }
     } finally {
       setIsUpdating(null);
     }
@@ -118,6 +140,39 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
       setIsUpdating(null);
     }
   };
+
+  const calculateTotalPrice = (): number => {
+    if (!cartData?.items || cartData.items.length === 0) return 0;
+
+    return cartData.items.reduce((total, item) => {
+      const productWithDiscount =
+        item.product as unknown as ProductWithDiscount;
+      const discountedPrice = calculateDiscountedPrice(productWithDiscount);
+      return total + discountedPrice * item.quantity;
+    }, 0);
+  };
+
+  const calculateTotalSavings = (): number => {
+    if (!cartData?.items || cartData.items.length === 0) return 0;
+
+    return cartData.items.reduce((savings, item) => {
+      const productWithDiscount =
+        item.product as unknown as ProductWithDiscount;
+      if (
+        !productWithDiscount.Discount ||
+        productWithDiscount.Discount.length === 0
+      ) {
+        return savings;
+      }
+
+      const originalPrice = productWithDiscount.price;
+      const discountedPrice = calculateDiscountedPrice(productWithDiscount);
+      return savings + (originalPrice - discountedPrice) * item.quantity;
+    }, 0);
+  };
+
+  const totalPrice = calculateTotalPrice();
+  const totalSavings = calculateTotalSavings();
 
   return (
     <div
@@ -168,113 +223,147 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
               </div>
             ) : (
               <div className="space-y-4">
-                {cartData.items.map((item) => (
-                  <div
-                    key={item.cartitem_id}
-                    className="relative group rounded-xl overflow-hidden"
-                  >
-                    {/* Card background */}
-                    <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl border border-neutral-800/50" />
+                {cartData.items.map((item) => {
+                  const productWithDiscount =
+                    item.product as unknown as ProductWithDiscount;
+                  const hasDiscount =
+                    productWithDiscount.Discount &&
+                    productWithDiscount.Discount.length > 0;
+                  const discountedPrice =
+                    calculateDiscountedPrice(productWithDiscount);
 
-                    <div className="relative p-4 flex items-center gap-4">
-                      <div className="relative w-20 h-20 rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300">
-                        <Image
-                          src={
-                            item.product.ProductImage[0]?.url ||
-                            "/product-placeholder.jpg"
-                          }
-                          alt={item.product.name}
-                          fill
-                          className="object-cover"
-                        />
-                      </div>
+                  return (
+                    <div
+                      key={item.cartitem_id}
+                      className="relative group rounded-xl overflow-hidden"
+                    >
+                      {/* Card background */}
+                      <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl border border-neutral-800/50" />
 
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-medium text-neutral-200 truncate">
-                          {item.product.name}
-                        </h3>
-                        <p className="text-neutral-400 mt-1">
-                          {formatRupiah(item.product.price)}
-                        </p>
+                      <div className="relative p-4 flex items-center gap-4">
+                        <div className="relative w-20 h-20 rounded-lg overflow-hidden group-hover:scale-105 transition-transform duration-300">
+                          <Image
+                            src={
+                              item.product.ProductImage[0]?.url ||
+                              "/product-placeholder.jpg"
+                            }
+                            alt={item.product.name}
+                            fill
+                            className="object-cover"
+                          />
+                        </div>
 
-                        <div className="flex items-center mt-3 gap-2">
-                          <div className="flex items-center bg-neutral-800 rounded-lg">
-                            <button
-                              className="p-1.5 text-neutral-400 hover:text-neutral-200 disabled:opacity-50 transition-colors"
-                              aria-label="Decrease quantity"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.cartitem_id,
-                                  item.quantity - 1
-                                )
-                              }
-                              disabled={isUpdating === item.cartitem_id}
-                            >
-                              <Minus size={14} />
-                            </button>
-                            <span className="min-w-[2rem] text-center text-sm text-neutral-200">
-                              {item.quantity}
-                            </span>
-                            <button
-                              className="p-1.5 text-neutral-400 hover:text-neutral-200 disabled:opacity-50 transition-colors"
-                              aria-label="Increase quantity"
-                              onClick={() =>
-                                handleUpdateQuantity(
-                                  item.cartitem_id,
-                                  item.quantity + 1
-                                )
-                              }
-                              disabled={isUpdating === item.cartitem_id}
-                            >
-                              <Plus size={14} />
-                            </button>
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-medium text-neutral-200 truncate">
+                            {item.product.name}
+                          </h3>
+
+                          {/* Price with discount */}
+                          <div className="mt-1">
+                            {hasDiscount ? (
+                              <div className="flex items-center">
+                                <span className="text-neutral-400 line-through mr-2">
+                                  {formatRupiah(item.product.price)}
+                                </span>
+                                <span className="text-emerald-400">
+                                  {formatRupiah(discountedPrice)}
+                                </span>
+                              </div>
+                            ) : (
+                              <p className="text-neutral-400">
+                                {formatRupiah(item.product.price)}
+                              </p>
+                            )}
                           </div>
 
-                          <button
-                            className="p-1.5 text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors"
-                            aria-label="Remove item"
-                            onClick={() => handleRemoveItem(item.cartitem_id)}
-                            disabled={isUpdating === item.cartitem_id}
-                          >
-                            <Trash2 size={14} />
-                          </button>
+                          <div className="flex items-center mt-3 gap-2">
+                            <div className="flex items-center bg-neutral-800 rounded-lg">
+                              <button
+                                className="p-1.5 text-neutral-400 hover:text-neutral-200 disabled:opacity-50 transition-colors"
+                                aria-label="Decrease quantity"
+                                onClick={() =>
+                                  handleUpdateQuantity(
+                                    item.cartitem_id,
+                                    item.quantity - 1
+                                  )
+                                }
+                                disabled={isUpdating === item.cartitem_id}
+                              >
+                                <Minus size={14} />
+                              </button>
+                              <span className="min-w-[2rem] text-center text-sm text-neutral-200">
+                                {item.quantity}
+                              </span>
+                              <button
+                                className="p-1.5 text-neutral-400 hover:text-neutral-200 disabled:opacity-50 transition-colors"
+                                aria-label="Increase quantity"
+                                onClick={() =>
+                                  handleUpdateQuantity(
+                                    item.cartitem_id,
+                                    item.quantity + 1
+                                  )
+                                }
+                                disabled={isUpdating === item.cartitem_id}
+                              >
+                                <Plus size={14} />
+                              </button>
+                            </div>
+
+                            <button
+                              className="p-1.5 text-red-400 hover:text-red-300 disabled:opacity-50 transition-colors"
+                              aria-label="Remove item"
+                              onClick={() => handleRemoveItem(item.cartitem_id)}
+                              disabled={isUpdating === item.cartitem_id}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             )}
           </div>
 
           <div className="mt-auto border-t border-neutral-800 pt-4 space-y-4">
             <div className="space-y-2">
+              {totalSavings > 0 && (
+                <div className="flex justify-between items-center">
+                  <span className="text-neutral-400">You Save</span>
+                  <span className="text-emerald-400 font-medium">
+                    {formatRupiah(totalSavings)}
+                  </span>
+                </div>
+              )}
+
               <div className="flex justify-between items-center">
                 <span className="text-neutral-400">Subtotal</span>
                 <span className="text-lg font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                  {cartData?.summary.totalPrice
-                    ? formatRupiah(cartData.summary.totalPrice)
-                    : formatRupiah(0)}
+                  {formatRupiah(totalPrice)}
                 </span>
               </div>
+
               <div className="flex justify-between text-sm text-neutral-500">
                 <span>Total Items</span>
                 <span>{cartData?.summary.totalItems || 0} items</span>
               </div>
             </div>
 
-            <button
-              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
-              disabled={!cartData?.items.length}
-              onClick={()=>{router.push('/checkout')}}
-            >
-              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
-              <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
-                <span className="text-neutral-200 font-medium">
-                  Proceed to Checkout
-                </span>
-              </div>
-            </button>
+            <Link href={`/checkout`}>
+              <button
+                className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+                disabled={!cartData?.items.length}
+              >
+                <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
+                <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
+                  <span className="text-neutral-200 font-medium">
+                    Proceed to Checkout
+                  </span>
+                </div>
+              </button>
+            </Link>
           </div>
         </div>
       </div>

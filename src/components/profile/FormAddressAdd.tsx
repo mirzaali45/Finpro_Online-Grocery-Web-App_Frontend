@@ -30,34 +30,12 @@ const initialValues = {
   longitude: "",
 };
 
-<<<<<<< HEAD
-const fields = [
-  { name: "address_name", label: "Address Name", type: "text" },
-  { name: "address", label: "Address", type: "text" },
-  { name: "subdistrict", label: "Subdistrict", type: "text" },
-  { name: "city", label: "City", type: "text" },
-  { name: "city_id", label: "City ID", type: "text" },
-  { name: "province", label: "Province", type: "text" },
-//     subdistrict: string;
-//     city: string;
-//     city_id: string;
-//     province: string;
-//     province_id: string;
-//     postcode: string;
-//     latitude: string;
-//     longitude: string;
-//   }) => void;
-// }
-interface FormAddressAddProps {
-  onsubmit: (values: typeof initialValues) => void;
-<<<<<<< HEAD
+interface LocationPickerProps {
+  setFieldValue: (field: string, value: number) => void;
 }
 
-
-const LocationPicker: React.FC<LocationPickerProps> = ({ setFieldValue }) => {
-  const [position, setPosition] = useState<[number, number]>([0, 0]);
-
-=======
+interface FormAddressAddProps {
+  onsubmit: (values: typeof initialValues) => void;
   location: any;
   setLocation: any;
 }
@@ -115,7 +93,6 @@ const fields = [
 
 const LocationPicker: React.FC<LocationPickerProps> = ({ setFieldValue }) => {
   const [position, setPosition] = useState<[number, number]>([0, 0]);
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
@@ -128,83 +105,15 @@ const LocationPicker: React.FC<LocationPickerProps> = ({ setFieldValue }) => {
   return position ? <Marker position={position} /> : null;
 };
 
-<<<<<<< HEAD
-const FormAddressAdd: React.FC<FormAddressAddProps> = ({ onsubmit }) => (
-=======
 const FormAddressAdd: React.FC<FormAddressAddProps> = ({
   onsubmit,
   location,
   setLocation,
 }) => (
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   <Formik
     initialValues={initialValues}
     validationSchema={addressSchema}
     onSubmit={(values) => {
-<<<<<<< HEAD
-      console.log("Submitted Data:", values);
-      onsubmit(values);
-    }}
-  >
-    {({ isSubmitting, setFieldValue, values }) => (
-  <Form className="space-y-4">
-    {fields.map((field) => (
-      <div key={field.name}>
-        <label htmlFor={field.name} className="block text-sm font-medium text-gray-500">
-          {field.label}
-        </label>
-        <Field
-          id={field.name}
-          name={field.name}
-          type={field.type}
-          className="mt-1 block w-full px-3 py-2 bg-gray-700 text-white rounded-md shadow-sm focus:ring-blue-500 focus:border-blue-500"
-        />
-        <ErrorMessage
-          name={field.name}
-          component="p"
-          className="mt-1 text-sm text-red-600"
-        />
-      </div>
-    ))}
-
-    {/* Map Section */}
-    <div className="mt-5">
-      <h3 className="text-sm font-medium text-gray-500">Select Location on Map</h3>
-      <MapContainer
-        center={[
-          Number(values.latitude) || -6.19676128457438,
-          Number(values.longitude) || 106.83754574840799,
-        ]}
-        zoom={8}
-        style={{ height: "300px", width: "100%", marginTop: "1rem" }}
-      >
-        <TileLayer
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        />
-        {values.latitude && values.longitude && (
-          <Marker position={[Number(values.latitude), Number(values.longitude)]}>
-            <Popup>
-              <span>Your New Selected Address</span>
-            </Popup>
-          </Marker>
-        )}
-        <LocationPicker setFieldValue={setFieldValue} />
-      </MapContainer>
-    </div>
-
-    <button
-      type="submit"
-      disabled={isSubmitting}
-      className={`w-full py-2 px-4 bg-blue-600 text-white rounded-md ${
-        isSubmitting ? "bg-blue-400 cursor-not-allowed" : "hover:bg-blue-700"
-      }`}
-    >
-      {isSubmitting ? "Submitting..." : "Submit Address"}
-    </button>
-  </Form>
-)}
-=======
       const payload = {
         ...values,
         province_id: location?.province?.value,
@@ -327,7 +236,6 @@ const FormAddressAdd: React.FC<FormAddressAddProps> = ({
         </button>
       </Form>
     )}
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   </Formik>
 );
 

@@ -27,7 +27,6 @@ export interface TokenCheckResponse {
   message: string;
 }
 
-
 export interface ResetPassResponse {
   token: string;
   email: string;
@@ -110,9 +109,25 @@ export interface LoginFormCustomerProps {
   handleGoogleLogin: () => void;
 }
 
+// Create a common password type to be used in both scenarios
+export interface PasswordFields {
+  password: string;
+  confirmPassword: string;
+}
+
+// Create separate props interfaces for each use case
 export interface VerifyAndSetPassProps {
   onSubmit: (values: VerifyAndSetPassValues) => Promise<void>;
+  formType?: "register";
 }
+
+export interface VerifyResetPassProps {
+  onSubmit: (values: VerifyResetPassValues) => Promise<void>;
+  formType: "reset";
+}
+
+// Create a union type that will work for both components
+export type VerifyPassProps = VerifyAndSetPassProps | VerifyResetPassProps;
 
 export interface LoginFormSuperProps {
   onSubmit: (values: LoginFormSuperValues) => Promise<void>;

@@ -46,7 +46,6 @@ export class AuthService {
       if (data.token) {
         localStorage.setItem("verify_email", "true");
         localStorage.setItem("token", data.token);
-        // localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
@@ -167,14 +166,13 @@ export class AuthService {
   static async login(
     credentials: LoginFormCustomerValues
   ): Promise<LoginResponse> {
-    // console.log(credentials)
     try {
       const response = await fetch(`${base_url_be}/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        credentials: "include",
+        credentials: "include", // Important for cookies
         body: JSON.stringify(credentials),
       });
 
@@ -186,26 +184,22 @@ export class AuthService {
       const data = (await response.json()) as LoginResponse;
 
       if (data.token) {
-        localStorage.setItem("is_login", "true");
+        // Explicitly log token storage for debugging
+        console.log("Token received:", data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
-        // localStorage.setItem("user_id", data.user.user_id.toString());
       }
 
       return data;
     } catch (error) {
-      if (error instanceof Error) {
-        throw error;
-      }
-      throw new Error("An unexpected error occurred");
+      console.error("Login error:", error);
+      throw error;
     }
   }
 
   static async logout(): Promise<void> {
     localStorage.removeItem("token");
-    localStorage.removeItem("is_login");
     localStorage.removeItem("exp_token");
-    localStorage.removeItem("user_id");
   }
 
   static async checkTokenVerifyEmailExp(): Promise<TokenCheckResponse> {

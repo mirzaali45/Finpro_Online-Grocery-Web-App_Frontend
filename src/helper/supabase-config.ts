@@ -1,4 +1,4 @@
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
 
 const supabaseUrl = process.env.NEXT_PUBLIC_BASE_URL_SUPABASE || ''; // Provide a default empty string
 const supabaseKey = process.env.NEXT_PUBLIC_BASE_KEY_SUPABASE || ''; // Provide a default empty string

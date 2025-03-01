@@ -1,45 +1,106 @@
-// @/services/log.service.ts
-import { Log } from "@/types/log-types";
+import { LogEntry, LogFilterOptions } from "@/types/log-types";
 
-export const LogService = {
-  createLog: (logData: Omit<Log, "id">) => {
+class LogService {
+  /**
+   * Get all logs
+   * @returns {Promise<LogEntry[]>} All logs
+   */
+  static async getLogs(options?: LogFilterOptions): Promise<LogEntry[]> {
     try {
-      // Retrieve existing logs
-      const existingLogs = JSON.parse(localStorage.getItem("appLogs") || "[]");
+      const response = await fetch("/api/inventory-logs");
+      if (!response.ok) {
+        throw new Error("Failed to fetch logs");
+      }
 
-      // Create a new log entry with a unique ID
-      const newLog = {
-        ...logData,
-        id: Date.now(), // Use timestamp as a simple unique identifier
-      };
+      let logs = await response.json();
 
-      // Add the new log
-      const updatedLogs = [...existingLogs, newLog];
+      // Apply client-side filtering if options are provided
+      if (options) {
+        if (options.module) {
+          logs = logs.filter(
+            (log: LogEntry) =>
+              log.module.toLowerCase() === options.module!.toLowerCase()
+          );
+        }
 
-      // Limit log storage (optional)
-      const MAX_LOGS = 100;
-      const trimmedLogs = updatedLogs.slice(-MAX_LOGS);
+        if (options.action) {
+          logs = logs.filter(
+            (log: LogEntry) =>
+              log.action.toLowerCase() === options.action!.toLowerCase()
+          );
+        }
 
-      // Save back to local storage
-      localStorage.setItem("appLogs", JSON.stringify(trimmedLogs));
+        if (options.startDate && options.endDate) {
+          const startDate = new Date(options.startDate);
+          const endDate = new Date(options.endDate);
 
-      return newLog;
+          logs = logs.filter((log: LogEntry) => {
+            const logDate = new Date(log.timestamp);
+            return logDate >= startDate && logDate <= endDate;
+          });
+        }
+      }
+
+      // Sort by timestamp (newest first)
+      logs.sort((a: LogEntry, b: LogEntry) => {
+        return (
+          new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+        );
+      });
+
+      return logs;
     } catch (error) {
-      console.error("Error creating log:", error);
-      return null;
-    }
-  },
-
-  getLogs: (): Log[] => {
-    try {
-      return JSON.parse(localStorage.getItem("appLogs") || "[]");
-    } catch (error) {
-      console.error("Error retrieving logs:", error);
+      console.error("Error getting logs:", error);
       return [];
     }
-  },
+  }
 
-  clearLogs: () => {
-    localStorage.removeItem("appLogs");
-  },
-};
+  /**
+   * Create a new log entry
+   * @param {Omit<LogEntry, 'id'>} logData - Log data
+   * @returns {Promise<LogEntry>} Created log entry
+   */
+  static async createLog(logData: Omit<LogEntry, "id">): Promise<LogEntry> {
+    try {
+      // Ensure timestamp is a string
+      const timestamp =
+        logData.timestamp instanceof Date
+          ? logData.timestamp.toISOString()
+          : logData.timestamp || new Date().toISOString();
+
+      // Prepare the data
+      const data = {
+        ...logData,
+        timestamp,
+      };
+
+      // Make API request
+      const response = await fetch("/api/inventory-logs", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to create log");
+      }
+
+      return await response.json();
+    } catch (error) {
+      console.error("Error creating log:", error);
+      // Return a mock response if we couldn't save it
+      return {
+        id: -1,
+        ...logData,
+        timestamp:
+          typeof logData.timestamp === "string"
+            ? logData.timestamp
+            : logData.timestamp?.toISOString() || new Date().toISOString(),
+      };
+    }
+  }
+}
+
+export default LogService;

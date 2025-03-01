@@ -1,9 +1,14 @@
-<<<<<<< HEAD
 "use client";
 
 import { useState, useEffect } from "react";
 import Sidebar from "@/components/sidebarSuperAdmin";
-import { RefreshCw, ArrowUpDown, FileText, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  RefreshCw,
+  ArrowUpDown,
+  FileText,
+  ChevronLeft,
+  ChevronRight,
+} from "lucide-react";
 import type {
   Inventory,
   UpdateInventoryRequest,
@@ -11,37 +16,24 @@ import type {
 } from "@/types/inventory-types";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { categoryService } from "@/services/category-admin.service";
-import { LogService } from "@/services/log.service";
+import LogService from "@/services/log.service";
 import { LogViewer } from "@/components/inventory-management/LogViewer";
 import InventoryTable from "@/components/inventory-management/InventoryTable";
 import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";
 import { toast } from "sonner";
 import { LogDetails } from "@/types/log-types";
-=======
-"use client"
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-import { useState, useEffect } from "react";
-import Sidebar from "@/components/sidebarSuperAdmin";
-import { Plus } from "lucide-react";
-import type { Inventory, CreateInventoryRequest, UpdateInventoryRequest } from "@/types/inventory-types";
-import { InventoryService } from "@/services/useInventoryAdmin";
-import InventoryTable from "@/components/inventory-management/InventoryTable";
-import CreateInventoryModal from "@/components/inventory-management/CreateInventoryModal";
-import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";
-import { toast } from "sonner";
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
-
-export default function Inventory() {
+function Inventory() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
-<<<<<<< HEAD
   const [pagination, setPagination] = useState<PaginationMetadata>({
     total: 0,
     page: 1,
     pageSize: 10,
     totalPages: 0,
     hasNextPage: false,
-    hasPrevPage: false
+    hasPrevPage: false,
   });
   const [categoriesCount, setCategoriesCount] = useState(0);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -61,7 +53,6 @@ export default function Inventory() {
     inventory?: Inventory
   ) => {
     if (action === "Update") {
-      // Create a more descriptive log message
       const logDescription = inventory
         ? `Updated ${inventory.product.name} at ${inventory.store.store_name}. 
           Quantity ${details.updates?.operation}: ${details.updates?.qty}`
@@ -70,6 +61,14 @@ export default function Inventory() {
       LogService.createLog({
         action,
         description: logDescription,
+        module: "Inventory Management",
+        timestamp: new Date(),
+      });
+    } else {
+      // For other action types (Add, Delete, Refresh, Error, Edit)
+      LogService.createLog({
+        action,
+        description: JSON.stringify(details),
         module: "Inventory Management",
         timestamp: new Date(),
       });
@@ -83,11 +82,11 @@ export default function Inventory() {
         InventoryService.getInventory({ page }),
         categoryService.getCategories(),
       ]);
-
-      // Extract inventory data and pagination info
-      const { data: newInventoryData, pagination: newPagination } = inventoryResponse;
-
-      // Detect added and deleted items (only when staying on same page)
+      console.log("Inventory Response:", inventoryResponse);
+      console.log("Inventory Data:", inventoryResponse.data);
+      console.log("Pagination:", inventoryResponse.pagination);
+      const { data: newInventoryData, pagination: newPagination } =
+        inventoryResponse;
       if (pagination.page === page) {
         const addedItems = newInventoryData.filter(
           (newItem) =>
@@ -102,8 +101,6 @@ export default function Inventory() {
               (newItem) => newItem.inv_id === oldItem.inv_id
             )
         );
-
-        // Log added items
         if (addedItems.length > 0) {
           createLog("Add", {
             items: addedItems.map((item) => ({
@@ -115,8 +112,6 @@ export default function Inventory() {
             totalAddedItems: addedItems.length,
           });
         }
-
-        // Log deleted items
         if (deletedItems.length > 0) {
           createLog("Delete", {
             items: deletedItems.map((item) => ({
@@ -129,53 +124,34 @@ export default function Inventory() {
           });
         }
       }
+      const categoriesData = categoriesResponse.data || [];
 
       setInventoryData(newInventoryData);
       setPagination(newPagination);
-      setCategoriesCount(categoriesResponse.length);
+      setCategoriesCount(categoriesData.length);
       setPreviousInventoryData(newInventoryData);
-
-      // Log the inventory refresh
       createLog("Refresh", {
         totalItems: newPagination.total,
-        page: newPagination.page,
-        totalPages: newPagination.totalPages,
-        totalCategories: categoriesResponse.length,
+        totalCategories: categoriesData.length,
+        message: `Inventory refreshed`,
       });
     } catch (error) {
       console.error("Error fetching inventory or categories:", error);
       toast.error("Failed to fetch inventory or categories");
-
-      // Log the error
       createLog("Error", {
         message: "Failed to refresh inventory and categories",
       });
     } finally {
       setIsLoading(false);
       setIsRefreshing(false);
-=======
-  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [selectedInventory, setSelectedInventory] = useState<Inventory>();
-  const [isLoading, setIsLoading] = useState(true);
-
-  const fetchInventory = async () => {
-    try {
-      const data = await InventoryService.getInventory();
-      setInventoryData(data);
-    } catch (error) {
-      toast.error('Failed to fetch inventory');
-    } finally {
-      setIsLoading(false);
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
     }
   };
 
   useEffect(() => {
-<<<<<<< HEAD
     fetchInventoryAndCategories();
   }, []);
 
+  // Modify the handleUpdateInventory function to properly format the updates object
   const handleUpdateInventory = async (
     invId: number,
     formData: UpdateInventoryRequest
@@ -183,18 +159,21 @@ export default function Inventory() {
     try {
       await InventoryService.updateInventory(invId, formData);
       toast.success("Inventory updated successfully");
-
-      // Find the specific inventory item to include in the log
       const updatedInventory = inventoryData.find(
         (item) => item.inv_id === invId
       );
 
-      // Log the inventory update with detailed information
+      // Create a properly formatted LogUpdates object from formData
+      const logUpdates = {
+        operation: formData.operation, // Assuming operation exists in UpdateInventoryRequest
+        qty: formData.qty, // Assuming qty exists in UpdateInventoryRequest
+      };
+
       createLog(
         "Update",
         {
           itemId: invId,
-          updates: formData,
+          updates: logUpdates,
         },
         updatedInventory
       );
@@ -204,52 +183,22 @@ export default function Inventory() {
     } catch (error) {
       console.error("Error updating inventory:", error);
       toast.error("Failed to update inventory");
-
-      // Log the update error
       createLog("Update", {
         itemId: invId,
         message: "Failed to update inventory item",
       });
-=======
-    fetchInventory();
-  }, []);
-
-  const handleCreateInventory = async (formData: CreateInventoryRequest) => {
-    try {
-      await InventoryService.createInventory(formData);
-      toast.success('Inventory created successfully');
-      fetchInventory();
-      setIsCreateModalOpen(false);
-    } catch (error) {
-      toast.error('Failed to create inventory');
-    }
-  };
-
-  const handleUpdateInventory = async (invId: number, formData: UpdateInventoryRequest) => {
-    try {
-      await InventoryService.updateInventory(invId, formData);
-      toast.success('Inventory updated successfully');
-      fetchInventory();
-      setIsUpdateModalOpen(false);
-    } catch (error) {
-      toast.error('Failed to update inventory');
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
     }
   };
 
   const handleDeleteInventory = async (invId: number) => {
-<<<<<<< HEAD
     if (!window.confirm("Are you sure you want to delete this inventory?"))
       return;
 
     try {
-      // Find the item details before deletion
       const itemToDelete = inventoryData.find((item) => item.inv_id === invId);
 
       await InventoryService.deleteInventory(invId);
       toast.success("Inventory deleted successfully");
-
-      // Log the inventory deletion with detailed information
       if (itemToDelete) {
         createLog("Delete", {
           item: {
@@ -260,42 +209,26 @@ export default function Inventory() {
           },
         });
       }
-
-      // Reload current page or go to previous page if this was the only item
-      const nextPage = 
-        inventoryData.length === 1 && pagination.page > 1 
-          ? pagination.page - 1 
+      const nextPage =
+        inventoryData.length === 1 && pagination.page > 1
+          ? pagination.page - 1
           : pagination.page;
-      
+
       fetchInventoryAndCategories(nextPage);
     } catch (error) {
       console.error("Error deleting inventory:", error);
       toast.error("Failed to delete inventory");
-
-      // Log the deletion error
       createLog("Error", {
         itemId: invId,
         message: "Failed to delete inventory item",
       });
-=======
-    if (!confirm('Are you sure you want to delete this inventory?')) return;
-    
-    try {
-      await InventoryService.deleteInventory(invId);
-      toast.success('Inventory deleted successfully');
-      fetchInventory();
-    } catch (error) {
-      toast.error('Failed to delete inventory');
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
     }
   };
 
   const handleEdit = (inventory: Inventory) => {
     setSelectedInventory(inventory);
     setIsUpdateModalOpen(true);
-<<<<<<< HEAD
 
-    // Log the edit action with item details
     createLog("Edit", {
       itemId: inventory.inv_id,
       productName: inventory.product.name,
@@ -321,7 +254,6 @@ export default function Inventory() {
           />
 
           <main className="p-8 ml-[10vw]">
-            {/* Page Header with Cards */}
             <div className="mb-8">
               <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
                 <div>
@@ -355,7 +287,6 @@ export default function Inventory() {
                 </div>
               </div>
 
-              {/* Statistics Cards */}
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
                 <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-6 border border-gray-100 dark:border-gray-700">
                   <div className="flex justify-between items-start">
@@ -419,8 +350,6 @@ export default function Inventory() {
                 </div>
               </div>
             </div>
-
-            {/* Main Content */}
             <div className="bg-white dark:bg-gray-800 rounded-xl shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
               <div className="p-6 border-b border-gray-200 dark:border-gray-700">
                 <h2 className="text-xl font-semibold text-gray-800 dark:text-gray-100">
@@ -476,15 +405,16 @@ export default function Inventory() {
                         onEdit={handleEdit}
                         onDelete={handleDeleteInventory}
                       />
-                      
-                      {/* Pagination Controls */}
                       <div className="flex justify-between items-center p-4 border-t border-gray-200 dark:border-gray-700">
                         <div className="text-sm text-gray-500 dark:text-gray-400">
-                          Showing {inventoryData.length} of {pagination.total} items
+                          Showing {inventoryData.length} of {pagination.total}{" "}
+                          items
                         </div>
                         <div className="flex items-center space-x-2">
                           <button
-                            onClick={() => handlePageChange(pagination.page - 1)}
+                            onClick={() =>
+                              handlePageChange(pagination.page - 1)
+                            }
                             disabled={!pagination.hasPrevPage}
                             className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Previous page"
@@ -495,7 +425,9 @@ export default function Inventory() {
                             Page {pagination.page} of {pagination.totalPages}
                           </span>
                           <button
-                            onClick={() => handlePageChange(pagination.page + 1)}
+                            onClick={() =>
+                              handlePageChange(pagination.page + 1)
+                            }
                             disabled={!pagination.hasNextPage}
                             className="p-2 rounded-md border border-gray-200 dark:border-gray-700 disabled:opacity-50 disabled:cursor-not-allowed"
                             aria-label="Next page"
@@ -509,8 +441,6 @@ export default function Inventory() {
                 </div>
               )}
             </div>
-
-            {/* Update Inventory Modal */}
             <UpdateInventoryModal
               isOpen={isUpdateModalOpen}
               onClose={() => {
@@ -523,80 +453,13 @@ export default function Inventory() {
           </main>
         </div>
       </div>
-
-      {/* Log Viewer Modal */}
       {isLogViewerOpen && (
         <LogViewer onClose={() => setIsLogViewerOpen(false)} />
       )}
     </>
-=======
-  };
-
-  return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <div className={`${isSidebarOpen ? "md:ml-20" : ""}`}>
-        <Sidebar
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        />
-        
-        <main className="p-8 ml-[10vw]">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Inventory Management</h1>
-            <button
-              onClick={() => setIsCreateModalOpen(true)}
-              className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
-            >
-              <Plus className="mr-2 h-4 w-4" /> Add Inventory
-            </button>
-          </div>
-
-          {isLoading ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-blue-500"></div>
-            </div>
-          ) : (
-            <div className="bg-white dark:bg-gray-800 rounded-lg shadow">
-              {inventoryData.length === 0 ? (
-                <div className="flex flex-col items-center justify-center h-64">
-                  <p className="text-gray-500 dark:text-gray-400 mb-4">No inventory items found</p>
-                  <button
-                    onClick={() => setIsCreateModalOpen(true)}
-                    className="flex items-center px-4 py-2 bg-blue-500 text-white rounded-md hover:bg-blue-600"
-                  >
-                    <Plus className="mr-2 h-4 w-4" /> Add First Item
-                  </button>
-                </div>
-              ) : (
-                <InventoryTable
-                  inventoryData={inventoryData}
-                  onEdit={handleEdit}
-                  onDelete={handleDeleteInventory}
-                />
-              )}
-            </div>
-          )}
-
-          {/* Create Inventory Modal */}
-          <CreateInventoryModal
-            isOpen={isCreateModalOpen}
-            onClose={() => setIsCreateModalOpen(false)}
-            onSubmit={handleCreateInventory}
-          />
-
-          {/* Update Inventory Modal */}
-          <UpdateInventoryModal
-            isOpen={isUpdateModalOpen}
-            onClose={() => {
-              setIsUpdateModalOpen(false);
-              setSelectedInventory(undefined);
-            }}
-            inventory={selectedInventory}
-            onSubmit={handleUpdateInventory}
-          />
-        </main>
-      </div>
-    </div>
->>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   );
 }
+export default withAuth(Inventory, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});

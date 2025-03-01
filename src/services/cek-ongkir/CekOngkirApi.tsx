@@ -26,14 +26,25 @@ export async function CekOngkirApi(
   return data;
 }
 
+interface LocationResponse {
+  data?: { id: string }[];
+}
+
+interface CostResponse {
+  data?: {
+    calculate_cargo?: any[];
+    calculate_reguler?: any[];
+  };
+}
+
 export async function CheckPricing(
   postcodeReceiver: number | undefined, // kode pos penerima
   postcodeSender: number | undefined, // kode pos pengirim
-  weight?: number | undefined, // berat barang dalam Kg
-  price?: number | undefined // total harga barang
-): Promise<any> {
+  weight: number = 1, // berat barang dalam Kg, default 1
+  price: number = 250000 // total harga barang, default 250000
+): Promise<CostResponse> {
   // fetch ke api location
-  const idLocation1 = await fetch(
+  const idLocation1Res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL_BE}/rajaongkir/location?keyword=${postcodeReceiver}`,
     {
       method: "GET",
@@ -44,7 +55,7 @@ export async function CheckPricing(
     }
   );
 
-  const idLocation2 = await fetch(
+  const idLocation2Res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL_BE}/rajaongkir/location?keyword=${postcodeSender}`,
     {
       method: "GET",
@@ -55,18 +66,18 @@ export async function CheckPricing(
     }
   );
 
-  let origin = await idLocation1?.json();
-  let destination = await idLocation2?.json();
+  const originLocation: LocationResponse = await idLocation1Res.json();
+  const destinationLocation: LocationResponse = await idLocation2Res.json();
 
   const res = await fetch(
     `${process.env.NEXT_PUBLIC_BASE_URL_BE}/rajaongkir/cost`,
     {
       method: "POST",
       body: JSON.stringify({
-        origin: origin?.data?.[0]?.id,
-        destination: destination?.data?.[0]?.id,
-        weight: 1,
-        price: 250000
+        origin: originLocation?.data?.[0]?.id,
+        destination: destinationLocation?.data?.[0]?.id,
+        weight,
+        price,
       }),
       headers: {
         "Content-Type": "application/json",
@@ -76,7 +87,7 @@ export async function CheckPricing(
   );
 
   // data hasil dari express
-  const data: any = await res.json();
+  const data: CostResponse = await res.json();
 
   if (!data) {
     console.log("error api:", data);
