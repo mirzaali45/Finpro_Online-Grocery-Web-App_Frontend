@@ -35,8 +35,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
     try {
       setIsLoading(true);
-      const userId = localStorage.getItem("userId") || "";
-      await addToCart(product.product_id, 1, userId);
+      await addToCart(product.product_id, 1);
       toast.success(`${product.name} added to cart!`, {
         position: "bottom-right",
         autoClose: 3000,
@@ -45,12 +44,26 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
         pauseOnHover: true,
         draggable: true,
       });
+
+
       onCartUpdate?.();
     } catch (error) {
-      toast.error("Failed to add product to cart", {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
+      // Handle specific error for authentication
+      if (
+        error instanceof Error &&
+        error.message === "User not authenticated"
+      ) {
+        toast.error("Please log in to add items to your cart", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error("Failed to add product to cart", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
+      }
+
       console.error("Failed to add to cart:", error);
     } finally {
       setIsLoading(false);
