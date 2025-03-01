@@ -10,6 +10,13 @@ import { MapPin } from "lucide-react";
 import ReactSelect from "react-select";
 import React, { useEffect, useState } from "react";
 
+interface CourierOption {
+  shipping_name: string;
+  shipping_cost: number;
+  value: string;
+  label: string;
+}
+
 interface Props {
   selectedAddress: Address;
 }
@@ -20,47 +27,62 @@ export default function ItemOrder({ selectedAddress }: Props) {
   const [cartData, setCartData] = useState<CartData[] | null>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
-  const [couriers, setCouriers] = useState<any>([]);
+  const [couriers, setCouriers] = useState<CourierOption[]>([]);
+
+  // Store postcode (replace with actual store postcode)
+  const STORE_POSTCODE = 40973;
 
   const getCourier = async () => {
     try {
       setIsLoading(true);
-      // const userId = localStorage.getItem("user_id");
-      // if (!userId) throw new Error("Please login to view your cart");
+      // Ensure postcode is converted to a number
+      const customerPostcode = selectedAddress?.postcode
+        ? parseInt(selectedAddress.postcode, 10)
+        : STORE_POSTCODE;
 
-      const response = await CheckPricing(selectedAddress?.postcode, 40973); //nanti angka 40973 ini diganti dengan postcode store
-      const resCargo = response.data?.calculate_cargo;
-      const resRegular = response.data?.calculate_reguler;
-      setCouriers([...resCargo, ...resRegular]);
+      const response = await CheckPricing(customerPostcode, STORE_POSTCODE);
+
+      const resCargo = response.data?.calculate_cargo || [];
+      const resRegular = response.data?.calculate_reguler || [];
+
+      const formattedCouriers: CourierOption[] = [
+        ...resCargo,
+        ...resRegular,
+      ].map((courier) => ({
+        ...courier,
+        value: courier.shipping_name,
+        label: `${courier.shipping_name} - ${courier.shipping_cost
+          .toLocaleString()
+          .replaceAll(",", ".")}`,
+      }));
+
+      setCouriers(formattedCouriers);
       setError("");
     } catch (error) {
-      setError(error instanceof Error ? error.message : "Failed to load cart");
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load courier options"
+      );
     } finally {
       setIsLoading(false);
     }
   };
 
   useEffect(() => {
-    if (addressData) {
+    if (addressData && selectedAddress?.postcode) {
       getCourier();
     }
   }, [addressData, selectedAddress]);
 
   return (
     <div className="w-full p-4 rounded shadow bg-gray-600 my-2">
-      {/* Product Detail Here */}
       <div className="px-2">
         <label className="text-white font-bold text-lg">Courier Delivery</label>
         <ReactSelect
           className="text-black"
           placeholder="Choose Courier Delivery"
-          options={couriers?.map((val: any) => ({
-            ...val,
-            value: val?.shipping_name,
-            label: `${val?.shipping_name} - ${val?.shipping_cost
-              ?.toLocaleString()
-              ?.replaceAll(",", ".")}`,
-          }))}
+          options={couriers}
         />
       </div>
     </div>

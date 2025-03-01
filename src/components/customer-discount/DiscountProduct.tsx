@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
@@ -46,7 +46,8 @@ const DiscountProductCard = ({
 
     try {
       setIsLoading(true);
-      await addToCart(product.product_id, 1);
+      // Add a third argument (empty string or null) if required by addToCart
+      await addToCart(product.product_id, 1, "");
       toast.success(`${product.name} added to cart!`, {
         position: "bottom-right",
         autoClose: 3000,
