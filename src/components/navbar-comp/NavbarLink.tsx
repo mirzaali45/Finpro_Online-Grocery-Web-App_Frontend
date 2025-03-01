@@ -7,36 +7,38 @@ import { motion } from "framer-motion";
 import { User, LogOut } from "lucide-react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import Swal from "sweetalert2";
+import ProfileServices from "@/services/profile/services1";
 
 interface CustomJwtPayload extends JwtPayload {
   role?: string;
 }
 export const NavLinks = () => {
   const [isCustomer, setIsCustomer] = useState(false);
+  const {profile} = ProfileServices();
 
-  useEffect(() => {
-    const checkAuthStatus = () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        try {
-          const decoded = jwtDecode<CustomJwtPayload>(token);
-          setIsCustomer(decoded?.role === "customer");
-        } catch (error) {
-          console.error("Error decoding token:", error);
-          setIsCustomer(false);
-        }
-      } else {
-        setIsCustomer(false);
-      }
-    };
+  // useEffect(() => {
+  //   const checkAuthStatus = () => {
+  //     const token = localStorage.getItem("token");
+  //     if (token) {
+  //       try {
+  //         const decoded = jwtDecode<CustomJwtPayload>(token);
+  //         setIsCustomer(decoded?.role === "customer");
+  //       } catch (error) {
+  //         console.error("Error decoding token:", error);
+  //         setIsCustomer(false);
+  //       }
+  //     } else {
+  //       setIsCustomer(false);
+  //     }
+  //   };
 
-    checkAuthStatus();
-    window.addEventListener("storage", checkAuthStatus);
+  //   checkAuthStatus();
+  //   window.addEventListener("storage", checkAuthStatus);
 
-    return () => {
-      window.removeEventListener("storage", checkAuthStatus);
-    };
-  }, []);
+  //   return () => {
+  //     window.removeEventListener("storage", checkAuthStatus);
+  //   };
+  // }, []);
 
   const handleLogout = async () => {
     const result = await Swal.fire({
@@ -56,6 +58,7 @@ export const NavLinks = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("is_login");
       localStorage.removeItem("user_id");
+      localStorage.removeItem("exp_token")
 
       await Swal.fire({
         title: "Logged Out!",
@@ -76,7 +79,7 @@ export const NavLinks = () => {
     { name: "Products", path: "/products" },
     { name: "Brands", path: "/brands" },
     { name: "Deals", path: "/deals" },
-    ...(isCustomer
+    ...((profile?.userId !== "") && (profile?.verified) && (profile?.password_reset_token == null)   
       ? [
           { name: "Profile", path: "/profile", icon: User },
           {

@@ -13,7 +13,6 @@ const Page = () => {
     try {
         // Tunggu hingga sesi tersedia
         const session = await getSession();
-        console.log(session,'session');
         // jika sesi ga ada maka redirect ke home
         if (!session || !session.user) {
             toast.dismiss();
@@ -41,12 +40,10 @@ const Page = () => {
         });
 
         const data = await response.json();
-        if (data.token || !data.email) {
+        if (data.token) {
             localStorage.setItem("exp_token", "24 Hours");
             localStorage.setItem("token", data.token);
             window.location.href = "/"
-        } else {
-            alert("Login gagal");
         }
     } catch (error) {
         console.error(error)

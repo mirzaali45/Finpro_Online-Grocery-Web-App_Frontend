@@ -11,13 +11,15 @@ import {
   Menu,
   FolderKanban,
   Boxes,
-  PackageOpen 
+  PackageOpen,
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import Swal from "sweetalert2";
 import "sweetalert2/dist/sweetalert2.css";
 import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { getSession } from "next-auth/react";
+import ProfileServices from "@/services/profile/services1";
 
 interface SidebarProps {
   isSidebarOpen: boolean;
@@ -30,6 +32,8 @@ export default function Sidebar({
 }: SidebarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { profile } = ProfileServices();
+
   const [activeLink, setActiveLink] = useState(pathname);
 
   useEffect(() => {
@@ -40,7 +44,7 @@ export default function Sidebar({
     {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: "/dashboard-superAdmin",
+      href: profile?.role == "super_admin" ? "/dashboard-superAdmin" : "/dashboard-storeAdmin",
     },
     {
       title: "My Store",
@@ -67,7 +71,7 @@ export default function Sidebar({
       icon: <PackageOpen className="h-5 w-5" />,
       href: "/dashboard-superAdmin/inventory",
     },
-  ];
+  ]?.filter((v: any) => v !== false);
 
   const handleLogout = () => {
     Swal.fire({
@@ -133,7 +137,9 @@ export default function Sidebar({
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-full flex items-center justify-center text-white font-bold">
                 SA
               </div>
-              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">Super Admin</h2>
+              <h2 className="text-2xl font-extrabold text-gray-800 dark:text-white">
+                Super Admin
+              </h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
@@ -146,7 +152,7 @@ export default function Sidebar({
 
           {/* Sidebar Links */}
           <nav className="flex-1 p-4 space-y-2 overflow-y-auto">
-            {sidebarLinks.map((link) => (
+            {sidebarLinks.map((link: any) => (
               <Link
                 key={link.title}
                 href={link.href}
@@ -160,11 +166,13 @@ export default function Sidebar({
                     : "text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
-                <div className={`transition-transform duration-300 ${
-                  activeLink === link.href 
-                    ? "text-white transform -translate-x-1" 
-                    : "group-hover:transform group-hover:-translate-x-1"
-                }`}>
+                <div
+                  className={`transition-transform duration-300 ${
+                    activeLink === link.href
+                      ? "text-white transform -translate-x-1"
+                      : "group-hover:transform group-hover:-translate-x-1"
+                  }`}
+                >
                   {link.icon}
                 </div>
                 <span className="font-medium">{link.title}</span>

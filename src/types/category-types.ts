@@ -1,6 +1,6 @@
 // types/category-types.ts
 export interface Category {
-  category_id: number;  // Changed from 'id' to 'category_id'
+  id: number;
   category_name: string;
   description: string;
   category_thumbnail?: string;
