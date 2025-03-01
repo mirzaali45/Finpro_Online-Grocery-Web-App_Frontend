@@ -25,7 +25,9 @@ interface AddStoreFormProps {
   formData: StoreData;
   errors: FormErrorsWithIndex;
   handleChange: (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
+    >
   ) => void;
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
@@ -49,7 +51,10 @@ const SelectField = ({
   options: StoreAdmin[];
 }) => (
   <div className="space-y-1">
-    <label htmlFor={name} className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+    <label
+      htmlFor={name}
+      className="block text-sm font-medium text-gray-700 dark:text-gray-200"
+    >
       {label}
     </label>
     <div className="relative">

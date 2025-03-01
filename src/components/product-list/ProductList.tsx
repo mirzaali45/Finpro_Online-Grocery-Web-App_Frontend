@@ -8,7 +8,10 @@ interface ProductListProps {
   showDistance?: boolean;
 }
 
-export function ProductList({ products, showDistance = false }: ProductListProps) {
+export function ProductList({
+  products,
+  showDistance = false,
+}: ProductListProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
       {products.map((product) => (
@@ -49,11 +52,13 @@ export function ProductList({ products, showDistance = false }: ProductListProps
                   {product.category.category_name}
                 </span>
               </div>
-              
+
               {showDistance && product.distance !== undefined && (
                 <div className="mt-2 flex items-center text-emerald-500">
                   <MapPin className="w-4 h-4 mr-1" />
-                  <span className="text-sm">{product.distance.toFixed(1)} km away</span>
+                  <span className="text-sm">
+                    {product.distance.toFixed(1)} km away
+                  </span>
                 </div>
               )}
             </div>

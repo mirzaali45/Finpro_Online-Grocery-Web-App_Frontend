@@ -11,6 +11,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavLogo } from "./navbar-comp/NavbarLogo";
 import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
+import { Menu, X } from "lucide-react"; // Icon untuk mobile menu
 
 
 export default function Navbar({ className }: NavbarProps) {
@@ -22,6 +23,7 @@ export default function Navbar({ className }: NavbarProps) {
   const [isLoading, setIsLoading] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
   const [isHovered, setIsHovered] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk mobile menu
   const modalRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
@@ -101,6 +103,7 @@ export default function Navbar({ className }: NavbarProps) {
           isSearchOpen: false,
           isCartOpen: false,
         }));
+        setIsMenuOpen(false); // Tutup menu saat klik di luar
       }
     };
 
@@ -115,21 +118,9 @@ export default function Navbar({ className }: NavbarProps) {
   }, [debouncedSearch]);
 
   const navVariants = {
-    hidden: {
-      opacity: 0,
-      y: -100,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { duration: 0.5, ease: "easeInOut" },
-    },
-    hover: {
-      scale: 1.02,
-      boxShadow: "0 10px 30px -10px rgba(255,255,255,0.1)",
-      transition: { duration: 0.3 },
-    },
+    hidden: { opacity: 0, y: -100, transition: { duration: 0.5 } },
+    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
+    hover: { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(255,255,255,0.1)" },
   };
 
   return (
@@ -144,7 +135,7 @@ export default function Navbar({ className }: NavbarProps) {
             whileHover="hover"
             onHoverStart={() => setIsHovered(true)}
             onHoverEnd={() => setIsHovered(false)}
-            className={`fixed top-0 left-0 right-0 z-40 ${className ?? ""}`}
+            className={`fixed top-0 left-0 right-0 z-50 ${className ?? ""}`}
           >
             <motion.div
               initial={{ scaleX: 0 }}
@@ -156,7 +147,6 @@ export default function Navbar({ className }: NavbarProps) {
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: isHovered ? 0.2 : 0.1 }}
-                transition={{ duration: 0.3 }}
                 className="absolute inset-0 bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-blue-500/10 blur-2xl"
               />
               <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-lg" />
@@ -164,30 +154,41 @@ export default function Navbar({ className }: NavbarProps) {
               <div className="relative max-w-6xl mx-auto px-6">
                 <div className="flex items-center justify-between h-16">
                   <NavLogo />
-                  <NavLinks />
-                  <ActionButtons
-                    toggleSearch={toggleSearch}
-                    toggleCart={toggleCart}
-                  />
+                  {/* Mobile Menu Toggle */}
+                  <div className="lg:hidden">
+                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
+                      {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
+                    </button>
+                  </div>
+                  {/* Links hanya muncul di layar lg ke atas */}
+                  <div className="hidden lg:flex">
+                    <NavLinks />
+                  </div>
+                  <ActionButtons toggleSearch={toggleSearch} toggleCart={toggleCart} />
                 </div>
               </div>
             </div>
+
+            {/* Mobile Menu */}
+            <AnimatePresence>
+              {isMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="absolute top-16 left-0 w-full bg-neutral-900/95 backdrop-blur-lg p-4 flex flex-col gap-3 items-center lg:hidden"
+                >
+                  <NavLinks />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.nav>
         )}
       </AnimatePresence>
 
       <div ref={modalRef}>
-        <SearchModal
-          isOpen={modalState.isSearchOpen}
-          onClose={() => toggleSearch(false)}
-          onSearch={handleSearchInput}
-          isLoading={isLoading}
-          searchResults={searchResults}
-        />
-        <CartModal
-          isOpen={modalState.isCartOpen}
-          onClose={() => toggleCart(false)}
-        />
+        <SearchModal isOpen={modalState.isSearchOpen} onClose={() => toggleSearch(false)} onSearch={handleSearchInput} isLoading={isLoading} searchResults={searchResults} />
+        <CartModal isOpen={modalState.isCartOpen} onClose={() => toggleCart(false)} />
       </div>
     </>
   );

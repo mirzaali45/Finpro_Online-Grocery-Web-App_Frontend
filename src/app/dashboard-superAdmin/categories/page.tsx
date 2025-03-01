@@ -259,7 +259,6 @@ function CategoriesAdmin() {
   );
 }
 
-
 export default withAuth(CategoriesAdmin, {
   allowedRoles: ["super_admin"],
   redirectPath: "/not-authorized-superadmin",

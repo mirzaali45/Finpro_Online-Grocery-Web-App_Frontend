@@ -50,7 +50,6 @@ const VerifyResetPass: React.FC<VerifyResetPassProps> = ({ onSubmit }) => {
   };
 
   const fields: { id: keyof VerifyResetPassValues; label: string }[] = [
-    { id: "oldPassword", label: "Old Password" },
     { id: "password", label: "New Password" },
     { id: "confirmPassword", label: "Confirm Password" },
   ];
