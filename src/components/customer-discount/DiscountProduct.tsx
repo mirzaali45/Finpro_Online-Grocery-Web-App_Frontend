@@ -46,6 +46,7 @@ const DiscountProductCard = ({
 
     try {
       setIsLoading(true);
+
       const userId = localStorage.getItem("userId") || "";
       await addToCart(product.product_id, 1, userId);
 

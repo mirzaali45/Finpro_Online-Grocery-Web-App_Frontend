@@ -76,6 +76,7 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
+
       console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
       const userId = localStorage.getItem("userId") || "";
