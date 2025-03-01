@@ -115,7 +115,11 @@ export default function CategoriesAdmin() {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             {categories.map((category) => (
               <CategoryCard
+<<<<<<< HEAD
                 key={category.category_id}
+=======
+                key={category.id}
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
                 category={category}
                 onEdit={handleEdit}
                 onDelete={handleDelete}

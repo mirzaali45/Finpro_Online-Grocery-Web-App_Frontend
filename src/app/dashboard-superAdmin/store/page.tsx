@@ -6,19 +6,42 @@ import { storeService } from "@/services/store-admin.service";
 import { StoreData } from "@/types/store-types";
 import StoreList from "@/components/store-management/StoreList";
 import AddStoreModal from "@/components/store-management/AddStoreModal";
+<<<<<<< HEAD
+=======
+import { UserManagementService } from "@/services/user-management.service";
+import { User } from "@/types/user-types";
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 
 export default function StoreDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [stores, setStores] = useState<StoreData[]>([]);
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
+<<<<<<< HEAD
 
   const handleSuccess = () => {
     fetchStores();
+=======
+  const [formData, setFormData] = useState<StoreData>({
+    store_name: "",
+    address: "",
+    subdistrict: "",
+    city: "",
+    province: "",
+    postcode: "",
+  });
+  const [storeAdmins, setStoreAdmins] = useState<User[]>([]);
+  const handleSuccess = () => {
+    fetchStores(); // Refresh the stores list
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   };
 
   useEffect(() => {
     fetchStores();
+<<<<<<< HEAD
+=======
+    fetchUsers()
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   }, []);
 
   const fetchStores = async () => {
@@ -32,6 +55,32 @@ export default function StoreDashboard() {
     }
   };
 
+<<<<<<< HEAD
+=======
+  const fetchUsers = async () => {
+    try {
+      const data = await UserManagementService.getAllStoreAdmin();
+      setStoreAdmins(data);
+    } catch (error) {
+      console.error("Error fetching admins:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      await storeService.createStore(formData);
+      await fetchStores();
+      handleCloseModal();
+      resetForm();
+    } catch (error) {
+      console.error("Error creating store:", error);
+    }
+  };
+
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   const handleDeleteStore = async (storeId: number) => {
     try {
       await storeService.deleteStore(storeId);
@@ -41,7 +90,36 @@ export default function StoreDashboard() {
     }
   };
 
+<<<<<<< HEAD
   // Remove formData state and resetForm since they're not used
+=======
+  const handleInputChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
+    const { id, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [id]: value,
+    }));
+  };
+
+  const resetForm = () => {
+    setFormData({
+      store_name: "",
+      address: "",
+      subdistrict: "",
+      city: "",
+      province: "",
+      postcode: "",
+      description: "",
+    });
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    resetForm();
+  };
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 
   if (loading) {
     return (
@@ -57,7 +135,11 @@ export default function StoreDashboard() {
         isSidebarOpen={isSidebarOpen}
         setIsSidebarOpen={setIsSidebarOpen}
       />
+<<<<<<< HEAD
       <div className="p-8 ml-[5rem]">
+=======
+      <div className="p-8 ml-[20rem]">
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
         <div className="max-w-7xl mx-auto">
           <header className="mb-8">
             <div className="flex justify-between items-center mb-6">
@@ -76,12 +158,25 @@ export default function StoreDashboard() {
             </div>
           </header>
 
+<<<<<<< HEAD
           <StoreList stores={stores} onDeleteStore={handleDeleteStore} />
+=======
+          <StoreList
+            stores={stores}
+            onDeleteStore={handleDeleteStore}
+            handleSuccess={handleSuccess}
+            users={storeAdmins}
+          />
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 
           <AddStoreModal
             isOpen={isModalOpen}
             onClose={() => setIsModalOpen(false)}
             onSuccess={handleSuccess}
+<<<<<<< HEAD
+=======
+            users={storeAdmins}
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
           />
         </div>
       </div>

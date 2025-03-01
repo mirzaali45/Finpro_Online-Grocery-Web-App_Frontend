@@ -3,25 +3,14 @@ const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export const categoryService = {
   async getCategories(): Promise<Category[]> {
-    try {
-      const response = await fetch(`${BASE_URL}/category`, {
-        method: 'GET',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
+    const response = await fetch(`${BASE_URL}/category`);
 
-      if (!response.ok) {
-        throw new Error('Failed to fetch categories');
-      }
-
-      return await response.json();
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      throw error;
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => null);
+      throw new Error(errorData?.message || "Failed to fetch categories");
     }
+    return response.json();
   },
-
   async createCategory(formData: CategoryFormData): Promise<Category> {
     const token = localStorage.getItem("token");
     if (!token) {

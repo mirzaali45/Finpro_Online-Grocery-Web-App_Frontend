@@ -10,13 +10,19 @@ import ImageUploadForm from "@/components/product-management/ImageUploadForm";
 import { Product, ProductFormData } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
+<<<<<<< HEAD
 import { Pagination } from "@/components/product-list/Pagination";
+=======
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
 
 export default function ProductAdmin() {
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+<<<<<<< HEAD
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
+=======
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
@@ -34,6 +40,7 @@ export default function ProductAdmin() {
   });
 
   useEffect(() => {
+<<<<<<< HEAD
     fetchProducts(currentPage);
   }, [currentPage]);
 
@@ -43,6 +50,16 @@ export default function ProductAdmin() {
       const response = await productService.getProducts(page);
       setProducts(response.products);
       setTotalPages(response.totalPages);
+=======
+    fetchProducts();
+  }, []);
+
+  const fetchProducts = async () => {
+    setLoading(true);
+    try {
+      const data = await productService.getProducts();
+      setProducts(data);
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
     } catch (error) {
       console.error("Error fetching products:", error);
     } finally {
@@ -75,7 +92,11 @@ export default function ProductAdmin() {
         selectedProduct.product_id,
         selectedFiles
       );
+<<<<<<< HEAD
       await fetchProducts(currentPage);
+=======
+      await fetchProducts();
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
       setShowImageUploadModal(false);
       resetForm();
     } catch (error) {
@@ -91,7 +112,11 @@ export default function ProductAdmin() {
     try {
       if (!selectedProduct) throw new Error("No product selected");
       await productService.updateProduct(selectedProduct.product_id, formData);
+<<<<<<< HEAD
       await fetchProducts(currentPage);
+=======
+      await fetchProducts();
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
       setShowEditModal(false);
       resetForm();
     } catch (error) {
@@ -105,7 +130,11 @@ export default function ProductAdmin() {
     if (!confirm("Are you sure you want to delete this product?")) return;
     try {
       await productService.deleteProduct(productId);
+<<<<<<< HEAD
       await fetchProducts(currentPage);
+=======
+      await fetchProducts();
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
     } catch (error) {
       console.error("Error deleting product:", error);
     }
@@ -205,6 +234,7 @@ export default function ProductAdmin() {
               <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
             </div>
           ) : (
+<<<<<<< HEAD
             <>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {products.map(renderProductCard)}
@@ -220,6 +250,11 @@ export default function ProductAdmin() {
                 </div>
               )}
             </>
+=======
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {products.map(renderProductCard)}
+            </div>
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
           )}
 
           {/* Add Product Modal */}
@@ -267,7 +302,11 @@ export default function ProductAdmin() {
             onClose={() => {
               setShowImageUploadModal(false);
               resetForm();
+<<<<<<< HEAD
               fetchProducts(currentPage);
+=======
+              fetchProducts();
+>>>>>>> 6fe60201730b8421f8ae35b8215b73a26def73dc
             }}
             title="Upload Product Images"
           >

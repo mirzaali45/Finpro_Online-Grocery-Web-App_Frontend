@@ -5,21 +5,24 @@ import { storeService } from "@/components/hooks/useStoreAdmin";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
-import { StoreData } from "@/types/store-types";
+import { StoreDataV2 } from "@/types/store-types";
+import { User } from "@/types/user-types";
 
 
 interface EditStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-  dataStore: StoreData;
+  dataStore: StoreDataV2;
+  users: User[]
 }
 
 export default function EditStoreModal({
   isOpen,
   onClose,
   onSuccess,
-  dataStore
+  dataStore,
+  users
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { formData, errors, handleChange, validateForm, setFormData } = useStoreForm();
@@ -49,10 +52,7 @@ export default function EditStoreModal({
     setIsSubmitting(true);
     // console.log(dataStore.store_id)
     try {
-     if (!dataStore.store_id) {
-       throw new Error("Store ID is missing");
-     }
-     await storeService.editStore(formData, dataStore.store_id);
+      await storeService.editStore(formData, dataStore.store_id);
       showNotification('success', 'Store edited successfully');
       onSuccess();
       onClose();
@@ -104,6 +104,7 @@ export default function EditStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            users={users}
           />
         </div>
       </div>

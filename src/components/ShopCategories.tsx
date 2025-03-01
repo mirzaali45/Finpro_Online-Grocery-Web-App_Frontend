@@ -65,7 +65,7 @@ export default function ShopCategories() {
         </h2>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-          {categories.map((category) => (
+          {categories.map((category, index) => (
             <Link
               key={category.category_name}
               href={`/category/${category.category_name.toLowerCase()}`}
