@@ -8,6 +8,7 @@ import StoreList from "@/components/store-management/StoreList";
 import AddStoreModal from "@/components/store-management/AddStoreModal";
 import { UserManagementService } from "@/services/user-management.service";
 import { User } from "@/types/user-types";
+import DeleteStoreModal from "@/components/store-management/DeleteStoreModal";
 
 export default function StoreDashboard() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
@@ -23,13 +24,15 @@ export default function StoreDashboard() {
     postcode: "",
   });
   const [storeAdmins, setStoreAdmins] = useState<User[]>([]);
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [storeToDelete, setStoreToDelete] = useState<number | null>(null);
   const handleSuccess = () => {
     fetchStores(); // Refresh the stores list
   };
 
   useEffect(() => {
     fetchStores();
-    fetchUsers()
+    fetchUsers();
   }, []);
 
   const fetchStores = async () => {
@@ -66,12 +69,22 @@ export default function StoreDashboard() {
     }
   };
 
-  const handleDeleteStore = async (storeId: number) => {
-    try {
-      await storeService.deleteStore(storeId);
-      await fetchStores();
-    } catch (error) {
-      console.error("Error deleting store:", error);
+  const confirmDeleteStore = (storeId: number) => {
+    setStoreToDelete(storeId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleDeleteStore = async () => {
+    if (storeToDelete !== null) {
+      try {
+        await storeService.deleteStore(storeToDelete);
+        await fetchStores();
+      } catch (error) {
+        console.error("Error deleting store:", error);
+      } finally {
+        setIsDeleteModalOpen(false);
+        setStoreToDelete(null);
+      }
     }
   };
 
@@ -137,7 +150,7 @@ export default function StoreDashboard() {
 
           <StoreList
             stores={stores}
-            onDeleteStore={handleDeleteStore}
+            onDeleteStore={confirmDeleteStore}
             handleSuccess={handleSuccess}
             users={storeAdmins}
           />
@@ -147,6 +160,11 @@ export default function StoreDashboard() {
             onClose={() => setIsModalOpen(false)}
             onSuccess={handleSuccess}
             users={storeAdmins}
+          />
+          <DeleteStoreModal
+            isOpen={isDeleteModalOpen}
+            onClose={() => setIsDeleteModalOpen(false)}
+            onConfirm={handleDeleteStore}
           />
         </div>
       </div>

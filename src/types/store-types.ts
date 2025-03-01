@@ -13,6 +13,17 @@ export interface StoreData {
   description?: string;
 }
 
+export interface EditData {
+  store_name?: string;
+  address?: string;
+  subdistrict?: string;
+  city?: string;
+  province?: string;
+  postcode?: string;
+  latitude?: number;
+  longitude?: number;
+  user_id?: number;
+}
 // Simplified Store interface for list display
 export interface StoreDisplay {
   store_id: number;
