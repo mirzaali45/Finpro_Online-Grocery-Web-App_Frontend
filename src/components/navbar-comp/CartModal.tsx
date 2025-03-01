@@ -13,8 +13,6 @@ import { toast, ToastOptions } from "react-toastify";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 
-// Update your CartItem type in cart-types.ts to include Discount
-// Add this to your product type:
 interface ProductWithDiscount {
   product_id: string;
   name: string;
@@ -28,7 +26,6 @@ interface ProductWithDiscount {
   }[];
 }
 
-// Helper function to calculate discounted price
 const calculateDiscountedPrice = (product: ProductWithDiscount): number => {
   if (!product.Discount || product.Discount.length === 0) {
     return product.price;
@@ -51,12 +48,13 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [isUpdating, setIsUpdating] = useState<number | null>(null);
-  const {profile} = ProfileServices();
+  const { profile } = ProfileServices();
   const router = useRouter();
+
   const showToast = (
     message: string,
     type: keyof typeof toast,
-    onClose: any = null
+    onClose?: () => void
   ) => {
     toast.dismiss();
     (toast[type] as (content: string, options?: ToastOptions) => void)(
@@ -74,9 +72,6 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const loadCart = async () => {
     try {
       setIsLoading(true);
-      // const userId = localStorage.getItem("user_id");
-      // if (!userId) throw new Error("Please login to view your cart");
-
       const response = await fetchCartId(profile?.userId);
       setCartData(response.data);
       setError("");
@@ -130,7 +125,6 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     }
   };
 
-  // Calculate total cart price with discounts
   const calculateTotalPrice = (): number => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 
@@ -142,7 +136,6 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     }, 0);
   };
 
-  // Calculate total savings
   const calculateTotalSavings = (): number => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 

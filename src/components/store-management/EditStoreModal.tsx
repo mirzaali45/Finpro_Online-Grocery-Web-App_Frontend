@@ -1,4 +1,5 @@
 import { Store } from "lucide-react";
+import { User } from "@/types/user-types";
 import { useStoreForm } from "@/helper/use-store-form";
 import { storeService } from "@/components/hooks/useStoreAdmin";
 import { storeAdminService } from "@/services/fetch-store-admin.service";
@@ -20,6 +21,7 @@ interface EditStoreModalProps {
   onClose: () => void;
   onSuccess: () => void;
   dataStore: StoreData;
+  users: User[]; 
 }
 
 export default function EditStoreModal({
@@ -27,6 +29,7 @@ export default function EditStoreModal({
   onClose,
   onSuccess,
   dataStore,
+  users,
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [storeAdmins, setStoreAdmins] = useState<StoreAdmin[]>([]);

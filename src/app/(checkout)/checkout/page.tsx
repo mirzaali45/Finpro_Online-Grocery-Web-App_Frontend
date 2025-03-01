@@ -8,22 +8,22 @@ import { Address } from "@/types/address-types";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 
-export default function page() {
+const CheckoutPage: React.FC = () => {
   const router = useRouter();
   useEffect(() => {
     if (!localStorage.getItem("token")) {
       router.push("/login-user-customer");
     }
   }, [router]);
+
   const { load, addressData } = Services2();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
 
   useEffect(() => {
-    if (addressData) {
+    if (addressData && addressData.length > 0) {
       setSelectedAddress(
-        addressData?.find((val: any) => val?.is_primary == true) ||
-          addressData?.[0] ||
-          "1"
+        addressData.find((val: Address) => val.is_primary === true) ||
+          addressData[0]
       );
     }
   }, [addressData]);
@@ -39,18 +39,14 @@ export default function page() {
         {selectedAddress ? (
           <main className="h-auto flex lg:flex-row flex-col max-w-5xl w-full justify-center mx-auto container gap-5">
             <div className="w-full">
-              {/* Alamat User */}
               <AddressClient
                 addressData={addressData}
                 selectedAddress={selectedAddress}
                 setSelectedAddress={setSelectedAddress}
               />
-
-              {/* Item Dibeli + Pilih Kurir */}
               <ItemOrder selectedAddress={selectedAddress} />
             </div>
             <div className="lg:w-1/3 w-full">
-              {/* Payment */}
               <PaymentOrder />
             </div>
           </main>
@@ -62,9 +58,10 @@ export default function page() {
             </div>
           </div>
         )}
-
         <ToastContainerElement />
       </div>
     </div>
   );
-}
+};
+
+export default CheckoutPage;

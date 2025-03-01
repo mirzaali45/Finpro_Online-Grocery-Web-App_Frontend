@@ -1,16 +1,10 @@
-// @/components/profile/Section2.tsx
 import services2 from "@/services/profile/services2";
 import React, { useState } from "react";
 import Modal from "../product-management/Modal";
 import FormAddressAdd from "./FormAddressAdd";
 import FormAddressEdit from "./FormAddressEdit";
 import { HouseIcon, PencilIcon, Trash2Icon } from "lucide-react";
-import {
-  Address,
-  AddressFormData,
-  Location,
-  convertAddressToFormData,
-} from "@/types/address-types";
+import { Address, AddressFormData, Location } from "@/types/address-types";
 
 const Section2 = () => {
   const {
@@ -47,9 +41,42 @@ const Section2 = () => {
     subdistrict: null,
   });
 
+  // Wrapper function to handle add address
+  const handleAddAddress = (values: {
+    address_name: string;
+    address: string;
+    postcode: string;
+    latitude: string;
+    longitude: string;
+  }) => {
+    const payload: {
+      address_name: string;
+      address: string;
+      postcode: string;
+      latitude: string;
+      longitude: string;
+      subdistrict: string;
+      city: string;
+      city_id: string;
+      province: string;
+      province_id: string;
+    } = {
+      address_name: values.address_name,
+      address: values.address,
+      postcode: values.postcode,
+      latitude: values.latitude,
+      longitude: values.longitude,
+      subdistrict: location.subdistrict?.label || "",
+      city: location.city?.label || "",
+      city_id: String(location.city?.value || ""),
+      province: location.province?.label || "",
+      province_id: String(location.province?.value || ""),
+    };
+    return addAddress(payload);
+  };
+
   // Wrapper function to handle edit address with correct type
   const handleEditAddress = (id: number, values: AddressFormData) => {
-    // Convert form data to Address and call the original editAddress
     const addressPayload: Address = {
       ...values,
       address_id: id,
@@ -139,7 +166,7 @@ const Section2 = () => {
           title="Add address"
         >
           <FormAddressAdd
-            onsubmit={addAddress}
+            onsubmit={handleAddAddress}
             location={location}
             setLocation={setLocation}
           />
