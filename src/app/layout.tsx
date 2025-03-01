@@ -6,8 +6,8 @@ import "sweetalert2/dist/sweetalert2.css";
 import NavbarWrapper from "@/components/navbarWrapper";
 import "leaflet/dist/leaflet.css";
 import { SearchProvider } from "@/components/searchContext";
-import "leaflet/dist/leaflet.css";
 import FooterWrapper from "@/components/footerWrapper";
+import { ToastContainer } from "react-toastify";
 
 const geistSans = localFont({
   src: "./fonts/GeistVF.woff",
@@ -37,9 +37,21 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <SearchProvider>
-        <NavbarWrapper />
-        {children}
-        <FooterWrapper />
+          <NavbarWrapper />
+          {children}
+          <FooterWrapper />
+          <ToastContainer
+            position="bottom-right"
+            autoClose={3000}
+            hideProgressBar={false}
+            newestOnTop={true}
+            closeOnClick
+            rtl={false}
+            pauseOnFocusLoss
+            draggable
+            pauseOnHover
+            theme="dark"
+          />
         </SearchProvider>
       </body>
     </html>

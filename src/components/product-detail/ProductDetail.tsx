@@ -76,10 +76,13 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
+      console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
       const userId = localStorage.getItem("userId") || "";
+      console.log("User ID:", userId); // Debugging
       await addToCart(product.product_id, 1, userId);
-      toast.success("Product added to cart successfully");
+      console.log("Product added successfully, showing toast..."); // Debugging
+      toast.success(`${product.name} added to cart successfully`);
       onCartUpdate?.();
     } catch (error) {
       console.error("Failed to add to cart:", error);
