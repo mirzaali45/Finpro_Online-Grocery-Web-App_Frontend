@@ -44,7 +44,7 @@ export default function Sidebar({
     {
       title: "Dashboard",
       icon: <LayoutDashboard className="h-5 w-5" />,
-      href: profile?.role == "super_admin" ? "/dashboard-superAdmin" : "/dashboard-storeAdmin",
+      href: "/dashboard-superAdmin/",
     },
     {
       title: "My Store",
