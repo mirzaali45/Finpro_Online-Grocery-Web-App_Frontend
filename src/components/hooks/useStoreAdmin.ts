@@ -115,11 +115,11 @@ export const storeService = {
         postcode: formData.postcode,
         latitude: Number(formData.latitude),
         longitude: Number(formData.longitude),
-        user_id: userId,
+        user_id: formData.user_id, // Keep the passed user_id instead of overriding with the token's userId
       };
 
       const response = await fetch(`${BASE_URL}/store/${storeId}`, {
-        method: "PUT",
+        method: "PATCH", // Changed from PUT to PATCH
         headers: {
           Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",

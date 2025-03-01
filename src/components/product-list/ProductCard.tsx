@@ -35,7 +35,8 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
     try {
       setIsLoading(true);
-      await addToCart(product.product_id, 1);
+      const userId = localStorage.getItem("userId") || "";
+      await addToCart(product.product_id, 1, userId);
       toast.success(`${product.name} added to cart!`, {
         position: "bottom-right",
         autoClose: 3000,

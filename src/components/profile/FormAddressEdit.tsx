@@ -14,6 +14,7 @@ import ReactSelect from "react-select";
 import { DISTRICTS } from "@/data/district";
 import { REGENCIES } from "@/data/regency";
 import { PROVINCES } from "@/data/province";
+import { LatLngTuple } from "leaflet";
 
 // Konfigurasi ikon Leaflet
 L.Icon.Default.mergeOptions({
@@ -77,8 +78,8 @@ const fields = [
 // Komponen untuk memilih lokasi di peta
 interface LocationPickerProps {
   setFieldValue: (field: string, value: number) => void;
-  setMarkerPosition: (position: [number, number]) => void;
-  markerPosition: [number, number];
+  setMarkerPosition: (position: LatLngTuple) => void;
+  markerPosition: LatLngTuple;
 }
 
 const LocationPicker: React.FC<LocationPickerProps> = ({
@@ -89,7 +90,7 @@ const LocationPicker: React.FC<LocationPickerProps> = ({
   useMapEvents({
     click(e) {
       const { lat, lng } = e.latlng;
-      setMarkerPosition([Number(lat), Number(lng)]);
+      setMarkerPosition([Number(lat), Number(lng)] as LatLngTuple);
       setFieldValue("latitude", lat);
       setFieldValue("longitude", lng);
     },
@@ -131,23 +132,20 @@ interface FormAddressEditProps {
   setLocation: any;
 }
 
+const DEFAULT_LATITUDE = -6.19676128457438;
+const DEFAULT_LONGITUDE = 106.83754574840799;
+
 const FormAddressEdit: React.FC<FormAddressEditProps> = ({
   formData,
   onSubmit,
   setPrimaryAddress,
-<<<<<<< HEAD
-}) => {
-  // State untuk menyimpan posisi marker - explicitly typed as a tuple
-  const [markerPosition, setMarkerPosition] = useState<[number, number]>([
-=======
   location,
   setLocation,
 }) => {
   // State untuk menyimpan posisi marker
-  const [markerPosition, setMarkerPosition] = useState([
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
-    formData.latitude || -6.19676128457438,
-    formData.longitude || 106.83754574840799,
+  const [markerPosition, setMarkerPosition] = useState<LatLngTuple>([
+    formData.latitude || DEFAULT_LATITUDE,
+    formData.longitude || DEFAULT_LONGITUDE,
   ]);
   const [addressId, setAddressId] = useState(0);
   // State untuk initial values
@@ -177,19 +175,17 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
         province: formData.province || "",
         province_id: formData.province_id || "",
         postcode: formData.postcode || "",
-        latitude: String(formData.latitude) || String(-6.19676128457438),
-        longitude: String(formData.longitude) || String(106.83754574840799),
+        latitude: String(formData.latitude) || String(DEFAULT_LATITUDE),
+        longitude: String(formData.longitude) || String(DEFAULT_LONGITUDE),
       });
-<<<<<<< HEAD
-      // Ensure we're using a proper tuple for markerPosition
-=======
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
-      setMarkerPosition([
-        formData.latitude || -6.19676128457438,
-        formData.longitude || 106.83754574840799,
-      ]);
-<<<<<<< HEAD
-=======
+
+      // Explicitly cast to LatLngTuple
+      const newMarkerPosition: LatLngTuple = [
+        formData.latitude || DEFAULT_LATITUDE,
+        formData.longitude || DEFAULT_LONGITUDE,
+      ];
+
+      setMarkerPosition(newMarkerPosition);
       setLocation({
         province: { value: formData?.province_id, label: formData?.province },
         city: {
@@ -203,7 +199,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
           regency_id: formData?.city_id,
         },
       });
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
     }
   }, [formData]);
 
@@ -213,15 +208,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
       initialValues={initialValues}
       validationSchema={addressSchema}
       onSubmit={(values) => {
-<<<<<<< HEAD
-        console.log("Updated Data:", values);
-        console.log(addressId);
-        onSubmit(addressId, {
-          ...values,
-          latitude: Number(values.latitude),
-          longitude: Number(values.longitude),
-        });
-=======
         const payload = {
           ...values,
           province_id: location?.province?.value,
@@ -233,7 +219,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
           longitude: Number(values.longitude),
         };
         onSubmit(addressId, payload);
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
       }}
     >
       {({ isSubmitting, setFieldValue }) => (
@@ -326,14 +311,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
                 component="p"
                 className="mt-1 text-sm text-red-600"
               />
-<<<<<<< HEAD
-              <ErrorMessage
-                name={field.name}
-                component="p"
-                className="mt-1 text-sm text-red-600"
-              />
-=======
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
             </div>
           ))}
 
@@ -368,7 +345,6 @@ const FormAddressEdit: React.FC<FormAddressEditProps> = ({
             <button
               type="button"
               onClick={() => setPrimaryAddress(addressId)}
-              // disabled={isSubmitting}
               className={`w-full py-2 px-4 bg-orange-500 text-white rounded-md hover:bg-orange-700}`}
             >
               {"Jadikan Alamat Utama"}

@@ -1,28 +1,25 @@
 import { Store } from "lucide-react";
 import { useStoreForm } from "@/helper/use-store-form";
-import AddStoreForm from "./AddStoreForm";
 import { storeService } from "@/components/hooks/useStoreAdmin";
+import { storeAdminService } from "@/services/fetch-store-admin.service";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
-<<<<<<< HEAD
-import { StoreData, EditData } from "@/types/store-types"; // Import EditData from store-types
-=======
-import { StoreDataV2 } from "@/types/store-types";
-import { User } from "@/types/user-types";
+import {
+  StoreData,
+  EditData,
+  FormErrors,
+  FormErrorsWithIndex,
+  StoreAdmin,
+} from "@/types/store-types";
 
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
+// Remove the local interface definition since it's defined in EditStoreForm.tsx
 
 interface EditStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
-<<<<<<< HEAD
   dataStore: StoreData;
-=======
-  dataStore: StoreDataV2;
-  users: User[]
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
 }
 
 export default function EditStoreModal({
@@ -30,15 +27,33 @@ export default function EditStoreModal({
   onClose,
   onSuccess,
   dataStore,
-<<<<<<< HEAD
-=======
-  users
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [storeAdmins, setStoreAdmins] = useState<StoreAdmin[]>([]);
   const { formData, errors, handleChange, validateForm, setFormData } =
-    useStoreForm();
+    useStoreForm() as {
+      formData: StoreData;
+      errors: FormErrorsWithIndex;
+      handleChange: (
+        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+      ) => void;
+      validateForm: () => boolean;
+      setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
+    };
   const [firstData, setFirstData] = useState(false);
+
+  // Fetch store admins when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      storeAdminService
+        .getStoreAdmins()
+        .then(setStoreAdmins)
+        .catch((error) => {
+          showNotification("error", "Failed to fetch store admins");
+          console.error(error);
+        });
+    }
+  }, [isOpen]);
 
   const showNotification = (type: "success" | "error", message: string) => {
     Swal.fire({
@@ -69,15 +84,15 @@ export default function EditStoreModal({
       // Create a new object with required fields ensuring they're not undefined
       // Using the EditData type from your store-types
       const editData: EditData = {
-        store_name: formData.store_name || "",
-        address: formData.address || "",
-        subdistrict: formData.subdistrict || "",
-        city: formData.city || "",
-        province: formData.province || "",
-        postcode: formData.postcode || "",
-        latitude: formData.latitude ?? 0, // Use nullish coalescing to provide a default value
-        longitude: formData.longitude ?? 0,
-        // Add any other fields required by your EditData type
+        store_name: formData.store_name || dataStore.store_name,
+        address: formData.address || dataStore.address,
+        subdistrict: formData.subdistrict || dataStore.subdistrict,
+        city: formData.city || dataStore.city,
+        province: formData.province || dataStore.province,
+        postcode: formData.postcode || dataStore.postcode,
+        latitude: formData.latitude ?? dataStore.latitude ?? 0,
+        longitude: formData.longitude ?? dataStore.longitude ?? 0,
+        user_id: formData.user_id || dataStore.user_id || null,
       };
 
       await storeService.editStore(editData, dataStore.store_id);
@@ -129,7 +144,6 @@ export default function EditStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
-            users={users}
           />
         </div>
       </div>

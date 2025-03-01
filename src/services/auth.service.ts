@@ -46,10 +46,6 @@ export class AuthService {
       if (data.token) {
         localStorage.setItem("verify_email", "true");
         localStorage.setItem("token", data.token);
-<<<<<<< HEAD
-=======
-        // localStorage.setItem("user_id", data.user.user_id.toString());
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
       }
 
       return data;
@@ -192,10 +188,6 @@ export class AuthService {
         console.log("Token received:", data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
-<<<<<<< HEAD
-=======
-        // localStorage.setItem("user_id", data.user.user_id.toString());
->>>>>>> 98e0645e58e7b7be4ccdae48f028e8cc4a2bc1a5
       }
 
       return data;
