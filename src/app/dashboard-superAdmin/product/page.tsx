@@ -3,26 +3,25 @@
 import { useState, useEffect } from "react";
 import { Plus, Pencil, Trash2 } from "lucide-react";
 import Image from "next/image";
-import Sidebar from "@/components/sidebarSuperAdmin";
+
 import Modal from "@/components/product-management/Modal";
 import ProductForm from "@/components/product-management/ProductForm";
 import ImageUploadForm from "@/components/product-management/ImageUploadForm";
+import { Pagination } from "@/components/product-list/Pagination";
+
 import { Product, ProductFormData } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
-import { Pagination } from "@/components/product-list/Pagination";
-import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-function ProductAdmin() {
+export default function ProductAdmin() {
+  // State
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [totalPages, setTotalPages] = useState<number>(0);
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [showAddModal, setShowAddModal] = useState<boolean>(false);
   const [showEditModal, setShowEditModal] = useState<boolean>(false);
-  const [showImageUploadModal, setShowImageUploadModal] =
-    useState<boolean>(false);
+  const [showImageUploadModal, setShowImageUploadModal] = useState<boolean>(false);
   const [selectedProduct, setSelectedProduct] = useState<Product | null>(null);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
   const [formData, setFormData] = useState<ProductFormData>({
@@ -34,10 +33,12 @@ function ProductAdmin() {
     initial_quantity: "",
   });
 
+  // Effects
   useEffect(() => {
     fetchProducts(currentPage);
   }, [currentPage]);
 
+  // Data fetching
   const fetchProducts = async (page: number) => {
     setLoading(true);
     try {
@@ -51,6 +52,7 @@ function ProductAdmin() {
     }
   };
 
+  // Form handlers
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setLoading(true);
@@ -125,10 +127,11 @@ function ProductAdmin() {
     setSelectedFiles([]);
   };
 
+  // UI components
   const renderProductCard = (product: Product) => (
     <div
       key={product.product_id}
-      className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden"
+      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
     >
       <div className="p-4">
         {product.ProductImage?.[0] && (
@@ -141,20 +144,26 @@ function ProductAdmin() {
             />
           </div>
         )}
-        <h3 className="text-xl font-semibold mb-2">{product.name}</h3>
-        <p className="font-bold mb-2">
-          <span className="font-bold text-[16px]">Categories : </span>{" "}
-          {product.category.category_name}
-        </p>
-        <p className="font-bold mb-2">
-          <span className="font-bold text-[16px]">Price : </span>
-          {formatRupiah(product.price)}
-        </p>
-        <p className="font-bold mb-2">
-          <span className="font-bold text-[16px]">Store : </span>
-          {product.store.store_name}
-        </p>
-        <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold mb-2 text-gray-800">{product.name}</h3>
+        
+        <div className="space-y-2 mb-4">
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Category</span>
+            <span className="text-sm font-medium">{product.category.category_name}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Price</span>
+            <span className="text-sm font-medium text-blue-600">{formatRupiah(product.price)}</span>
+          </div>
+          
+          <div className="flex items-center justify-between">
+            <span className="text-sm text-gray-500">Store</span>
+            <span className="text-sm font-medium">{product.store.store_name}</span>
+          </div>
+        </div>
+        
+        <div className="flex justify-between items-center pt-2 border-t border-gray-100">
           <button
             onClick={() => {
               setSelectedProduct(product);
@@ -168,13 +177,13 @@ function ProductAdmin() {
               });
               setShowEditModal(true);
             }}
-            className="flex items-center gap-2 px-3 py-1 border border-gray-300 rounded hover:bg-gray-100 dark:hover:bg-gray-700"
+            className="flex items-center gap-1 px-3 py-1.5 border border-gray-200 rounded-md text-gray-600 hover:bg-gray-50 transition-colors"
           >
             <Pencil className="w-4 h-4" /> Edit
           </button>
           <button
             onClick={() => handleDelete(product.product_id)}
-            className="flex items-center gap-2 px-3 py-1 bg-red-600 text-white rounded hover:bg-red-700"
+            className="flex items-center gap-1 px-3 py-1.5 bg-red-50 border border-red-200 text-red-600 rounded-md hover:bg-red-100 transition-colors"
           >
             <Trash2 className="w-4 h-4" /> Delete
           </button>
@@ -184,107 +193,125 @@ function ProductAdmin() {
   );
 
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <div className={`${isSidebarOpen ? "md:ml-20" : ""}`}>
-        <Sidebar
-          isSidebarOpen={isSidebarOpen}
-          setIsSidebarOpen={setIsSidebarOpen}
-        />
-        <div className="p-4 ml-[10vw]">
-          <div className="flex justify-between items-center mb-6">
-            <h1 className="text-2xl font-bold">Products Management</h1>
-            <button
-              onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-            >
-              <Plus className="w-4 h-4" /> Add Product
-            </button>
+    <>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-6">
+        <div>
+          <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
+          <p className="text-gray-500 mt-1">Manage your store&apos;s product catalog</p>
+        </div>
+        <button
+          onClick={() => setShowAddModal(true)}
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+        >
+          <Plus className="w-4 h-4" /> Add Product
+        </button>
+      </div>
+
+      {/* Content */}
+      {loading && !products.length ? (
+        <div className="flex justify-center items-center h-64 bg-white rounded-xl shadow-sm">
+          <div className="flex flex-col items-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-t-2 border-blue-500"></div>
+            <p className="mt-4 text-gray-500">Loading products...</p>
+          </div>
+        </div>
+      ) : (
+        <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+          <div className="p-6 border-b border-gray-200">
+            <h2 className="text-xl font-semibold text-gray-800">All Products</h2>
+            <p className="text-sm text-gray-500 mt-1">
+              Showing {products.length} products
+            </p>
           </div>
 
-          {loading && !products.length ? (
-            <div className="flex justify-center items-center h-64">
-              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
-            </div>
-          ) : (
-            <>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          <div className="p-6">
+            {products.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-12">
+                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                  <svg className="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                </div>
+                <p className="text-lg font-medium text-gray-700 mb-2">No products found</p>
+                <p className="text-gray-500 text-center mt-2 max-w-md">
+                  Click the &quot;Add Product&quot; button to create your first product.
+                </p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {products.map(renderProductCard)}
               </div>
+            )}
+          </div>
 
-              {totalPages > 1 && (
-                <div className="mt-8 flex justify-center">
-                  <Pagination
-                    totalPages={totalPages}
-                    currentPage={currentPage}
-                    onPageChange={setCurrentPage}
-                  />
-                </div>
-              )}
-            </>
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex justify-center py-4 border-t border-gray-200">
+              <Pagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onPageChange={setCurrentPage}
+              />
+            </div>
           )}
-
-          {/* Add Product Modal */}
-          <Modal
-            isOpen={showAddModal}
-            onClose={() => {
-              setShowAddModal(false);
-              resetForm();
-            }}
-            title="Add New Product"
-          >
-            <ProductForm
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleSubmit}
-              loading={loading}
-              submitText="Create Product"
-              loadingText="Creating..."
-            />
-          </Modal>
-
-          {/* Edit Product Modal */}
-          <Modal
-            isOpen={showEditModal}
-            onClose={() => {
-              setShowEditModal(false);
-              resetForm();
-            }}
-            title="Edit Product"
-          >
-            <ProductForm
-              formData={formData}
-              setFormData={setFormData}
-              onSubmit={handleUpdate}
-              loading={loading}
-              submitText="Update Product"
-              loadingText="Updating..."
-              isEdit
-            />
-          </Modal>
-
-          {/* Image Upload Modal */}
-          <Modal
-            isOpen={showImageUploadModal}
-            onClose={() => {
-              setShowImageUploadModal(false);
-              resetForm();
-              fetchProducts(currentPage);
-            }}
-            title="Upload Product Images"
-          >
-            <ImageUploadForm
-              selectedFiles={selectedFiles}
-              setSelectedFiles={setSelectedFiles}
-              onSubmit={handleImageUpload}
-              loading={loading}
-            />
-          </Modal>
         </div>
-      </div>
-    </div>
+      )}
+
+      {/* Modals */}
+      <Modal
+        isOpen={showAddModal}
+        onClose={() => {
+          setShowAddModal(false);
+          resetForm();
+        }}
+        title="Add New Product"
+      >
+        <ProductForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleSubmit}
+          loading={loading}
+          submitText="Create Product"
+          loadingText="Creating..."
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showEditModal}
+        onClose={() => {
+          setShowEditModal(false);
+          resetForm();
+        }}
+        title="Edit Product"
+      >
+        <ProductForm
+          formData={formData}
+          setFormData={setFormData}
+          onSubmit={handleUpdate}
+          loading={loading}
+          submitText="Update Product"
+          loadingText="Updating..."
+          isEdit
+        />
+      </Modal>
+
+      <Modal
+        isOpen={showImageUploadModal}
+        onClose={() => {
+          setShowImageUploadModal(false);
+          resetForm();
+          fetchProducts(currentPage);
+        }}
+        title="Upload Product Images"
+      >
+        <ImageUploadForm
+          selectedFiles={selectedFiles}
+          setSelectedFiles={setSelectedFiles}
+          onSubmit={handleImageUpload}
+          loading={loading}
+        />
+      </Modal>
+    </>
   );
 }
-export default withAuth(ProductAdmin, {
-  allowedRoles: ["super_admin"],
-  redirectPath: "/not-authorized-superadmin",
-});
