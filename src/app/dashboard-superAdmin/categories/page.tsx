@@ -184,7 +184,7 @@ export default function CategoriesAdmin() {
                   </div>
                   <p className="text-lg font-medium text-gray-700">No categories found</p>
                   <p className="text-gray-500 text-center mt-2 max-w-md">
-                    Click the "Add Category" button to create your first category.
+                    Click the &quot;Add Category&quot; button to create your first category.
                   </p>
                 </div>
               ) : (

@@ -75,36 +75,34 @@ export const StoreRevenueCharts: React.FC<RevenueChartProps> = ({
 }) => {
   const [chartType, setChartType] = React.useState<'bar' | 'line' | 'area'>('bar');
   
-  if (!revenueData || !revenueData.revenue.length) {
-    return (
-      <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center text-gray-500">
-        No data available for charts
-      </div>
-    );
-  }
-  
-  // Prepare revenue chart data
-  const revenueChartData = revenueData.revenue.map((item: any) => {
-    let label = '';
+  // Prepare revenue chart data - moved outside conditional return
+  const revenueChartData = React.useMemo(() => {
+    if (!revenueData || !revenueData.revenue.length) return [];
     
-    if (period === 'monthly') {
-      // Convert month number to month name
-      label = new Date(0, item.month - 1).toLocaleString('default', { month: 'short' });
-    } else {
-      // If year is missing, use the current year or a specified default year
-      const defaultYear = year || new Date().getFullYear();
-      label = item.year ? item.year.toString() : defaultYear.toString();
-    }
-    
-    return {
-      name: label,
-      revenue: item.total_revenue
-    };
-  });
+    return revenueData.revenue.map((item: any) => {
+      let label = '';
+      
+      if (period === 'monthly') {
+        // Convert month number to month name
+        label = new Date(0, item.month - 1).toLocaleString('default', { month: 'short' });
+      } else {
+        // If year is missing, use the current year or a specified default year
+        const defaultYear = year || new Date().getFullYear();
+        label = item.year ? item.year.toString() : defaultYear.toString();
+      }
+      
+      return {
+        name: label,
+        revenue: item.total_revenue
+      };
+    });
+  }, [revenueData, period, year]);
   
   // Prepare order status distribution if orders data is available
   const orderStatusData = React.useMemo(() => {
-    if (!ordersData || !ordersData.orders || !ordersData.orders.length) return [];
+    const defaultValue: Array<{ name: string; value: number }> = [];
+    
+    if (!ordersData || !ordersData.orders || !ordersData.orders.length) return defaultValue;
     
     const statusCount: Record<string, number> = {};
     
@@ -119,24 +117,18 @@ export const StoreRevenueCharts: React.FC<RevenueChartProps> = ({
     }));
   }, [ordersData]);
   
-  // Format y-axis tick values
-  const formatYAxisTick = (value: any): string => {
-    const numValue = Number(value);
-    return numValue >= 1000000 
-      ? `${(numValue / 1000000).toFixed(1)}M` 
-      : numValue >= 1000 
-        ? `${(numValue / 1000).toFixed(0)}K` 
-        : String(numValue);
-  };
-  
   // Calculate revenue trends (percentage increase/decrease) if we have enough data
   const revenueTrend = React.useMemo(() => {
-    if (revenueChartData.length < 2) return null;
+    if (!revenueChartData.length || revenueChartData.length < 2) {
+      return { percentage: '0.0', isPositive: true };
+    }
     
     const firstValue = revenueChartData[0].revenue;
     const lastValue = revenueChartData[revenueChartData.length - 1].revenue;
     
-    if (firstValue === 0) return null;
+    if (firstValue === 0) {
+      return { percentage: '0.0', isPositive: true };
+    }
     
     const percentChange = ((lastValue - firstValue) / firstValue) * 100;
     return {
@@ -152,6 +144,24 @@ export const StoreRevenueCharts: React.FC<RevenueChartProps> = ({
     const total = revenueChartData.reduce((sum, item) => sum + item.revenue, 0);
     return total / revenueChartData.length;
   }, [revenueChartData]);
+  
+  // Format y-axis tick values
+  const formatYAxisTick = (value: any): string => {
+    const numValue = Number(value);
+    return numValue >= 1000000 
+      ? `${(numValue / 1000000).toFixed(1)}M` 
+      : numValue >= 1000 
+        ? `${(numValue / 1000).toFixed(0)}K` 
+        : String(numValue);
+  };
+  
+  if (!revenueData || !revenueData.revenue.length) {
+    return (
+      <div className="bg-gray-50 border border-gray-200 p-6 rounded-lg text-center text-gray-500">
+        No data available for charts
+      </div>
+    );
+  }
   
   return (
     <div className="space-y-6">

@@ -198,7 +198,7 @@ export default function ProductAdmin() {
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold text-gray-800">Products Management</h1>
-          <p className="text-gray-500 mt-1">Manage your store's product catalog</p>
+          <p className="text-gray-500 mt-1">Manage your store&apos;s product catalog</p>
         </div>
         <button
           onClick={() => setShowAddModal(true)}
@@ -235,7 +235,7 @@ export default function ProductAdmin() {
                 </div>
                 <p className="text-lg font-medium text-gray-700 mb-2">No products found</p>
                 <p className="text-gray-500 text-center mt-2 max-w-md">
-                  Click the "Add Product" button to create your first product.
+                  Click the &quot;Add Product&quot; button to create your first product.
                 </p>
               </div>
             ) : (
