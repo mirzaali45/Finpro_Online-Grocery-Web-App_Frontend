@@ -1,77 +1,52 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import Sidebar from "@/components/sidebarSuperAdmin";
 import { UserManagementService } from "@/services/user-management.service";
-import { withAuth } from "@/components/high-ordered-component/AdminGuard";
-
 import {
   PieChart,
   ShoppingCart,
   DollarSign,
   Users,
 } from "lucide-react";
+import InventoryCharts from "@/components/super-reports/ChartReport";
+import { InventoryReportService } from "@/services/reports-superadmin";
+import { InventoryReportData } from "@/types/reports-superadmin-types";
 
-function DashboardSuperAdmin() {
-  const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+export default function DashboardSuperAdmin() {
   const [totalUsers, setTotalUsers] = useState(0);
   const [totalStoreAdmin, setStoreAdmin] = useState(0);
   const [totalCustomer, setTotalCustomer] = useState(0);
+  const [inventoryData, setInventoryData] = useState<InventoryReportData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const fetchTotalUsers = async () => {
+    const fetchData = async () => {
       try {
         setIsLoading(true);
-        const users = await UserManagementService.getAllUsers();
-        setTotalUsers(users.length);
+        // Fetch all data in parallel for better performance
+        const [allUsers, storeAdmins, customers, inventoryReport] = await Promise.all([
+          UserManagementService.getAllUsers(),
+          UserManagementService.getAllStoreAdmin(),
+          UserManagementService.getAllCustomer(),
+          InventoryReportService.getInventoryReport() // Add inventory report fetch
+        ]);
+        
+        setTotalUsers(allUsers.length);
+        setStoreAdmin(storeAdmins.length);
+        setTotalCustomer(customers.length);
+        setInventoryData(inventoryReport.data);
+        
         setIsLoading(false);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage);
         setIsLoading(false);
-        console.error("Failed to load total users:", err);
+        console.error("Failed to load dashboard data:", err);
       }
     };
 
-    fetchTotalUsers();
-  }, []);
-
-  useEffect(() => {
-    const fetchTotalStoreAdmin = async () => {
-      try {
-        setIsLoading(true);
-        const users = await UserManagementService.getAllStoreAdmin();
-        setStoreAdmin(users.length);
-        setIsLoading(false);
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        setError(errorMessage);
-        setIsLoading(false);
-        console.error("Failed to load store admins:", err);
-      }
-    };
-
-    fetchTotalStoreAdmin();
-  }, []);
-
-  useEffect(() => {
-    const fetchTotalCustomer = async () => {
-      try {
-        setIsLoading(true);
-        const users = await UserManagementService.getAllCustomer();
-        setTotalCustomer(users.length);
-        setIsLoading(false);
-      } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : String(err);
-        setError(errorMessage);
-        setIsLoading(false);
-        console.error("Failed to load customers:", err);
-      }
-    };
-
-    fetchTotalCustomer();
+    fetchData();
   }, []);
 
   const statistics = [
@@ -100,71 +75,71 @@ function DashboardSuperAdmin() {
       color: "bg-orange-500",
     },
   ];
+
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-white">
+      <div className="flex items-center justify-center min-h-[500px]">
         <div className="loader-dominoes-container">
           <div className="loader-dominoes"></div>
-          <p className="loading-text">Loading Dashboard . . .</p>
+          <p className="loading-text">Loading Dashboard...</p>
         </div>
       </div>
     );
   }
+  
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-red-100">
-        <p className="text-red-600">{error}</p>
+      <div className="min-h-[500px] flex items-center justify-center bg-red-50 rounded-lg p-6">
+        <div className="text-center">
+          <p className="text-red-600 font-medium mb-2">Failed to load dashboard data</p>
+          <p className="text-red-500">{error}</p>
+        </div>
       </div>
     );
   }
+  
   return (
-    <div className="min-h-screen bg-gray-100">
-      <Sidebar
-        isSidebarOpen={isSidebarOpen}
-        setIsSidebarOpen={setIsSidebarOpen}
-      />
-      <div className={`${isSidebarOpen ? "md:ml-64" : ""}`}>
-        <main className="p-4 sm:p-4 md:p-6 lg:p-8 xl:p-10 2xl:p-12 space-y-6">
-          <h1 className="text-2xl mt-16 font-bold text-gray-800">
-            Dashboard Overview
-          </h1>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-            {statistics.map((stat) => (
-              <div
-                key={stat.title}
-                className="bg-white rounded-lg shadow p-6 space-y-4"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm text-gray-600">{stat.title}</p>
-                    <p className="text-2xl font-bold text-gray-900">
-                      {stat.value}
-                    </p>
-                  </div>
-                  <div className={`${stat.color} p-3 rounded-lg text-white`}>
-                    {stat.icon}
-                  </div>
-                </div>
+    <>
+      <h1 className="text-2xl font-bold text-gray-800 mb-6">
+        Dashboard Overview
+      </h1>
+      
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+        {statistics.map((stat) => (
+          <div
+            key={stat.title}
+            className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 hover:shadow-md transition-shadow duration-200"
+          >
+            <div className="flex items-center justify-between">
+              <div>
+                <p className="text-sm font-medium text-gray-500">{stat.title}</p>
+                <p className="text-2xl font-bold text-gray-900 mt-1">
+                  {stat.value}
+                </p>
               </div>
-            ))}
-          </div>
-          <div className="bg-white rounded-lg shadow">
-            <div className="p-6">
-              <h2 className="text-lg font-semibold text-gray-800 mb-4">
-                Recent Activity
-              </h2>
-              <div className="space-y-4">
-                <p className="text-gray-600">No recent activity to display.</p>
+              <div className={`${stat.color} p-3 rounded-full text-white`}>
+                {stat.icon}
               </div>
             </div>
           </div>
-        </main>
+        ))}
       </div>
-    </div>
+      
+      {/* Inventory Charts Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+        <InventoryCharts data={inventoryData} />
+      </div>
+      
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Recent Activity
+          </h2>
+          <div className="space-y-4">
+            <p className="text-gray-600">No recent activity to display.</p>
+          </div>
+        </div>
+      </div>
+    </>
   );
 }
-
-export default withAuth(DashboardSuperAdmin, {
-  allowedRoles: ["super_admin"],
-  redirectPath: "/not-authorized-superadmin",
-});

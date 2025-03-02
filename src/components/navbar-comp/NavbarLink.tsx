@@ -82,7 +82,7 @@ export const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
   const navigationItems = [
     { name: "Home", path: "/" },
     { name: "Products", path: "/products" },
-    { name: "Brands", path: "/brands" },
+    { name: "About Us", path: "/about" },
     { name: "Deals", path: "/deals" },
     ...((profile?.userId !== "") && (profile?.verified) && (profile?.password_reset_token == null)   
       ? [
