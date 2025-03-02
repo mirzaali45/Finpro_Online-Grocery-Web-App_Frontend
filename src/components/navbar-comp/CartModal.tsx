@@ -7,6 +7,12 @@ import {
   removeFromCart,
 } from "@/services/cart.service";
 import { formatRupiah } from "@/helper/currencyRp";
+import { Product } from "@/types/product-types";
+import { 
+  calculateDiscountedPrice, 
+  calculateDiscountPercentage, 
+  hasDiscount 
+} from "@/helper/discountCutPrice";
 import { CartModalProps, CartData } from "@/types/cart-types";
 import ProfileServices from "@/services/profile/services1";
 import { toast, ToastOptions } from "react-toastify";
@@ -18,6 +24,7 @@ interface ProductWithDiscount {
   name: string;
   price: number;
   ProductImage: { url: string }[];
+  Inventory?: { total_qty: number }[];
   Discount?: {
     discount_id: number;
     discount_type: "point" | "percentage";
@@ -26,21 +33,41 @@ interface ProductWithDiscount {
   }[];
 }
 
-const calculateDiscountedPrice = (product: ProductWithDiscount): number => {
-  if (!product.Discount || product.Discount.length === 0) {
-    return product.price;
-  }
-
-  const discount = product.Discount[0];
-
-  if (discount.discount_type === "percentage") {
-    return (
-      product.price -
-      Math.floor((product.price * discount.discount_value) / 100)
-    );
-  } else {
-    return product.price - discount.discount_value;
-  }
+// Type adaptation function
+const adaptProductForDiscount = (product: ProductWithDiscount): Product => {
+  return {
+    product_id: parseInt(product.product_id),
+    store_id: 0, // Default value, adjust as needed
+    name: product.name,
+    description: '', // Default value
+    price: product.price,
+    category_id: 0, // Default value
+    category: { category_id: 0, category_name: '' }, // Default value
+    slug: '', // Default value
+    store: { 
+      store_id: 0, 
+      store_name: '', 
+      latitude: 0, 
+      longitude: 0, 
+      city: '' 
+    },
+    Discount: product.Discount?.map(discount => ({
+      discount_id: discount.discount_id,
+      store_id: null,
+      product_id: null,
+      thumbnail: null,
+      discount_code: '',
+      discount_type: discount.discount_type,
+      discount_value: discount.discount_value,
+      minimum_order: null,
+      expires_at: discount.expires_at,
+      created_at: '',
+      updated_at: '',
+      userUser_id: null
+    })),
+    Inventory: product.Inventory ? [{ total_qty: product.Inventory[0]?.total_qty || 0 }] : [],
+    ProductImage: product.ProductImage
+  };
 };
 
 export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
@@ -145,9 +172,9 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 
     return cartData.items.reduce((total, item) => {
-      const productWithDiscount =
-        item.product as unknown as ProductWithDiscount;
-      const discountedPrice = calculateDiscountedPrice(productWithDiscount);
+      const productWithDiscount = item.product as unknown as ProductWithDiscount;
+      const adaptedProduct = adaptProductForDiscount(productWithDiscount);
+      const discountedPrice = calculateDiscountedPrice(adaptedProduct);
       return total + discountedPrice * item.quantity;
     }, 0);
   };
@@ -156,17 +183,15 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 
     return cartData.items.reduce((savings, item) => {
-      const productWithDiscount =
-        item.product as unknown as ProductWithDiscount;
-      if (
-        !productWithDiscount.Discount ||
-        productWithDiscount.Discount.length === 0
-      ) {
+      const productWithDiscount = item.product as unknown as ProductWithDiscount;
+      const adaptedProduct = adaptProductForDiscount(productWithDiscount);
+      
+      if (!hasDiscount(adaptedProduct)) {
         return savings;
       }
 
       const originalPrice = productWithDiscount.price;
-      const discountedPrice = calculateDiscountedPrice(productWithDiscount);
+      const discountedPrice = calculateDiscountedPrice(adaptedProduct);
       return savings + (originalPrice - discountedPrice) * item.quantity;
     }, 0);
   };
@@ -224,13 +249,10 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
             ) : (
               <div className="space-y-4">
                 {cartData.items.map((item) => {
-                  const productWithDiscount =
-                    item.product as unknown as ProductWithDiscount;
-                  const hasDiscount =
-                    productWithDiscount.Discount &&
-                    productWithDiscount.Discount.length > 0;
-                  const discountedPrice =
-                    calculateDiscountedPrice(productWithDiscount);
+                  const productWithDiscount = item.product as unknown as ProductWithDiscount;
+                  const adaptedProduct = adaptProductForDiscount(productWithDiscount);
+                  const hasDiscountFlag = hasDiscount(adaptedProduct);
+                  const discountedPrice = calculateDiscountedPrice(adaptedProduct);
 
                   return (
                     <div
@@ -260,7 +282,7 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
 
                           {/* Price with discount */}
                           <div className="mt-1">
-                            {hasDiscount ? (
+                            {hasDiscountFlag ? (
                               <div className="flex items-center">
                                 <span className="text-neutral-400 line-through mr-2">
                                   {formatRupiah(item.product.price)}

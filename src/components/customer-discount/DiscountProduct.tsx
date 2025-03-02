@@ -4,6 +4,11 @@ import Link from "next/link";
 import { useState } from "react";
 import { Product } from "@/types/product-types";
 import { generateSlug } from "@/utils/slugUtils";
+import { 
+  calculateDiscountedPrice, 
+  calculateDiscountPercentage, 
+  hasDiscount 
+} from "@/helper/discountCutPrice";
 import { ShoppingCart, ExternalLink, Store, Tag } from "lucide-react";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
@@ -20,26 +25,26 @@ const DiscountProductCard = ({
   const [isLoading, setIsLoading] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
 
+  // Null-safe discount handling
+  const discount = product.Discount?.[0] ?? {
+    discount_type: 'percentage',
+    discount_value: 0,
+    expires_at: new Date().toISOString()
+  };
+
   // Check if product has discount
-  if (!product.Discount || product.Discount.length === 0) {
+  if (!hasDiscount(product)) {
     return null;
   }
 
-  const discount = product.Discount[0];
   const inventory = product.Inventory?.[0]?.total_qty || 0;
   const image = product.ProductImage?.[0]?.url || "/product-placeholder.jpg";
 
   // Calculate discounted price
-  const discountedPrice =
-    discount.discount_type === "percentage"
-      ? product.price - (product.price * discount.discount_value) / 100
-      : product.price - discount.discount_value;
+  const discountedPrice = calculateDiscountedPrice(product);
 
   // Calculate discount percentage for display
-  const discountPercentage =
-    discount.discount_type === "percentage"
-      ? discount.discount_value
-      : Math.round((discount.discount_value / product.price) * 100);
+  const discountPercentage = calculateDiscountPercentage(product);
 
   const handleAddToCart = async () => {
     if (isLoading) return;
@@ -124,10 +129,10 @@ const DiscountProductCard = ({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium line-through text-neutral-500">
-                Rp.{product.price.toLocaleString()}
+                Rp.{Math.floor(product.price).toLocaleString()}
               </span>
               <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                Rp.{discountedPrice.toLocaleString()}
+                Rp.{Math.floor(discountedPrice).toLocaleString()}
               </span>
             </div>
             <div className="flex items-center justify-between mt-1">
