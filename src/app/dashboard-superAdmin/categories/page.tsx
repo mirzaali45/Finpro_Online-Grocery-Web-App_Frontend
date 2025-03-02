@@ -1,48 +1,49 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
-import { Plus, Pencil, Trash2 } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Plus } from "lucide-react";
 import Sidebar from "@/components/sidebarSuperAdmin";
+import CategoryCard from "@/components/category-management/CategoryCard";
+import CategoryModal from "@/components/category-management/CategoryModal";
+import { categoryService } from "@/services/category-admin.service";
+import {
+  Category,
+  CategoryFormData,
+  PaginatedResponse,
+} from "@/types/category-types";
+import { toast, ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 
-interface Category {
-  id: number;
-  category_name: string;
-  description: string;
-  category_url: string;
-  Product?: string; // Made optional with ?
-}
-
-export default function CategoriesAdmin() {
+function CategoriesAdmin() {
   const [isSidebarOpen, setIsSidebarOpen] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [categories, setCategories] = useState<Category[]>([]);
-
-  // Form states
-  const [formData, setFormData] = useState({
+  const [pagination, setPagination] = useState({
+    currentPage: 1,
+    totalPages: 1,
+    totalItems: 0,
+    itemsPerPage: 8,
+  });
+  const [formData, setFormData] = useState<CategoryFormData>({
     category_name: "",
     description: "",
-    category_url: "",
+    thumbnail: "",
   });
+  const [categoryImage, setCategoryImage] = useState<File | null>(null);
 
-  // Fetch categories on component mount
   useEffect(() => {
-    fetchCategories();
+    fetchCategories(1);
   }, []);
 
-  const fetchCategories = async () => {
+  const fetchCategories = async (page: number = 1) => {
     try {
       setIsLoading(true);
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/category`
-      );
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to fetch categories");
-      }
-      const data = await response.json();
-      setCategories(data);
+      const response = await categoryService.getCategories(page);
+      setCategories(response.data);
+      setPagination(response.pagination);
     } catch (err) {
       setError(
         err instanceof Error ? err.message : "Failed to fetch categories"
@@ -50,6 +51,10 @@ export default function CategoriesAdmin() {
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const handlePageChange = (page: number) => {
+    fetchCategories(page);
   };
 
   const handleInputChange = (
@@ -62,48 +67,65 @@ export default function CategoriesAdmin() {
     }));
   };
 
-  const handleAddCategory = async () => {
+  const handleFileChange = (file: File | null) => {
+    setCategoryImage(file);
+  };
+
+  const resetForm = () => {
+    setFormData({
+      category_name: "",
+      description: "",
+      thumbnail: "",
+    });
+    setCategoryImage(null);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     try {
-      const token = localStorage.getItem("token");
-      if (!token) {
-        throw new Error("Authentication required");
+      const submitData = new FormData();
+      submitData.append("category_name", formData.category_name);
+      submitData.append("description", formData.description);
+
+      if (categoryImage) {
+        submitData.append("thumbnail", categoryImage);
       }
 
-      const response = await fetch(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/category`,
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${token}`,
-          },
-          body: JSON.stringify(formData),
-        }
-      );
+      const newCategory = await categoryService.createCategory(submitData);
 
-      if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || "Failed to create category");
-      }
-
-      const newCategory = await response.json();
-      setCategories((prev) => [...prev, newCategory]);
+      toast.success("Category created successfully");
       setIsModalOpen(false);
-      setFormData({
-        category_name: "",
-        description: "",
-        category_url: "",
-      });
+      resetForm();
+      fetchCategories(1);
     } catch (err) {
-      setError(
-        err instanceof Error ? err.message : "Failed to create category"
+      toast.error(
+        err instanceof Error ? err.message : "A Category Has Already Exist"
       );
     }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    handleAddCategory();
+  const handleEdit = (category: Category) => {
+    console.log("Edit category:", category);
+  };
+
+  const handleDelete = async (id: number) => {
+    try {
+      await categoryService.deleteCategory(id);
+      toast.success("Category deleted successfully");
+      fetchCategories(pagination.currentPage);
+    } catch (err) {
+      toast.error(
+        err instanceof Error ? err.message : "Failed to delete category"
+      );
+      setError(
+        err instanceof Error ? err.message : "Failed to delete category"
+      );
+    }
+  };
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    resetForm();
   };
 
   if (error) {
@@ -111,7 +133,10 @@ export default function CategoriesAdmin() {
       <div className="min-h-screen bg-gray-100 dark:bg-gray-900 p-6">
         <div className="text-red-600 dark:text-red-400">Error: {error}</div>
         <button
-          onClick={() => setError(null)}
+          onClick={() => {
+            setError(null);
+            fetchCategories(1);
+          }}
           className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
         >
           Try Again
@@ -144,113 +169,97 @@ export default function CategoriesAdmin() {
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {categories.map((category) => (
-              <div
-                key={category.id}
-                className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700"
-              >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-lg font-semibold">
-                    {category.category_name}
-                  </h3>
-                  <div className="flex gap-2">
-                    <button className="text-blue-600 hover:text-blue-700 dark:text-blue-400">
-                      <Pencil size={18} />
-                    </button>
-                    <button className="text-red-600 hover:text-red-700 dark:text-red-400">
-                      <Trash2 size={18} />
-                    </button>
-                  </div>
-                </div>
-                <p className="text-sm text-gray-600 dark:text-gray-300 mb-2">
-                  {category.description}
-                </p>
-                <p className="text-sm text-gray-600 dark:text-gray-300">
-                  Total Products: {category.Product?.length || 0}
-                </p>
-              </div>
-            ))}
-          </div>
-        )}
+          <>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {categories.map((category) => (
+                <CategoryCard
+                  key={category.category_id}
+                  category={category}
+                  onEdit={handleEdit}
+                  onDelete={handleDelete}
+                />
+              ))}
+            </div>
 
-        {/* Modal */}
-        {isModalOpen && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
-            <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-md">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-bold">Add New Category</h2>
+            {/* Display total number of categories */}
+            <div className="mt-6 text-gray-600 dark:text-gray-400">
+              Showing {categories.length} of {pagination.totalItems} categories
+            </div>
+
+            {/* Pagination Controls */}
+            {pagination.totalPages > 1 && (
+              <div className="flex items-center justify-center mt-6 space-x-2">
                 <button
-                  onClick={() => setIsModalOpen(false)}
-                  className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  onClick={() => handlePageChange(pagination.currentPage - 1)}
+                  disabled={pagination.currentPage === 1}
+                  className={`px-3 py-1 rounded ${
+                    pagination.currentPage === 1
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  }`}
                 >
-                  ✕
+                  Previous
+                </button>
+
+                {Array.from(
+                  { length: pagination.totalPages },
+                  (_, i) => i + 1
+                ).map((page) => (
+                  <button
+                    key={page}
+                    onClick={() => handlePageChange(page)}
+                    className={`w-8 h-8 rounded-full ${
+                      pagination.currentPage === page
+                        ? "bg-blue-600 text-white"
+                        : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                    }`}
+                  >
+                    {page}
+                  </button>
+                ))}
+
+                <button
+                  onClick={() => handlePageChange(pagination.currentPage + 1)}
+                  disabled={pagination.currentPage === pagination.totalPages}
+                  className={`px-3 py-1 rounded ${
+                    pagination.currentPage === pagination.totalPages
+                      ? "bg-gray-300 dark:bg-gray-700 text-gray-500 dark:text-gray-500 cursor-not-allowed"
+                      : "bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600"
+                  }`}
+                >
+                  Next
                 </button>
               </div>
-
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category Name
-                  </label>
-                  <input
-                    type="text"
-                    name="category_name"
-                    value={formData.category_name}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Description
-                  </label>
-                  <textarea
-                    name="description"
-                    value={formData.description}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    rows={3}
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium mb-1">
-                    Category URL
-                  </label>
-                  <input
-                    type="text"
-                    name="category_url"
-                    value={formData.category_url}
-                    onChange={handleInputChange}
-                    required
-                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                </div>
-
-                <div className="flex justify-end gap-2 mt-6">
-                  <button
-                    type="button"
-                    onClick={() => setIsModalOpen(false)}
-                    className="px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    type="submit"
-                    className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700"
-                  >
-                    Add Category
-                  </button>
-                </div>
-              </form>
-            </div>
-          </div>
+            )}
+          </>
         )}
+
+        <CategoryModal
+          isOpen={isModalOpen}
+          onClose={handleCloseModal}
+          formData={formData}
+          onSubmit={handleSubmit}
+          onChange={handleInputChange}
+          onFileChange={handleFileChange}
+        />
+        <ToastContainer
+          position="bottom-right"
+          autoClose={5000}
+          hideProgressBar={false}
+          newestOnTop
+          closeOnClick
+          rtl={false}
+          pauseOnFocusLoss
+          draggable
+          pauseOnHover
+          theme="light"
+        />
       </div>
     </div>
   );
 }
+
+export default withAuth(CategoriesAdmin, {
+  allowedRoles: ["super_admin"],
+  redirectPath: "/not-authorized-superadmin",
+});

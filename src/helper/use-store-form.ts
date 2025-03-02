@@ -1,15 +1,13 @@
 // hooks/use-store-form.ts
 import { useState } from "react";
-import { StoreData } from "@/types/storeForm-types";
+import { StoreData } from "@/types/store-types";
 
 const initialFormData: StoreData = {
   store_name: "",
   address: "",
   subdistrict: "",
   city: "",
-  city_id: "",
   province: "",
-  province_id: "",
   postcode: "",
   latitude: undefined,
   longitude: undefined,
@@ -21,9 +19,9 @@ interface FormErrors {
   address: string;
   subdistrict: string;
   city: string;
-  city_id: string;
+  city_id?: string; // Make this optional
   province: string;
-  province_id: string;
+  province_id?: string; // Make this optional
   postcode: string;
 }
 
@@ -32,9 +30,7 @@ const initialErrors: FormErrors = {
   address: "",
   subdistrict: "",
   city: "",
-  city_id: "",
   province: "",
-  province_id: "",
   postcode: "",
 };
 
@@ -67,38 +63,23 @@ export const useStoreForm = () => {
     if (!formData.store_name.trim()) {
       newErrors.store_name = "Store name is required";
     }
-
     if (!formData.address.trim()) {
       newErrors.address = "Address is required";
     }
-
     if (!formData.subdistrict.trim()) {
       newErrors.subdistrict = "Subdistrict is required";
     }
-
     if (!formData.city.trim()) {
       newErrors.city = "City is required";
-    }
-
-    if (!formData.city_id.trim()) {
-      newErrors.city_id = "City ID is required";
     }
 
     if (!formData.province.trim()) {
       newErrors.province = "Province is required";
     }
-
-    if (!formData.province_id.trim()) {
-      newErrors.province_id = "Province ID is required";
-    }
-
     if (!formData.postcode.trim()) {
       newErrors.postcode = "Postcode is required";
     }
-
     setErrors(newErrors);
-
-    // Check if any errors exist
     return Object.values(newErrors).every((error) => error === "");
   };
 

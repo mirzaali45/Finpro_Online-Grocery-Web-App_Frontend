@@ -7,5 +7,9 @@
   "tailwindCSS.validation.enable": true,
   "tailwindCSS.experimental.classRegex": [
     ["@apply ([^;]*);", "(?:@apply )?([^;]*)"]
-  ]
+  ],
+  "typescript.validate.enable": true,
+  "typescript.tsserver.experimental.enableProjectDiagnostics": false,
+  "@typescript-eslint/ban-ts-comment": "off",
+  "typescript.tsdk": "node_modules/typescript/lib"
 }

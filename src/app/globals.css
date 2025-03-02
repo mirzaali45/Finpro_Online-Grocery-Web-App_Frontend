@@ -25,6 +25,9 @@ body {
     text-wrap: balance;
   }
 }
+input {
+  color: #171717;
+}
 /* Loader Styles */
 .loader-dominoes-container {
   display: flex;
