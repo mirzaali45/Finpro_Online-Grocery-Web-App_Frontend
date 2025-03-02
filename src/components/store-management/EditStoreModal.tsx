@@ -23,7 +23,8 @@ export default function EditStoreModal({
   users,
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { formData, errors, handleChange, validateForm, setFormData } = useStoreForm();
+  const { formData, errors, handleChange, validateForm, setFormData } =
+    useStoreForm();
   const [firstData, setFirstData] = useState(false);
 
   const showNotification = (type: "success" | "error", message: string) => {
@@ -60,7 +61,8 @@ export default function EditStoreModal({
       onSuccess();
       onClose();
     } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to edit store";
+      const errorMessage =
+        error instanceof Error ? error.message : "Failed to edit store";
       showNotification("error", errorMessage);
     } finally {
       setIsSubmitting(false);

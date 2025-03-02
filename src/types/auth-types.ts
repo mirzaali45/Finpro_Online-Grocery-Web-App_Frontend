@@ -72,7 +72,7 @@ export interface VerifyAndSetPassValues {
   phone: string;
   password: string;
   confirmPassword: string;
-  referralCode: "", 
+  referralCode: "";
 }
 
 export interface VerifyResetPassValues {
