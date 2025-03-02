@@ -19,9 +19,7 @@ interface FormErrors {
   address: string;
   subdistrict: string;
   city: string;
-  city_id?: string; // Make this optional
   province: string;
-  province_id?: string; // Make this optional
   postcode: string;
 }
 

@@ -15,16 +15,18 @@ const ProfileServices = () => {
   const [profile, setProfile] = useState({
     avatar: "",
     username: "Loading..",
-    userId: "Loading..",
+    userId: "",
     firstName: "Loading..",
     lastName: "Loading..",
     email: "Loading..",
-    phone: "",
+    phone: 0,
     password: "Loading..",
     role: "Loading..",
     status: "Loading..",
     referral_code: "",
     is_google: false,
+    verified: false,
+    password_reset_token: null,
   });
   const [refCode, setRefCode] = useState();
 
@@ -57,9 +59,11 @@ const ProfileServices = () => {
           email: data.email ?? "",
           phone: data.phone ?? "",
           role: data.role,
-          status: data.verified ? "Aktif" : "Tidak Aktif",
+          status: data.verified ? "Active" : "Inactive",
           referral_code: data.referral_code ?? "",
-          is_google: !!data.google_id,
+          is_google: data.is_google,
+          verified: data.verified,
+          password_reset_token: data.password_reset_token ?? null
         }));
       }
     } catch {
@@ -118,8 +122,15 @@ const ProfileServices = () => {
 
   const handlePickImage = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
+    const maxSize = 1 * 1024 * 1024; // 1MB in bytes
+
     if (!file) return;
     if (!validateFileSize(file)) return;
+    if (file.size > maxSize) {
+      showToast("File size should be less than 1MB", "error");
+      setIsSaveAvatar(false);
+      return;
+    }
 
     const fileURL = URL.createObjectURL(file);
     setNewFile({ file, url: fileURL });
