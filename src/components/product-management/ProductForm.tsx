@@ -131,12 +131,12 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
   };
 
   const ButtonStyle =
-    "p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded text-gray-700 dark:text-gray-200 transition-colors duration-150";
+    "p-1.5 hover:bg-gray-100 rounded text-gray-700 transition-colors duration-150";
 
   return (
-    <div className="border border-gray-200 dark:border-gray-700 rounded-md overflow-hidden">
+    <div className="border border-gray-200 rounded-md overflow-hidden">
       {/* Toolbar */}
-      <div className="flex items-center gap-1 p-2 border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
+      <div className="flex items-center gap-1 p-2 border-b border-gray-200 bg-gray-50">
         <button
           type="button"
           onClick={() => execCommand("bold")}
@@ -153,7 +153,7 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         >
           <Italic className="w-4 h-4" />
         </button>
-        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+        <div className="w-px h-6 bg-gray-200 mx-1" />
         <button
           type="button"
           onClick={() => execCommand("insertUnorderedList")}
@@ -170,7 +170,7 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         >
           <Heading className="w-4 h-4" />
         </button>
-        <div className="w-px h-6 bg-gray-200 dark:bg-gray-700 mx-1" />
+        <div className="w-px h-6 bg-gray-200 mx-1" />
         <button
           type="button"
           onClick={() => execCommand("justifyLeft")}
@@ -202,8 +202,8 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
         ref={editorRef}
         contentEditable
         className="min-h-[200px] max-h-[300px] overflow-y-auto p-3 focus:outline-none 
-    bg-white dark:bg-gray-800 
-    text-gray-900 dark:text-gray-100
+    bg-white
+    text-gray-900
     text-left rtl:text-right
     [&_*]:text-inherit
     [&_*]:direction-ltr
@@ -211,8 +211,8 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
     [&_h3]:text-lg [&_h3]:font-semibold [&_h3]:my-2
     [&_ul]:list-disc [&_ul]:pl-5 [&_ul]:my-2
     [&_li]:my-1
-    selection:bg-blue-200 dark:selection:bg-blue-900
-    caret-blue-600 dark:caret-blue-400
+    selection:bg-blue-200
+    caret-blue-600
     break-words whitespace-pre-wrap"
         onPaste={handlePaste}
         spellCheck={false}
@@ -235,23 +235,23 @@ const RichTextEditor = ({ value, onChange }: RichTextEditorProps) => {
 const InputField = ({ className = "", ...props }: InputFieldProps) => (
   <input
     {...props}
-    className={`w-full p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 
+    className={`w-full p-2 bg-white border border-gray-300 
     rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-    text-gray-900 dark:text-gray-100 ${className}`}
+    text-gray-900 ${className}`}
   />
 );
 
 const SelectField = ({ className = "", ...props }: SelectFieldProps) => (
   <select
     {...props}
-    className={`w-full p-2 bg-white dark:bg-gray-900 border border-gray-300 dark:border-gray-600 
+    className={`w-full p-2 bg-white border border-gray-300 
     rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-    text-gray-900 dark:text-gray-100 ${className}`}
+    text-gray-900 ${className}`}
   />
 );
 
 const FormLabel = ({ children }: FormLabelProps) => (
-  <label className="block text-sm font-medium text-gray-700 dark:text-gray-200">
+  <label className="block text-sm font-medium text-gray-700">
     {children}
   </label>
 );
@@ -268,6 +268,7 @@ export default function ProductForm({
   const [categories, setCategories] = useState<Category[]>([]);
   const [stores, setStores] = useState<Store[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     fetchCategoriesAndStores();
@@ -276,6 +277,7 @@ export default function ProductForm({
   const fetchCategoriesAndStores = async () => {
     try {
       setIsLoading(true);
+      setError(null);
       const token = localStorage.getItem("token");
       if (!token) throw new Error("No token found");
 
@@ -288,28 +290,67 @@ export default function ProductForm({
         }),
       ]);
 
+      if (!categoriesResponse.ok) {
+        throw new Error(`Failed to fetch categories: ${categoriesResponse.statusText}`);
+      }
+      
+      if (!storesResponse.ok) {
+        throw new Error(`Failed to fetch stores: ${storesResponse.statusText}`);
+      }
+
       const [categoriesData, storesData] = await Promise.all([
         categoriesResponse.json(),
         storesResponse.json(),
       ]);
 
-      setCategories(categoriesData);
-      setStores(storesData);
+      // Process categories data - handle different API response formats
+      let categoryItems: Category[] = [];
+      if (Array.isArray(categoriesData)) {
+        categoryItems = categoriesData;
+      } else if (categoriesData && typeof categoriesData === 'object') {
+        // Check common API response patterns
+        if (Array.isArray(categoriesData.data)) {
+          categoryItems = categoriesData.data;
+        } else if (categoriesData.results && Array.isArray(categoriesData.results)) {
+          categoryItems = categoriesData.results;
+        } else if (categoriesData.categories && Array.isArray(categoriesData.categories)) {
+          categoryItems = categoriesData.categories;
+        }
+      }
+
+      // Process stores data - handle different API response formats
+      let storeItems: Store[] = [];
+      if (Array.isArray(storesData)) {
+        storeItems = storesData;
+      } else if (storesData && typeof storesData === 'object') {
+        // Check common API response patterns
+        if (Array.isArray(storesData.data)) {
+          storeItems = storesData.data;
+        } else if (storesData.results && Array.isArray(storesData.results)) {
+          storeItems = storesData.results;
+        } else if (storesData.stores && Array.isArray(storesData.stores)) {
+          storeItems = storesData.stores;
+        }
+      }
+
+      // Debug info
+      console.log('Categories response:', categoriesData);
+      console.log('Processed categories:', categoryItems);
+      
+      console.log('Stores response:', storesData);
+      console.log('Processed stores:', storeItems);
+
+      setCategories(categoryItems);
+      setStores(storeItems);
     } catch (error) {
       console.error("Error fetching data:", error);
+      setError(error instanceof Error ? error.message : "Failed to load data");
     } finally {
       setIsLoading(false);
     }
   };
 
-  if (isLoading) {
-    return (
-      <div className="flex justify-center items-center h-32">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
-      </div>
-    );
-  }
-
+  // Event handlers
   const handleNameChange = (e: ChangeEvent<HTMLInputElement>) => {
     setFormData({ ...formData, name: e.target.value });
   };
@@ -334,6 +375,29 @@ export default function ProductForm({
     e.preventDefault();
     onSubmit(e);
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-32">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600" />
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="p-4 bg-red-50 border border-red-200 rounded-md text-red-600">
+        <p className="font-medium">Error loading form data:</p>
+        <p>{error}</p>
+        <button
+          onClick={() => fetchCategoriesAndStores()}
+          className="mt-2 px-3 py-1 bg-red-600 text-white rounded-md hover:bg-red-700"
+        >
+          Retry
+        </button>
+      </div>
+    );
+  }
 
   return (
     <form
@@ -380,11 +444,15 @@ export default function ProductForm({
           required
         >
           <option value="">Select Category</option>
-          {categories.map((category) => (
-            <option key={category.category_id} value={category.category_id}>
-              {category.category_name}
-            </option>
-          ))}
+          {Array.isArray(categories) && categories.length > 0 ? (
+            categories.map((category) => (
+              <option key={category.category_id} value={category.category_id}>
+                {category.category_name}
+              </option>
+            ))
+          ) : (
+            <option value="" disabled>No categories available</option>
+          )}
         </SelectField>
       </div>
 
@@ -396,11 +464,15 @@ export default function ProductForm({
           required
         >
           <option value="">Select Store</option>
-          {stores.map((store) => (
-            <option key={store.store_id} value={store.store_id}>
-              {store.store_name}
-            </option>
-          ))}
+          {Array.isArray(stores) && stores.length > 0 ? (
+            stores.map((store) => (
+              <option key={store.store_id} value={store.store_id}>
+                {store.store_name}
+              </option>
+            ))
+          ) : (
+            <option value="" disabled>No stores available</option>
+          )}
         </SelectField>
       </div>
 
