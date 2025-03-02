@@ -1,6 +1,7 @@
 "use client";
 import AddressClient from "@/components/checkout/AddressClient";
 import ItemOrder from "@/components/checkout/ItemOrder";
+import ProceedToPaymentButton from "@/components/checkout/payment";
 import PaymentOrder from "@/components/checkout/PaymentOrder";
 import ToastContainerElement from "@/components/ToastContainerElement";
 import Services2 from "@/services/profile/services2";
@@ -47,7 +48,7 @@ const CheckoutPage: React.FC = () => {
               <ItemOrder selectedAddress={selectedAddress} />
             </div>
             <div className="lg:w-1/3 w-full">
-              <PaymentOrder />
+              <ProceedToPaymentButton order_id={""} totalPrice={0} userId={0}  />
             </div>
           </main>
         ) : (
