@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import { Store, MapPin, Building2, User } from "lucide-react";
+import { Store, MapPin, Building2 } from "lucide-react";
 import { InputField } from "@/components/store-management/StoreInputFields";
 import { StoreData, FormErrorsWithIndex } from "@/types/store-types";
-import { StoreAdmin } from "@/services/fetch-store-admin.service";
 import {
   MapContainer,
   TileLayer,
@@ -14,6 +13,8 @@ import {
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { SelectField } from "./StoreSelectFields";
+import { User } from "@/types/user-types";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/marker-icon-2x.png",
@@ -24,62 +25,12 @@ L.Icon.Default.mergeOptions({
 interface AddStoreFormProps {
   formData: StoreData;
   errors: FormErrorsWithIndex;
-  handleChange: (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement
-    >
-  ) => void;
+  handleChange: (e: React.ChangeEvent<any>) => void;
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  storeAdmins: StoreAdmin[];
+  users: User[]
 }
-
-const SelectField = ({
-  name,
-  label,
-  value,
-  error,
-  onChange,
-  options,
-}: {
-  name: string;
-  label: string;
-  value: number | undefined;
-  error?: string;
-  onChange: (e: React.ChangeEvent<HTMLSelectElement>) => void;
-  options: StoreAdmin[];
-}) => (
-  <div className="space-y-1">
-    <label
-      htmlFor={name}
-      className="block text-sm font-medium text-gray-700 dark:text-gray-200"
-    >
-      {label}
-    </label>
-    <div className="relative">
-      <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-        <User className="h-5 w-5 text-gray-400" />
-      </div>
-      <select
-        id={name}
-        name={name}
-        value={value || ""}
-        onChange={onChange}
-        className="block w-full pl-10 py-2 rounded-md border border-gray-300 bg-white dark:bg-gray-700 dark:border-gray-600 dark:text-white focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-      >
-        <option value="">Select Store Admin</option>
-        {options.map((admin) => (
-          <option key={admin.user_id} value={admin.user_id}>
-            {admin.username}
-          </option>
-        ))}
-      </select>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-    </div>
-  </div>
-);
-
 function MapClickHandler({
   setFormData,
 }: {
@@ -105,7 +56,7 @@ export default function AddStoreForm({
   setFormData,
   handleSubmit,
   isSubmitting,
-  storeAdmins,
+  users
 }: AddStoreFormProps) {
   const handleNumberChange =
     (fieldName: "latitude" | "longitude") =>
@@ -126,21 +77,13 @@ export default function AddStoreForm({
     <form
       onSubmit={(e) => {
         e.preventDefault();
+        console.log("Form submitted", formData); // Debug log
         handleSubmit(e).catch((error) => {
           console.error("Submit error:", error);
         });
       }}
       className="space-y-6"
     >
-      <SelectField
-        name="user_id"
-        label="Assign Store Admin"
-        value={formData.user_id}
-        error={errors.user_id}
-        onChange={handleChange}
-        options={storeAdmins}
-      />
-
       <div className="grid md:grid-cols-2 gap-6">
         <InputField
           name="store_name"
@@ -205,7 +148,7 @@ export default function AddStoreForm({
           Icon={MapPin}
           type="number"
           value={formData.latitude?.toString()}
-          error={errors.latitude}
+          error={errors.latitude?.toString()}
           onChange={handleNumberChange("latitude")}
         />
         <InputField
@@ -213,9 +156,21 @@ export default function AddStoreForm({
           label="Longitude (Optional)"
           Icon={MapPin}
           type="number"
-          value={formData.longitude?.toString()}
+          value={formData.longitude}
           error={errors.longitude}
           onChange={handleNumberChange("longitude")}
+        />
+        <SelectField
+          name="user_id"
+          label="Store Admin"
+          Icon={MapPin}
+          value={formData.user_id}
+          error={errors.user_id}
+          onChange={handleChange}
+          options={users?.map((v: User) => ({ 
+            value: v.user_id, 
+            label: `${v.first_name} ${v.last_name}` 
+          }))}
         />
       </div>
 

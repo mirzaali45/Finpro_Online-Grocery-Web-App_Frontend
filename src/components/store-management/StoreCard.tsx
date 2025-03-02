@@ -19,9 +19,7 @@ export default function StoreCard({
 }: StoreCardProps) {
   const [modal, setModal] = useState<boolean>(false);
   const handleDelete = () => {
-    if (window.confirm("Are you sure you want to delete this store?")) {
-      onDelete(store.store_id!);
-    }
+    onDelete(store.store_id!);
   };
 
   return (
