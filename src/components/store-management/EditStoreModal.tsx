@@ -1,27 +1,18 @@
 import { Store } from "lucide-react";
-import { User } from "@/types/user-types";
 import { useStoreForm } from "@/helper/use-store-form";
 import { storeService } from "@/components/hooks/useStoreAdmin";
-import { storeAdminService } from "@/services/fetch-store-admin.service";
 import Swal from "sweetalert2";
 import { useEffect, useState } from "react";
 import EditStoreForm from "./EditStoreForm";
-import {
-  StoreData,
-  EditData,
-  FormErrors,
-  FormErrorsWithIndex,
-  StoreAdmin,
-} from "@/types/store-types";
-
-// Remove the local interface definition since it's defined in EditStoreForm.tsx
+import { StoreData } from "@/types/store-types";
+import { User } from "@/types/user-types";
 
 interface EditStoreModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSuccess: () => void;
   dataStore: StoreData;
-  users: User[]; 
+  users: User[];
 }
 
 export default function EditStoreModal({
@@ -32,31 +23,9 @@ export default function EditStoreModal({
   users,
 }: EditStoreModalProps) {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [storeAdmins, setStoreAdmins] = useState<StoreAdmin[]>([]);
   const { formData, errors, handleChange, validateForm, setFormData } =
-    useStoreForm() as {
-      formData: StoreData;
-      errors: FormErrorsWithIndex;
-      handleChange: (
-        e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
-      ) => void;
-      validateForm: () => boolean;
-      setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
-    };
+    useStoreForm();
   const [firstData, setFirstData] = useState(false);
-
-  // Fetch store admins when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      storeAdminService
-        .getStoreAdmins()
-        .then(setStoreAdmins)
-        .catch((error) => {
-          showNotification("error", "Failed to fetch store admins");
-          console.error(error);
-        });
-    }
-  }, [isOpen]);
 
   const showNotification = (type: "success" | "error", message: string) => {
     Swal.fire({
@@ -80,25 +49,14 @@ export default function EditStoreModal({
 
     setIsSubmitting(true);
     try {
-      if (!dataStore.store_id) {
-        throw new Error("Store ID is missing");
-      }
-
-      // Create a new object with required fields ensuring they're not undefined
-      // Using the EditData type from your store-types
-      const editData: EditData = {
-        store_name: formData.store_name || dataStore.store_name,
-        address: formData.address || dataStore.address,
-        subdistrict: formData.subdistrict || dataStore.subdistrict,
-        city: formData.city || dataStore.city,
-        province: formData.province || dataStore.province,
-        postcode: formData.postcode || dataStore.postcode,
-        latitude: formData.latitude ?? dataStore.latitude ?? 0,
-        longitude: formData.longitude ?? dataStore.longitude ?? 0,
-        user_id: formData.user_id || dataStore.user_id || null,
-      };
-
-      await storeService.editStore(editData, dataStore.store_id);
+      await storeService.editStore(
+        {
+          ...formData,
+          latitude: formData.latitude ?? 0, // Pastikan angka
+          longitude: formData.longitude ?? 0, // Pastikan angka
+        },
+        dataStore.store_id ?? 0
+      );
       showNotification("success", "Store edited successfully");
       onSuccess();
       onClose();
@@ -113,7 +71,11 @@ export default function EditStoreModal({
 
   useEffect(() => {
     if (isOpen && !firstData) {
-      setFormData(dataStore);
+      setFormData({
+        ...dataStore,
+        latitude: dataStore.latitude ?? 0, // Default ke 0 jika undefined
+        longitude: dataStore.longitude ?? 0, // Default ke 0 jika undefined
+      });
       setFirstData(true);
     }
   }, [isOpen, firstData, setFormData, dataStore]);
@@ -147,6 +109,7 @@ export default function EditStoreModal({
             setFormData={setFormData}
             handleSubmit={handleSubmit}
             isSubmitting={isSubmitting}
+            users={users}
           />
         </div>
       </div>

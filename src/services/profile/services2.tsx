@@ -165,8 +165,6 @@ const Services2 = () => {
         showToast("Address deleted successfully.", "success", 1500, () =>
           window.location.reload()
         );
-      } else {
-        showToast("Failed to delete address.", "error");
       }
     } catch (error) {
       showToast("Failed to delete address.", "error");
