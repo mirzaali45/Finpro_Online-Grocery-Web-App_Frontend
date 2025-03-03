@@ -43,11 +43,10 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
     "inventory"
   );
 
-  // Early return if no data
-  if (!data) return null;
-
   // Memoized store bar data preparation
   const storeBarData = useMemo(() => {
+    if (!data) return [];
+
     return [...data.storesSummary]
       .sort((a, b) =>
         chartType === "inventory"
@@ -60,10 +59,12 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
         value: chartType === "inventory" ? store.totalItems : store.totalValue,
         location: store.location,
       }));
-  }, [data.storesSummary, chartType]);
+  }, [data, chartType]);
 
   // Memoized category pie data preparation - STATIC version
   const categoryPieData = useMemo(() => {
+    if (!data) return [];
+
     const categoryMap: Record<string, { name: string; value: number }> = {};
 
     data.inventory.forEach((item) => {
@@ -77,7 +78,10 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
     });
 
     return Object.values(categoryMap).sort((a, b) => b.value - a.value);
-  }, [data.inventory]); // Remove chartType dependency
+  }, [data]); // Remove chartType dependency
+
+  // Early return if no data
+  if (!data) return null;
 
   // Format tooltip value based on chart type
   const formatTooltipValue = (value: number) => {
