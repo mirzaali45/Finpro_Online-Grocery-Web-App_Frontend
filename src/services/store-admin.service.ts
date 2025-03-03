@@ -208,4 +208,5 @@ export const storeService = {
       throw new StoreServiceError("Failed to delete store: Network error");
     }
   },
+  
 };

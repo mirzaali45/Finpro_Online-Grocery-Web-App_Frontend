@@ -228,7 +228,6 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
           </div>
         </div>
       </div>
-
       {/* Main charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Bar chart */}
@@ -269,7 +268,6 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
             </ResponsiveContainer>
           </div>
         </div>
-
         {/* Pie chart */}
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <h3 className="flex items-center gap-1 text-gray-700 font-medium mb-4">

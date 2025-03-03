@@ -15,6 +15,7 @@ import { storeService } from "@/services/store-admin.service";
 import { Icon, DivIcon } from "leaflet";
 import { useGeolocation } from "@/components/hooks/useGeolocation";
 import { sortByDistance } from "@/utils/distanceCalc";
+import { storeDebugHelper } from "@/utils/storeDebugerHelper";
 
 // Dynamically import Leaflet components and CSS
 const MapContainer = dynamic(
@@ -52,6 +53,26 @@ export default function NearbyStore() {
   const [storeMarkerIcon, setStoreMarkerIcon] = useState<
     Icon | DivIcon | undefined
   >(undefined);
+  const [debugInfo, setDebugInfo] = useState<string | null>(null);
+
+  // Add CSS for z-index control
+  useEffect(() => {
+    // Add stylesheet to control Leaflet z-index
+    const style = document.createElement("style");
+    style.innerHTML = `
+      .leaflet-container {
+        z-index: 10 !important;
+      }
+      .leaflet-control {
+        z-index: 20 !important;
+      }
+    `;
+    document.head.appendChild(style);
+
+    return () => {
+      document.head.removeChild(style);
+    };
+  }, []);
 
   // Ensure this only runs on client
   useEffect(() => {
@@ -81,16 +102,33 @@ export default function NearbyStore() {
       try {
         const fetchedStores = await storeService.getStores();
 
-        // Filter out stores without coordinates - Fix for 'filter' not existing on StoreApiResponse
-        // Assuming fetchedStores is array-like, we first ensure it's an array
-        const storesArray = Array.isArray(fetchedStores)
-          ? fetchedStores
-          : [fetchedStores];
+        // Log the raw response for debugging
+        storeDebugHelper.logStoreResponse(fetchedStores, "Raw API Response");
 
-        // Filter out stores without coordinates with proper typing
-        const validStores = storesArray.filter(
-          (store: StoreWithDistance) => store.latitude && store.longitude
-        );
+        // Extract stores array using helper (works with any format)
+        const storesArray = storeDebugHelper.extractStores(fetchedStores);
+
+        // Log the extracted stores
+        console.log("Extracted stores array:", storesArray);
+        console.log("Stores array length:", storesArray.length);
+
+        // Validate stores have coordinates
+        const validStores = storesArray.filter((store: StoreWithDistance) => {
+          const isValid = storeDebugHelper.hasValidCoordinates(store);
+          if (!isValid) {
+            console.warn("Store missing coordinates:", store);
+          }
+          return isValid;
+        });
+
+        console.log("Valid stores with coordinates:", validStores.length);
+
+        // Set debug info for UI
+        if (validStores.length === 0) {
+          setDebugInfo(
+            `Found ${storesArray.length} stores, but none have valid coordinates`
+          );
+        }
 
         setStores(validStores);
 
@@ -113,11 +151,13 @@ export default function NearbyStore() {
           setNearestStores(validStores.slice(0, 3));
         }
       } catch (error) {
-        setError(
+        console.error("Store fetch error:", error);
+        const errorMsg =
           error instanceof Error
             ? error.message
-            : "Unable to fetch store locations"
-        );
+            : "Unable to fetch store locations";
+        setError(errorMsg);
+        setDebugInfo(`Error fetching stores: ${errorMsg}`);
       } finally {
         setLoading(false);
       }
@@ -162,13 +202,24 @@ export default function NearbyStore() {
           <h2 className="text-2xl font-bold text-white mb-4">
             {stores.length === 0 ? "No Stores Found" : "Error"}
           </h2>
-          <p className="text-gray-300 mb-6">
+          <p className="text-gray-300 mb-3">
             {error || locationError || "Unable to retrieve store information"}
           </p>
+
+          {/* Added debug info */}
+          {debugInfo && (
+            <div className="text-sm text-gray-400 mb-6 p-2 bg-gray-800 rounded">
+              <p>Debug info: {debugInfo}</p>
+              <p className="mt-1">Check browser console for more details</p>
+            </div>
+          )}
+
           <button
             onClick={() => {
               setError("");
               setLoading(true);
+              // Force reload by triggering a re-render
+              window.location.reload();
             }}
             className="px-4 py-2 bg-purple-500 text-white rounded-lg hover:bg-purple-600 transition-colors"
           >
@@ -201,13 +252,14 @@ export default function NearbyStore() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="mb-8 rounded-xl overflow-hidden shadow-lg border border-gray-700/50"
+              className="mb-8 rounded-xl overflow-hidden shadow-lg border border-gray-700/50 relative"
               style={{ height: "400px" }}
             >
               <MapContainer
                 center={[location.latitude, location.longitude]}
                 zoom={13}
                 style={{ height: "100%", width: "100%" }}
+                className="z-10" // Lower z-index for map
               >
                 <TileLayer
                   attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
