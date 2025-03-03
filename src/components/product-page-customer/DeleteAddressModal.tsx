@@ -16,7 +16,7 @@ const DeleteAddressModal: React.FC<DeleteAddressModalProps> = ({
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white rounded-lg shadow-lg p-6 w-96">
-        <h2 className="text-lg font-semibold mb-4">Delete Address</h2>
+        <h2 className="text-lg font-semibold mb-4 text-gray-800">Delete Address</h2>
         <p className="text-gray-600 mb-4">Are you sure you want to delete this address?</p>
         <div className="flex justify-end gap-3">
           <button
