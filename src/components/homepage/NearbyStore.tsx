@@ -40,12 +40,18 @@ interface StoreWithDistance extends StoreData {
 }
 
 export default function NearbyStore() {
-  const { location, loading: locationLoading, error: locationError } = useGeolocation();
+  const {
+    location,
+    loading: locationLoading,
+    error: locationError,
+  } = useGeolocation();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string>("");
   const [stores, setStores] = useState<StoreWithDistance[]>([]);
   const [nearestStores, setNearestStores] = useState<StoreWithDistance[]>([]);
-  const [storeMarkerIcon, setStoreMarkerIcon] = useState<Icon | DivIcon | undefined>(undefined);
+  const [storeMarkerIcon, setStoreMarkerIcon] = useState<
+    Icon | DivIcon | undefined
+  >(undefined);
 
   // Ensure this only runs on client
   useEffect(() => {
@@ -74,26 +80,32 @@ export default function NearbyStore() {
       setLoading(true);
       try {
         const fetchedStores = await storeService.getStores();
-        
-        // Filter out stores without coordinates
-        const validStores = fetchedStores.filter(
-          (store) => store.latitude && store.longitude
+
+        // Filter out stores without coordinates - Fix for 'filter' not existing on StoreApiResponse
+        // Assuming fetchedStores is array-like, we first ensure it's an array
+        const storesArray = Array.isArray(fetchedStores)
+          ? fetchedStores
+          : [fetchedStores];
+
+        // Filter out stores without coordinates with proper typing
+        const validStores = storesArray.filter(
+          (store: StoreWithDistance) => store.latitude && store.longitude
         );
-        
+
         setStores(validStores);
-        
+
         // If we already have location, sort stores by distance
         if (location) {
           const sorted = sortByDistance(
             validStores,
             location.latitude,
             location.longitude,
-            (store) => ({
+            (store: StoreWithDistance) => ({
               lat: store.latitude,
-              lon: store.longitude
+              lon: store.longitude,
             })
           );
-          
+
           // Select 3 nearest stores
           setNearestStores(sorted.slice(0, 3));
         } else {
@@ -121,12 +133,12 @@ export default function NearbyStore() {
         stores,
         location.latitude,
         location.longitude,
-        (store) => ({
+        (store: StoreWithDistance) => ({
           lat: store.latitude,
-          lon: store.longitude
+          lon: store.longitude,
         })
       );
-      
+
       // Select 3 nearest stores
       setNearestStores(sorted.slice(0, 3));
     }
@@ -142,7 +154,7 @@ export default function NearbyStore() {
   }
 
   // Render error state
-  if ((error || locationError) || stores.length === 0) {
+  if (error || locationError || stores.length === 0) {
     return (
       <div className="h-auto bg-gradient-to-br from-black to-gray-900 flex items-center justify-center px-4">
         <div className="text-center bg-gray-800/50 backdrop-blur-lg rounded-xl p-8 shadow-lg border border-gray-700/50">
@@ -202,9 +214,7 @@ export default function NearbyStore() {
                   url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
                 />
                 {/* User location marker */}
-                <Marker
-                  position={[location.latitude, location.longitude]}
-                >
+                <Marker position={[location.latitude, location.longitude]}>
                   <Popup>
                     <div className="font-semibold">Your Location</div>
                     <div className="text-sm">{location.address}</div>
@@ -215,8 +225,12 @@ export default function NearbyStore() {
                   <Marker
                     key={store.store_id}
                     position={[
-                      typeof store.latitude === 'string' ? parseFloat(store.latitude) : (store.latitude || 0), 
-                      typeof store.longitude === 'string' ? parseFloat(store.longitude) : (store.longitude || 0)
+                      typeof store.latitude === "string"
+                        ? parseFloat(store.latitude)
+                        : store.latitude || 0,
+                      typeof store.longitude === "string"
+                        ? parseFloat(store.longitude)
+                        : store.longitude || 0,
                     ]}
                     icon={storeMarkerIcon}
                   >
