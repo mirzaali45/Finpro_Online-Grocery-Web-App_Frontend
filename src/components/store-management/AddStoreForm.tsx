@@ -167,9 +167,12 @@ export default function AddStoreForm({
           value={formData.user_id}
           error={errors.user_id}
           onChange={handleChange}
-          options={users?.map((v: User) => ({ 
-            value: v.user_id, 
-            label: `${v.first_name} ${v.last_name}` 
+          options={users?.map((v: User) => ({
+            value: v.user_id,
+            label:
+              v.username ||
+              `${v.first_name || ""} ${v.last_name || ""}`.trim() ||
+              "Unnamed Admin",
           }))}
         />
       </div>
