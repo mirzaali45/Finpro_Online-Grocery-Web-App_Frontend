@@ -14,7 +14,6 @@ import {
 import { Address, AddressFormData, Location } from "@/types/address-types";
 import DeleteAddressModal from "../product-page-customer/DeleteAddressModal";
 
-
 const Section2 = () => {
   const {
     load,
@@ -262,7 +261,7 @@ const Section2 = () => {
             setLocation={setLocation}
           />
         </Modal>
-        
+
         {/* modal edit address */}
         <Modal
           isOpen={modalEdit}
