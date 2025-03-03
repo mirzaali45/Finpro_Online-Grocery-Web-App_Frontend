@@ -1,100 +1,118 @@
-'use client';
+"use client";
 
-import { 
-  BarChart, 
-  FileBarChart, 
-  PieChart as PieChartIcon, 
-  ArrowUpDown
-} from 'lucide-react';
-import { useState } from 'react';
-import { 
-  BarChart as RechartsBarChart, 
-  Bar, 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip, 
-  Legend, 
+import React, { useState, useMemo } from "react";
+import {
+  BarChart,
+  FileBarChart,
+  PieChart as PieChartIcon,
+  ArrowUpDown,
+} from "lucide-react";
+import {
+  BarChart as RechartsBarChart,
+  Bar,
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip,
+  Legend,
   ResponsiveContainer,
   PieChart,
   Pie,
   Cell,
   LineChart,
-  Line
-} from 'recharts';
-import { InventoryReportData } from '@/types/reports-superadmin-types';
+  Line,
+} from "recharts";
+import { InventoryReportData } from "@/types/reports-superadmin-types";
 
 // Colors for charts
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
+const COLORS = [
+  "#0088FE",
+  "#00C49F",
+  "#FFBB28",
+  "#FF8042",
+  "#8884d8",
+  "#82ca9d",
+];
 
 interface InventoryChartsProps {
   data: InventoryReportData | null;
 }
 
 export default function InventoryCharts({ data }: InventoryChartsProps) {
-  const [chartType, setChartType] = useState<'inventory' | 'value'>('inventory');
-  
-  if (!data) return null;
-  
-  // Prepare data for bar chart - top 5 stores by inventory count or value
-  const storeBarData = [...data.storesSummary]
-    .sort((a, b) => chartType === 'inventory' 
-      ? b.totalItems - a.totalItems 
-      : b.totalValue - a.totalValue
-    )
-    .slice(0, 5)
-    .map(store => ({
-      name: store.store_name,
-      value: chartType === 'inventory' ? store.totalItems : store.totalValue,
-      location: store.location
-    }));
-    
-  // Prepare data for pie chart - inventory distribution by category
-  const categoryMap: Record<string, { name: string, value: number }> = {};
-  
-  data.inventory.forEach(item => {
-    const category = item.product.category;
-    if (!categoryMap[category]) {
-      categoryMap[category] = { name: category, value: 0 };
-    }
-    if (chartType === 'inventory') {
+  const [chartType, setChartType] = useState<"inventory" | "value">(
+    "inventory"
+  );
+
+  // Memoized store bar data preparation
+  const storeBarData = useMemo(() => {
+    if (!data) return [];
+
+    return [...data.storesSummary]
+      .sort((a, b) =>
+        chartType === "inventory"
+          ? b.totalItems - a.totalItems
+          : b.totalValue - a.totalValue
+      )
+      .slice(0, 5)
+      .map((store) => ({
+        name: store.store_name,
+        value: chartType === "inventory" ? store.totalItems : store.totalValue,
+        location: store.location,
+      }));
+  }, [data, chartType]);
+
+  // Memoized category pie data preparation - STATIC version
+  const categoryPieData = useMemo(() => {
+    if (!data) return [];
+
+    const categoryMap: Record<string, { name: string; value: number }> = {};
+
+    data.inventory.forEach((item) => {
+      const category = item.product.category;
+      if (!categoryMap[category]) {
+        categoryMap[category] = { name: category, value: 0 };
+      }
+
+      // ALWAYS use current_quantity
       categoryMap[category].value += item.current_quantity;
-    } else {
-      categoryMap[category].value += item.stockValue;
-    }
-  });
-  
-  const categoryPieData = Object.values(categoryMap)
-    .sort((a, b) => b.value - a.value);
-    
-  // Format tooltip values based on chart type
+    });
+
+    return Object.values(categoryMap).sort((a, b) => b.value - a.value);
+  }, [data]); // Remove chartType dependency
+
+  // Early return if no data
+  if (!data) return null;
+
+  // Format tooltip value based on chart type
   const formatTooltipValue = (value: number) => {
-    if (chartType === 'inventory') {
+    if (chartType === "inventory") {
       return `${value.toLocaleString()} units`;
     } else {
       return `Rp ${value.toLocaleString()}`;
     }
   };
-  
-  // Calculate low stock percentage
-  const lowStockItems = data.inventory.filter(item => item.lowStock).length;
+
+  // Low stock calculations
+  const lowStockItems = data.inventory.filter((item) => item.lowStock).length;
   const totalItems = data.inventory.length;
   const lowStockPercentage = Math.round((lowStockItems / totalItems) * 100);
-  
-  // Format Y-axis tick values - ensure we return a string to satisfy TypeScript
+
+  // Y-axis tick formatter
   const formatYAxisTick = (value: any): string => {
     const numValue = Number(value);
-    if (chartType === 'inventory') {
-      return numValue >= 1000 ? `${(numValue / 1000).toFixed(0)}K` : String(numValue);
+    if (chartType === "inventory") {
+      return numValue >= 1000
+        ? `${(numValue / 1000).toFixed(0)}K`
+        : String(numValue);
     } else {
-      return numValue >= 1000000 
-        ? `${(numValue / 1000000).toFixed(1)}M` 
-        : numValue >= 1000 
-          ? `${(numValue / 1000).toFixed(0)}K` 
-          : String(numValue);
+      return numValue >= 1000000
+        ? `${(numValue / 1000000).toFixed(1)}M`
+        : numValue >= 1000
+        ? `${(numValue / 1000).toFixed(0)}K`
+        : String(numValue);
     }
   };
-  
+
   return (
     <div className="space-y-8">
       {/* Chart header with toggle */}
@@ -104,18 +122,26 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
           Inventory Analytics
         </h2>
         <div className="flex items-center space-x-2 border rounded-md overflow-hidden">
-          <button 
-            className={`px-3 py-2 text-sm font-medium ${chartType === 'inventory' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'}`}
-            onClick={() => setChartType('inventory')}
+          <button
+            className={`px-3 py-2 text-sm font-medium ${
+              chartType === "inventory"
+                ? "bg-blue-50 text-blue-600"
+                : "bg-white text-gray-600"
+            }`}
+            onClick={() => setChartType("inventory")}
           >
             <span className="flex items-center gap-1">
               <BarChart className="h-4 w-4" />
               Quantity
             </span>
           </button>
-          <button 
-            className={`px-3 py-2 text-sm font-medium ${chartType === 'value' ? 'bg-blue-50 text-blue-600' : 'bg-white text-gray-600'}`}
-            onClick={() => setChartType('value')}
+          <button
+            className={`px-3 py-2 text-sm font-medium ${
+              chartType === "value"
+                ? "bg-blue-50 text-blue-600"
+                : "bg-white text-gray-600"
+            }`}
+            onClick={() => setChartType("value")}
           >
             <span className="flex items-center gap-1">
               <ArrowUpDown className="h-4 w-4" />
@@ -124,11 +150,13 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
           </button>
         </div>
       </div>
-      
+
       {/* Metrics summary */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         <div className="bg-white rounded-lg shadow-sm p-6 border">
-          <h3 className="text-gray-500 text-sm font-medium mb-3">Low Stock Items</h3>
+          <h3 className="text-gray-500 text-sm font-medium mb-3">
+            Low Stock Items
+          </h3>
           <div className="flex items-center">
             <div className="relative h-16 w-16">
               <svg viewBox="0 0 36 36" className="h-16 w-16 stroke-current">
@@ -150,7 +178,12 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
                     a 15.9155 15.9155 0 0 1 0 31.831
                     a 15.9155 15.9155 0 0 1 0 -31.831"
                 />
-                <text x="18" y="20.5" className="text-red-500 font-medium text-5" textAnchor="middle">
+                <text
+                  x="18"
+                  y="20.5"
+                  className="text-red-500 font-medium text-5"
+                  textAnchor="middle"
+                >
                   {lowStockPercentage}%
                 </text>
               </svg>
@@ -161,9 +194,11 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
             </div>
           </div>
         </div>
-        
+
         <div className="bg-white rounded-lg shadow-sm p-6 border md:col-span-2">
-          <h3 className="text-gray-500 text-sm font-medium mb-2">Inventory Value Distribution</h3>
+          <h3 className="text-gray-500 text-sm font-medium mb-2">
+            Inventory Value Distribution
+          </h3>
           <div className="h-40">
             <ResponsiveContainer width="100%" height="100%">
               <LineChart
@@ -172,35 +207,35 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="store_name" />
-                <YAxis 
-                  tickFormatter={formatYAxisTick} 
+                <YAxis tickFormatter={formatYAxisTick} />
+                <Tooltip
+                  formatter={(value: number) =>
+                    chartType === "inventory"
+                      ? [`${value.toLocaleString()} units`, "Items"]
+                      : [`Rp ${value.toLocaleString()}`, "Value"]
+                  }
                 />
-                <Tooltip 
-                  formatter={(value: number) => 
-                    chartType === 'inventory' 
-                      ? [`${value.toLocaleString()} units`, 'Items'] 
-                      : [`Rp ${value.toLocaleString()}`, 'Value']
-                  } 
-                />
-                <Line 
-                  type="monotone" 
-                  dataKey={chartType === 'inventory' ? 'totalItems' : 'totalValue'} 
-                  stroke="#8884d8" 
-                  activeDot={{ r: 8 }} 
+                <Line
+                  type="monotone"
+                  dataKey={
+                    chartType === "inventory" ? "totalItems" : "totalValue"
+                  }
+                  stroke="#8884d8"
+                  activeDot={{ r: 8 }}
                 />
               </LineChart>
             </ResponsiveContainer>
           </div>
         </div>
       </div>
-      
       {/* Main charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Bar chart */}
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <h3 className="flex items-center gap-1 text-gray-700 font-medium mb-4">
             <BarChart className="h-4 w-4" />
-            Top 5 Stores by {chartType === 'inventory' ? 'Inventory Count' : 'Inventory Value'}
+            Top 5 Stores by{" "}
+            {chartType === "inventory" ? "Inventory Count" : "Inventory Value"}
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -210,32 +245,34 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
               >
                 <CartesianGrid strokeDasharray="3 3" />
                 <XAxis dataKey="name" />
-                <YAxis 
-                  tickFormatter={formatYAxisTick}
-                />
-                <Tooltip 
-                  formatter={(value: number) => [formatTooltipValue(value), chartType === 'inventory' ? 'Items' : 'Value']} 
+                <YAxis tickFormatter={formatYAxisTick} />
+                <Tooltip
+                  formatter={(value: number) => [
+                    formatTooltipValue(value),
+                    chartType === "inventory" ? "Items" : "Value",
+                  ]}
                   labelFormatter={(name) => {
-                    const store = storeBarData.find(s => s.name === name);
+                    const store = storeBarData.find((s) => s.name === name);
                     return `${name} (${store?.location})`;
                   }}
                 />
                 <Legend />
-                <Bar 
-                  dataKey="value" 
-                  name={chartType === 'inventory' ? 'Total Items' : 'Total Value'} 
-                  fill="#0088FE" 
+                <Bar
+                  dataKey="value"
+                  name={
+                    chartType === "inventory" ? "Total Items" : "Total Value"
+                  }
+                  fill="#0088FE"
                 />
               </RechartsBarChart>
             </ResponsiveContainer>
           </div>
         </div>
-        
         {/* Pie chart */}
         <div className="bg-white rounded-lg shadow-sm p-6 border">
           <h3 className="flex items-center gap-1 text-gray-700 font-medium mb-4">
             <PieChartIcon className="h-4 w-4" />
-            {chartType === 'inventory' ? 'Inventory' : 'Value'} by Category
+            Inventory by Category
           </h3>
           <div className="h-64">
             <ResponsiveContainer width="100%" height="100%">
@@ -249,14 +286,22 @@ export default function InventoryCharts({ data }: InventoryChartsProps) {
                   fill="#8884d8"
                   dataKey="value"
                   nameKey="name"
-                  label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                  label={({ name, percent }) =>
+                    `${name}: ${(percent * 100).toFixed(0)}%`
+                  }
                 >
                   {categoryPieData.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
+                    <Cell
+                      key={`cell-${index}`}
+                      fill={COLORS[index % COLORS.length]}
+                    />
                   ))}
                 </Pie>
-                <Tooltip 
-                  formatter={(value: number) => [formatTooltipValue(value), chartType === 'inventory' ? 'Items' : 'Value']} 
+                <Tooltip
+                  formatter={(value: number) => [
+                    `${value.toLocaleString()} units`,
+                    "Items",
+                  ]}
                 />
                 <Legend />
               </PieChart>

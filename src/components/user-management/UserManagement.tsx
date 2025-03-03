@@ -86,20 +86,6 @@ export default function UserManagement() {
           <span>{error}</span>
         </div>
       )}
-
-      {/* Debug Info (remove in production) */}
-      {/* <div className="bg-gray-100 p-3 rounded-lg mb-4">
-        <pre className="text-xs">
-          {JSON.stringify({
-            totalUsers: pagination.total,
-            currentPage: pagination.page,
-            totalPages: pagination.totalPages,
-            hasNextPage: pagination.hasNextPage,
-            hasPrevPage: pagination.hasPrevPage
-          }, null, 2)}
-        </pre>
-      </div> */}
-
       {/* User List */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-6">
         {isFetching ? (
