@@ -29,7 +29,7 @@ interface AddStoreFormProps {
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
-  users: User[]
+  users: User[];
 }
 function MapClickHandler({
   setFormData,
@@ -56,7 +56,7 @@ export default function AddStoreForm({
   setFormData,
   handleSubmit,
   isSubmitting,
-  users
+  users,
 }: AddStoreFormProps) {
   const handleNumberChange =
     (fieldName: "latitude" | "longitude") =>
@@ -160,6 +160,7 @@ export default function AddStoreForm({
           error={errors.longitude}
           onChange={handleNumberChange("longitude")}
         />
+        
         <SelectField
           name="user_id"
           label="Store Admin"
@@ -167,9 +168,9 @@ export default function AddStoreForm({
           value={formData.user_id}
           error={errors.user_id}
           onChange={handleChange}
-          options={users?.map((v: User) => ({ 
-            value: v.user_id, 
-            label: `${v.first_name} ${v.last_name}` 
+          options={users?.map((v: User) => ({
+            value: v.user_id,
+            label: `${v.first_name} ${v.last_name}`,
           }))}
         />
       </div>

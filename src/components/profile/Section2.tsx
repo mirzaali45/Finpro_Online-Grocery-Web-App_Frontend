@@ -3,9 +3,17 @@ import services2 from "@/services/profile/services2";
 import Modal from "../product-management/Modal";
 import FormAddressAdd from "./FormAddressAdd";
 import FormAddressEdit from "./FormAddressEdit";
-import { HouseIcon, PencilIcon, Trash2Icon, PlusCircleIcon, MapPinIcon, StarIcon } from "lucide-react";
+import {
+  HouseIcon,
+  PencilIcon,
+  Trash2Icon,
+  PlusCircleIcon,
+  MapPinIcon,
+  StarIcon,
+} from "lucide-react";
 import { Address, AddressFormData, Location } from "@/types/address-types";
 import DeleteAddressModal from "../product-page-customer/DeleteAddressModal";
+
 
 const Section2 = () => {
   const {
@@ -20,10 +28,14 @@ const Section2 = () => {
 
   const [modalAdd, setModalAdd] = useState(false);
   const [modalEdit, setModalEdit] = useState(false);
-  const [expandedAddressId, setExpandedAddressId] = useState<number | null>(null);
+  const [expandedAddressId, setExpandedAddressId] = useState<number | null>(
+    null
+  );
   const [modalDelete, setModalDelete] = useState(false);
-  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(null);
-  
+  const [selectedAddressId, setSelectedAddressId] = useState<number | null>(
+    null
+  );
+
   const [formEditData, setFormEditData] = useState<Address>({
     address_id: 0,
     address_name: "",
@@ -85,29 +97,35 @@ const Section2 = () => {
   const confirmDelete = async (id: number) => {
     try {
       await deleteAddress(id);
-      setAddressData((prev) => prev.filter((address) => address.address_id !== id)); // Hapus dari state biar langsung update
+      setAddressData((prev) =>
+        prev.filter((address) => address.address_id !== id)
+      ); // Hapus dari state biar langsung update
     } catch (error) {
       console.error("Failed to delete address:", error);
     }
   };
-  
 
   return (
     <>
       <div className="mt-10 text-center">
         <h1 className="text-3xl font-bold">My Addresses</h1>
-        <p className="text-gray-400 mt-2">Manage and update your delivery locations</p>
+        <p className="text-gray-400 mt-2">
+          Manage and update your delivery locations
+        </p>
       </div>
-      
+
       <section className="mt-8 max-w-4xl mx-auto px-6 pt-6 pb-12 bg-gradient-to-br from-gray-900 to-gray-800 rounded-lg shadow-xl">
         <div className="flex flex-col md:flex-row gap-4 justify-between items-center mb-8">
           <div>
-            <h2 className="text-xl font-semibold text-white">Saved Locations</h2>
+            <h2 className="text-xl font-semibold text-white">
+              Saved Locations
+            </h2>
             <p className="text-gray-400 text-sm">
-              {addressData.length} {addressData.length === 1 ? 'address' : 'addresses'} saved
+              {addressData.length}{" "}
+              {addressData.length === 1 ? "address" : "addresses"} saved
             </p>
           </div>
-          
+
           <button
             onClick={() => setModalAdd(true)}
             className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md transition-all transform hover:scale-105"
@@ -116,11 +134,13 @@ const Section2 = () => {
             <span>Add New Address</span>
           </button>
         </div>
-        
+
         {addressData.length === 0 ? (
           <div className="text-center py-12 bg-gray-800 bg-opacity-50 rounded-lg">
             <MapPinIcon size={48} className="mx-auto text-gray-600 mb-4" />
-            <h3 className="text-gray-400 mb-4">You don't have any saved addresses yet</h3>
+            <h3 className="text-gray-400 mb-4">
+              You don&apos;t have any saved addresses yet
+            </h3>
             <button
               onClick={() => setModalAdd(true)}
               className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-md transition-all"
@@ -136,9 +156,9 @@ const Section2 = () => {
                 <div
                   key={data.address_id}
                   className={`bg-gray-800 rounded-lg overflow-hidden transition-all duration-300 shadow-lg hover:shadow-xl border border-gray-700 
-                    ${data.is_primary ? 'ring-2 ring-blue-500' : ''}`}
+                    ${data.is_primary ? "ring-2 ring-blue-500" : ""}`}
                 >
-                  <div 
+                  <div
                     className="px-5 py-4 cursor-pointer"
                     onClick={() => toggleExpand(data.address_id)}
                   >
@@ -180,21 +200,20 @@ const Section2 = () => {
                           <PencilIcon size={16} />
                         </button>
                         <button
-  onClick={(e) => {
-    e.stopPropagation();
-    setSelectedAddressId(data.address_id);
-    setModalDelete(true);
-  }}
-  className="p-2 rounded-full bg-gray-700 hover:bg-red-600 transition-colors"
-  title="Delete address"
->
-  <Trash2Icon size={16} />
-</button>
-
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setSelectedAddressId(data.address_id);
+                            setModalDelete(true);
+                          }}
+                          className="p-2 rounded-full bg-gray-700 hover:bg-red-600 transition-colors"
+                          title="Delete address"
+                        >
+                          <Trash2Icon size={16} />
+                        </button>
                       </div>
                     </div>
                   </div>
-                  
+
                   {expandedAddressId === data.address_id && (
                     <div className="px-5 py-4 bg-gray-750 border-t border-gray-700 animate-fadeIn">
                       <div className="grid grid-cols-2 gap-3 mb-3">
@@ -215,7 +234,7 @@ const Section2 = () => {
                           <p className="text-sm">{data.postcode || "—"}</p>
                         </div>
                       </div>
-                      
+
                       {!data.is_primary && (
                         <button
                           onClick={() => setPrimaryAddressEdit(data.address_id)}
@@ -230,7 +249,7 @@ const Section2 = () => {
               ))}
           </div>
         )}
-        
+
         {/* modal add address */}
         <Modal
           isOpen={modalAdd}
@@ -259,16 +278,15 @@ const Section2 = () => {
           />
         </Modal>
         <DeleteAddressModal
-  isOpen={modalDelete}
-  onClose={() => setModalDelete(false)}
-  onDelete={async () => {
-    if (selectedAddressId !== null) {
-      await confirmDelete(selectedAddressId);
-    }
-    setModalDelete(false);
-  }}
-/>
-
+          isOpen={modalDelete}
+          onClose={() => setModalDelete(false)}
+          onDelete={async () => {
+            if (selectedAddressId !== null) {
+              await confirmDelete(selectedAddressId);
+            }
+            setModalDelete(false);
+          }}
+        />
       </section>
     </>
   );
