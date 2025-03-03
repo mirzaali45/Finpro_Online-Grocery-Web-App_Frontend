@@ -5,11 +5,17 @@ import UserManagement from "@/components/user-management/UserManagement";
 
 export default function UserAdmin() {
   return (
-    <div className="min-h-screen bg-gray-100 text-gray-900 dark:bg-gray-900 dark:text-gray-100">
-      <main className="container mx-auto p-6">
-        <UserManagement />
-      </main>
+    <>
+      <div className="mb-6">
+        <div className="flex items-center text-sm text-gray-500 mb-2">
+          <span>Dashboard</span>
+          <span className="mx-2">›</span>
+          <span className="text-blue-600">User Management</span>
+        </div>
+        <h1 className="text-2xl font-bold">User Management</h1>
       </div>
+
+      <UserManagement />
+    </>
   );
 }
-
