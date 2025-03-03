@@ -17,6 +17,8 @@ import {
   useOrders,
   useDashboardStats,
 } from "@/components/hooks/useRevenueSuper";
+// Add missing import for InventoryCharts
+import InventoryCharts from "@/components/super-reports/ChartReport";
 
 export default function DashboardSuperAdmin() {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -124,7 +126,6 @@ export default function DashboardSuperAdmin() {
         setStoreAdmin(storeAdmins.length);
         setTotalCustomer(customers.length);
         setInventoryData(inventoryReport.data);
-
         setIsLoading(false);
       } catch (err: unknown) {
         const errorMessage = err instanceof Error ? err.message : String(err);
@@ -290,6 +291,22 @@ export default function DashboardSuperAdmin() {
             <p className="text-sm md:text-base text-gray-600">
               No recent activity to display.
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* Inventory Charts Section */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
+        <InventoryCharts data={inventoryData} />
+      </div>
+
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Recent Activity
+          </h2>
+          <div className="space-y-4">
+            <p className="text-gray-600">No recent activity to display.</p>
           </div>
         </div>
       </div>
