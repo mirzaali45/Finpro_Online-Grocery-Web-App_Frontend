@@ -7,7 +7,6 @@ import {
   GetRevenueParams,
 } from "@/types/revenuesuper-types";
 
-
 const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 // Helper function to fetch with timeout
@@ -28,7 +27,6 @@ async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 3
     throw error;
   }
 }
-
 
 // Helper function to handle API responses
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -129,7 +127,6 @@ export const revenueService = {
     try {
       const url = buildUrl("/revenue-superadmin/period", params);
 
-
       const response = await fetchWithTimeout(
         url,
         {
@@ -165,7 +162,6 @@ export const revenueService = {
     try {
       const url = `${API_BASE_URL}/revenue-superadmin/dashboard`;
 
-
       const response = await fetchWithTimeout(
         url,
         {
@@ -185,6 +181,7 @@ export const revenueService = {
           error: "Request timeout",
         };
       }
+
       return {
         status: "error",
         message: "Failed to fetch dashboard statistics",
@@ -193,8 +190,6 @@ export const revenueService = {
     }
   },
 };
-
-
 export default revenueService;
 
 
