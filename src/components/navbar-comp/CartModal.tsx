@@ -206,8 +206,6 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
 const handleCheckout = async () => {
   try {
     setIsLoading(true);
-    onClose(); // Close the cart modal
-
     const token = localStorage.getItem("token");
     if (!token || !profile?.userId) {
       showToast("Please log in to checkout", "error");
@@ -244,7 +242,8 @@ const handleCheckout = async () => {
     showToast(errorMessage, "error");
 
     if (errorMessage.includes("toko yang berbeda")) {
-      router.push("/orders/checkout");
+
+      router.push("/products");
     }
   } finally {
     setIsLoading(false);
