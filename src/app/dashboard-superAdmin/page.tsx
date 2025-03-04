@@ -17,7 +17,6 @@ import {
   useOrders,
   useDashboardStats,
 } from "@/components/hooks/useRevenueSuper";
-// Add missing import for InventoryCharts
 import InventoryCharts from "@/components/super-reports/ChartReport";
 
 export default function DashboardSuperAdmin() {

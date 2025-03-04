@@ -10,8 +10,6 @@ import {
   GetRevenueParams,
 } from "@/types/revenuesuper-types";
 import revenueService from "@/services/revenuesuperadmin";
-
-// Custom hook for fetching all orders
 export const useOrders = (initialParams?: GetOrdersParams) => {
   const [orders, setOrders] = useState<OrdersResponse | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
