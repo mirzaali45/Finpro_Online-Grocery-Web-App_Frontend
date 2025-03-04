@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { productService } from "@/services/product.service";
 import debounce from "lodash/debounce";
-import { NavbarProps, ModalState, Product, } from "@/types/product-types";
+import { NavbarProps, ModalState, Product } from "@/types/product-types";
 import { SearchModal } from "@/components/navbar-comp/SearchModal";
 import { CartModal } from "@/components/navbar-comp/CartModal";
 import { generateSlug } from "../utils/slugUtils";
@@ -13,7 +13,6 @@ import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
 import { Menu, X } from "lucide-react"; // Icon untuk mobile menu
 
-
 export default function Navbar({ className }: NavbarProps) {
   const [modalState, setModalState] = useState<ModalState>({
     isSearchOpen: false,
@@ -22,11 +21,11 @@ export default function Navbar({ className }: NavbarProps) {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk mobile menu
   const modalRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
+  // Fungsi pencarian
   const handleSearch = useCallback(async (term: string) => {
     if (term.length < 1) {
       setSearchResults([]);
@@ -34,8 +33,8 @@ export default function Navbar({ className }: NavbarProps) {
     }
     setIsLoading(true);
     try {
-      const response = await productService.getProducts(); 
-      const filtered = response.products 
+      const response = await productService.getProducts();
+      const filtered = response.products
         .filter((product: Product) => {
           const name = product.name.toLowerCase();
           const searchTerm = term.toLowerCase();
@@ -117,68 +116,58 @@ export default function Navbar({ className }: NavbarProps) {
     };
   }, [debouncedSearch]);
 
-  const navVariants = {
-    hidden: { opacity: 0, y: -100, transition: { duration: 0.5 } },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-    hover: { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(255,255,255,0.1)" },
-  };
-
   return (
     <>
       <AnimatePresence>
         {isNavbarVisible && (
           <motion.nav
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={navVariants}
-            whileHover="hover"
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
-            className={`fixed top-0 left-0 right-0 z-50 ${className ?? ""}`}
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className={`fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-md ${
+              className ?? ""
+            }`}
+            style={{ overflow: "visible" }} // Tambahkan ini
           >
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="h-[1px] w-full origin-left bg-gradient-to-r from-rose-500/50 via-purple-500/50 to-blue-500/50"
-            />
-            <div className="relative">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isHovered ? 0.2 : 0.1 }}
-                className="absolute inset-0 bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-blue-500/10 blur-2xl"
-              />
-              <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-lg" />
+            <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16 relative">
+              {/* Logo */}
+              <NavLogo />
 
-              <div className="relative max-w-6xl mx-auto px-6">
-                <div className="flex items-center justify-between h-16">
-                  <NavLogo />
-                  {/* Mobile Menu Toggle */}
-                  <div className="lg:hidden">
-                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                      {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-                    </button>
-                  </div>
-                  {/* Links hanya muncul di layar lg ke atas */}
-                  <div className="hidden lg:flex">
-                    <NavLinks />
-                  </div>
-                  <ActionButtons toggleSearch={toggleSearch} toggleCart={toggleCart} />
-                </div>
+              {/* Mobile Menu Toggle */}
+              <button
+                className="lg:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
+                {isMenuOpen ? (
+                  <X className="w-6 h-6 text-white" />
+                ) : (
+                  <Menu className="w-6 h-6 text-white" />
+                )}
+              </button>
+
+              {/* Navbar Links (Desktop) */}
+              <div className="hidden lg:flex">
+                <NavLinks />
               </div>
+
+              {/* Action Buttons */}
+              <ActionButtons
+                toggleSearch={toggleSearch}
+                toggleCart={toggleCart}
+              />
             </div>
 
-            {/* Mobile Menu */}
+            {/* Mobile Menu (Vertikal) */}
             <AnimatePresence>
               {isMenuOpen && (
                 <motion.div
                   initial={{ opacity: 0, y: -20 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
-                  className="absolute top-16 left-0 w-full bg-neutral-900/95 backdrop-blur-lg p-4 flex flex-col gap-3 items-center lg:hidden"
+                  className="fixed top-16 left-0 w-full h-screen bg-neutral-900/95 backdrop-blur-lg 
+              flex !flex-col items-center gap-6 p-6 lg:hidden"
                 >
-                  <NavLinks />
+                  <NavLinks className="flex !flex-col items-center gap-6 w-full" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -186,9 +175,19 @@ export default function Navbar({ className }: NavbarProps) {
         )}
       </AnimatePresence>
 
+      {/* Modals */}
       <div ref={modalRef}>
-        <SearchModal isOpen={modalState.isSearchOpen} onClose={() => toggleSearch(false)} onSearch={handleSearchInput} isLoading={isLoading} searchResults={searchResults} />
-        <CartModal isOpen={modalState.isCartOpen} onClose={() => toggleCart(false)} />
+        <SearchModal
+          isOpen={modalState.isSearchOpen}
+          onClose={() => toggleSearch(false)}
+          onSearch={handleSearchInput}
+          isLoading={isLoading}
+          searchResults={searchResults}
+        />
+        <CartModal
+          isOpen={modalState.isCartOpen}
+          onClose={() => toggleCart(false)}
+        />
       </div>
     </>
   );

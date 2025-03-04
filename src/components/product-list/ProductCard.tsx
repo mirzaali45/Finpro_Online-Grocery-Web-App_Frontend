@@ -28,7 +28,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
-  const inventory = product.Inventory?.[0]?.total_qty || 0;
+  const inventory = product.Inventory?.[0]?.total_qty|| 0;
 
   const handleAddToCart = async () => {
     if (isLoading) return;
@@ -44,7 +44,6 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
         pauseOnHover: true,
         draggable: true,
       });
-
 
       onCartUpdate?.();
     } catch (error) {
@@ -183,15 +182,14 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium line-through text-neutral-500">
-                    Rp.{product.price.toLocaleString()}
+                    Rp.{Math.trunc(product.price).toLocaleString()}
                   </span>
                   <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
                     Rp.
-                    {(product.Discount[0].discount_type === "percentage"
-                      ? product.price -
-                        (product.price * product.Discount[0].discount_value) /
-                          100
-                      : product.price - product.Discount[0].discount_value
+                    {Math.trunc(
+                      product.Discount[0].discount_type === "percentage"
+                        ? product.price - (product.price * product.Discount[0].discount_value) / 100
+                        : product.price - product.Discount[0].discount_value
                     ).toLocaleString()}
                   </span>
                 </div>
@@ -199,13 +197,13 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
                   <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full">
                     {product.Discount[0].discount_type === "percentage"
                       ? `${product.Discount[0].discount_value}% OFF`
-                      : `Rp.${product.Discount[0].discount_value.toLocaleString()} OFF`}
+                      : `Rp.${Math.trunc(product.Discount[0].discount_value).toLocaleString()} OFF`}
                   </span>
                 </div>
               </>
             ) : (
               <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                Rp.{product.price.toLocaleString()}
+                Rp.{Math.trunc(product.price).toLocaleString()}
               </span>
             )}
             <span className="text-sm text-neutral-400">Stock: {inventory}</span>

@@ -236,8 +236,12 @@ export const VoucherList: React.FC = () => {
                   <div className="flex items-center gap-3 text-gray-300">
                     <MapPin className="w-5 h-5 text-blue-400" />
                     <span className="font-medium">
-                      {voucher.discount.store.store_name}
+                      {voucher.discount.store
+                        ? voucher.discount.store.store_name
+                        : "All Tech Lite Store"}
                     </span>
+
+
                   </div>
 
                   <div className="flex items-center gap-3 text-gray-300">
