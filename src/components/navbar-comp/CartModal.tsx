@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { X, Minus, Plus, Trash2, ShoppingCart } from "lucide-react";
+import { orderService } from "@/services/order.service";
 import Image from "next/image";
 import {
   fetchCartId,
@@ -8,10 +9,10 @@ import {
 } from "@/services/cart.service";
 import { formatRupiah } from "@/helper/currencyRp";
 import { Product } from "@/types/product-types";
-import { 
-  calculateDiscountedPrice, 
-  calculateDiscountPercentage, 
-  hasDiscount 
+import {
+  calculateDiscountedPrice,
+  calculateDiscountPercentage,
+  hasDiscount,
 } from "@/helper/discountCutPrice";
 import { CartModalProps, CartData } from "@/types/cart-types";
 import ProfileServices from "@/services/profile/services1";
@@ -33,40 +34,41 @@ interface ProductWithDiscount {
   }[];
 }
 
-// Type adaptation function
 const adaptProductForDiscount = (product: ProductWithDiscount): Product => {
   return {
     product_id: parseInt(product.product_id),
     store_id: 0, // Default value, adjust as needed
     name: product.name,
-    description: '', // Default value
+    description: "", // Default value
     price: product.price,
     category_id: 0, // Default value
-    category: { category_id: 0, category_name: '' }, // Default value
-    slug: '', // Default value
-    store: { 
-      store_id: 0, 
-      store_name: '', 
-      latitude: 0, 
-      longitude: 0, 
-      city: '' 
+    category: { category_id: 0, category_name: "" }, // Default value
+    slug: "", // Default value
+    store: {
+      store_id: 0,
+      store_name: "",
+      latitude: 0,
+      longitude: 0,
+      city: "",
     },
-    Discount: product.Discount?.map(discount => ({
+    Discount: product.Discount?.map((discount) => ({
       discount_id: discount.discount_id,
       store_id: null,
       product_id: null,
       thumbnail: null,
-      discount_code: '',
+      discount_code: "",
       discount_type: discount.discount_type,
       discount_value: discount.discount_value,
       minimum_order: null,
       expires_at: discount.expires_at,
-      created_at: '',
-      updated_at: '',
-      userUser_id: null
+      created_at: "",
+      updated_at: "",
+      userUser_id: null,
     })),
-    Inventory: product.Inventory ? [{ total_qty: product.Inventory[0]?.total_qty || 0 }] : [],
-    ProductImage: product.ProductImage
+    Inventory: product.Inventory
+      ? [{ total_qty: product.Inventory[0]?.total_qty || 0 }]
+      : [],
+    ProductImage: product.ProductImage,
   };
 };
 
@@ -172,7 +174,8 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 
     return cartData.items.reduce((total, item) => {
-      const productWithDiscount = item.product as unknown as ProductWithDiscount;
+      const productWithDiscount =
+        item.product as unknown as ProductWithDiscount;
       const adaptedProduct = adaptProductForDiscount(productWithDiscount);
       const discountedPrice = calculateDiscountedPrice(adaptedProduct);
       return total + discountedPrice * item.quantity;
@@ -183,9 +186,10 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
     if (!cartData?.items || cartData.items.length === 0) return 0;
 
     return cartData.items.reduce((savings, item) => {
-      const productWithDiscount = item.product as unknown as ProductWithDiscount;
+      const productWithDiscount =
+        item.product as unknown as ProductWithDiscount;
       const adaptedProduct = adaptProductForDiscount(productWithDiscount);
-      
+
       if (!hasDiscount(adaptedProduct)) {
         return savings;
       }
@@ -198,6 +202,40 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
 
   const totalPrice = calculateTotalPrice();
   const totalSavings = calculateTotalSavings();
+
+ const handleCheckout = async () => {
+   try {
+     setIsLoading(true);
+     onClose(); // Close the cart modal
+
+     const token = localStorage.getItem("token");
+     if (!token || !profile?.userId) {
+       showToast("Please log in to checkout", "error");
+       router.push("/login-user-customer");
+       return;
+     }
+
+     // Create order using the order service
+     const response = await orderService.createOrderFromCart(
+       token,
+       profile.userId
+     );
+
+     // Show success message
+     showToast(response.message || "Order created successfully!", "success");
+
+     router.push("/ordered");
+   } catch (error) {
+     const errorMessage =
+       error instanceof Error ? error.message : "Failed to create order";
+     showToast(errorMessage, "error");
+     if (errorMessage.includes("toko yang berbeda")) {
+       router.push("/orders/checkout");
+     }
+   } finally {
+     setIsLoading(false);
+   }
+ };
 
   return (
     <div
@@ -249,10 +287,13 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
             ) : (
               <div className="space-y-4">
                 {cartData.items.map((item) => {
-                  const productWithDiscount = item.product as unknown as ProductWithDiscount;
-                  const adaptedProduct = adaptProductForDiscount(productWithDiscount);
+                  const productWithDiscount =
+                    item.product as unknown as ProductWithDiscount;
+                  const adaptedProduct =
+                    adaptProductForDiscount(productWithDiscount);
                   const hasDiscountFlag = hasDiscount(adaptedProduct);
-                  const discountedPrice = calculateDiscountedPrice(adaptedProduct);
+                  const discountedPrice =
+                    calculateDiscountedPrice(adaptedProduct);
 
                   return (
                     <div
@@ -373,19 +414,21 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
               </div>
             </div>
 
-            <Link href={`/checkout`}>
-              <button
-                className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
-                disabled={!cartData?.items.length}
-              >
-                <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
-                <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
-                  <span className="text-neutral-200 font-medium">
-                    Proceed to Checkout
-                  </span>
-                </div>
-              </button>
-            </Link>
+            <button
+              onClick={handleCheckout}
+              className="relative w-full group disabled:opacity-50 disabled:cursor-not-allowed"
+              disabled={!cartData?.items.length || isLoading}
+            >
+              <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 rounded-lg blur opacity-60 group-hover:opacity-100 transition duration-300" />
+              <div className="relative flex items-center justify-center gap-2 py-3 bg-neutral-900 rounded-lg">
+                {isLoading ? (
+                  <div className="h-5 w-5 border-t-2 border-b-2 border-neutral-200 rounded-full animate-spin mr-2"></div>
+                ) : null}
+                <span className="text-neutral-200 font-medium">
+                  {isLoading ? "Processing..." : "Proceed to Checkout"}
+                </span>
+              </div>
+            </button>
           </div>
         </div>
       </div>

@@ -1,4 +1,4 @@
-import { Orders } from "@/types/orders-types";
+import { Order } from "@/types/orders-types";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
@@ -10,7 +10,7 @@ class StoreServiceError extends Error {
 }
 
 export const ordersCust = {
-  async getOrders(): Promise<Orders[]> {
+  async getOrders(): Promise<Order[]> {
     try {
       const token = localStorage.getItem("token");
       if (!token) throw new StoreServiceError("No authentication token found");
@@ -28,7 +28,7 @@ export const ordersCust = {
           response.status
         );
       }
-      const data: Orders[] = await response.json()
+      const data: Order[] = await response.json()
       return data;
     } catch (error) {
       if (error instanceof StoreServiceError) throw error;
