@@ -242,6 +242,7 @@ const handleCheckout = async () => {
     showToast(errorMessage, "error");
 
     if (errorMessage.includes("toko yang berbeda")) {
+
       router.push("/products");
     }
   } finally {
