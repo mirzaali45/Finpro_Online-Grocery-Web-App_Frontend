@@ -15,7 +15,7 @@ const ProfileServices = () => {
   const [profile, setProfile] = useState({
     avatar: "",
     username: "Loading..",
-    userId: "",
+    userId: 0,
     firstName: "Loading..",
     lastName: "Loading..",
     email: "Loading..",
