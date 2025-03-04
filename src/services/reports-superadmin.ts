@@ -9,7 +9,6 @@ import {
 const API_BASE_URL =
   process.env.NEXT_PUBLIC_BASE_URL_BE ;
 
-
 export class InventoryReportService {
   /**
    * Get inventory report for super admin with optional filters and pagination
