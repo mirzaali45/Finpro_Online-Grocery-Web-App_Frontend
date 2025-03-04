@@ -7,8 +7,26 @@ import {
   GetRevenueParams,
 } from "@/types/revenuesuper-types";
 
-const API_BASE_URL =
-  process.env.NEXT_PUBLIC_BASE_URL_BE
+const API_BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
+
+// Helper function to fetch with timeout
+async function fetchWithTimeout(url: string, options: RequestInit, timeoutMs = 30000) {
+  const controller = new AbortController();
+  const { signal } = controller;
+  
+  const timeout = setTimeout(() => {
+    controller.abort();
+  }, timeoutMs);
+  
+  try {
+    const response = await fetch(url, { ...options, signal });
+    clearTimeout(timeout);
+    return response;
+  } catch (error) {
+    clearTimeout(timeout);
+    throw error;
+  }
+}
 
 // Helper function to handle API responses
 async function handleResponse<T>(response: Response): Promise<ApiResponse<T>> {
@@ -70,13 +88,26 @@ export const revenueService = {
     try {
       const url = buildUrl("/revenue-superadmin/allorder", params);
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: "GET",
+          headers: getAuthHeaders(),
+        },
+        30000 // 30 second timeout
+      );
 
       return handleResponse<OrdersResponse>(response);
     } catch (error) {
+      // Check if this was a timeout error
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return {
+          status: "error",
+          message: "Request timed out. The server is taking too long to respond.",
+          error: "Request timeout",
+        };
+      }
+      
       return {
         status: "error",
         message: "Failed to fetch orders",
@@ -94,13 +125,26 @@ export const revenueService = {
     try {
       const url = buildUrl("/revenue-superadmin/period", params);
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: "GET",
+          headers: getAuthHeaders(),
+        },
+        30000 // 30 second timeout
+      );
 
       return handleResponse<RevenueResponse>(response);
     } catch (error) {
+      // Check if this was a timeout error
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return {
+          status: "error",
+          message: "Request timed out. The server is taking too long to respond.",
+          error: "Request timeout",
+        };
+      }
+      
       return {
         status: "error",
         message: "Failed to fetch revenue data",
@@ -116,13 +160,26 @@ export const revenueService = {
     try {
       const url = `${API_BASE_URL}/revenue-superadmin/dashboard`;
 
-      const response = await fetch(url, {
-        method: "GET",
-        headers: getAuthHeaders(),
-      });
+      const response = await fetchWithTimeout(
+        url,
+        {
+          method: "GET",
+          headers: getAuthHeaders(),
+        },
+        60000 // 60 second timeout for dashboard stats since this might take longer
+      );
 
       return handleResponse<DashboardStats>(response);
     } catch (error) {
+      // Check if this was a timeout error
+      if (error instanceof DOMException && error.name === "AbortError") {
+        return {
+          status: "error",
+          message: "Dashboard request timed out. The server is taking too long to respond.",
+          error: "Request timeout",
+        };
+      }
+      
       return {
         status: "error",
         message: "Failed to fetch dashboard statistics",
