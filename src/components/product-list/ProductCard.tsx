@@ -28,7 +28,7 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
-  const inventory = product.Inventory?.[0]?.total_qty || 0;
+  const inventory = product.Inventory?.[0]?.total_qty|| 0;
 
   const handleAddToCart = async () => {
     if (isLoading) return;

@@ -121,19 +121,23 @@ export default function Navbar({ className }: NavbarProps) {
       <AnimatePresence>
         {isNavbarVisible && (
           <motion.nav
-          initial={{ y: -100, opacity: 0 }}
-          animate={{ y: 0, opacity: 1 }}
-          exit={{ y: -100, opacity: 0 }}
-          className={`fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-md ${className ?? ""}`}
-          style={{ overflow: "visible" }} // Tambahkan ini
-        >
-        
+            initial={{ y: -100, opacity: 0 }}
+            animate={{ y: 0, opacity: 1 }}
+            exit={{ y: -100, opacity: 0 }}
+            className={`fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-md ${
+              className ?? ""
+            }`}
+            style={{ overflow: "visible" }} // Tambahkan ini
+          >
             <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16 relative">
               {/* Logo */}
               <NavLogo />
 
               {/* Mobile Menu Toggle */}
-              <button className="lg:hidden" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+              <button
+                className="lg:hidden"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+              >
                 {isMenuOpen ? (
                   <X className="w-6 h-6 text-white" />
                 ) : (
@@ -147,24 +151,26 @@ export default function Navbar({ className }: NavbarProps) {
               </div>
 
               {/* Action Buttons */}
-              <ActionButtons toggleSearch={toggleSearch} toggleCart={toggleCart} />
+              <ActionButtons
+                toggleSearch={toggleSearch}
+                toggleCart={toggleCart}
+              />
             </div>
 
             {/* Mobile Menu (Vertikal) */}
-<AnimatePresence>
-  {isMenuOpen && (
-   <motion.div
-   initial={{ opacity: 0, y: -20 }}
-   animate={{ opacity: 1, y: 0 }}
-   exit={{ opacity: 0, y: -20 }}
-   className="fixed top-16 left-0 w-full h-screen bg-neutral-900/95 backdrop-blur-lg 
+            <AnimatePresence>
+              {isMenuOpen && (
+                <motion.div
+                  initial={{ opacity: 0, y: -20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  className="fixed top-16 left-0 w-full h-screen bg-neutral-900/95 backdrop-blur-lg 
               flex !flex-col items-center gap-6 p-6 lg:hidden"
- >
-   <NavLinks className="flex !flex-col items-center gap-6 w-full" />
- </motion.div>
- 
-  )}
-</AnimatePresence>
+                >
+                  <NavLinks className="flex !flex-col items-center gap-6 w-full" />
+                </motion.div>
+              )}
+            </AnimatePresence>
           </motion.nav>
         )}
       </AnimatePresence>
@@ -178,7 +184,10 @@ export default function Navbar({ className }: NavbarProps) {
           isLoading={isLoading}
           searchResults={searchResults}
         />
-        <CartModal isOpen={modalState.isCartOpen} onClose={() => toggleCart(false)} />
+        <CartModal
+          isOpen={modalState.isCartOpen}
+          onClose={() => toggleCart(false)}
+        />
       </div>
     </>
   );
