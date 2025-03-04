@@ -28,6 +28,10 @@ import {
 } from "lucide-react";
 import VoucherSelector from "@/components/ordered-component/VoucherSelector";
 import { Voucher } from "@/types/voucher-types";
+import ItemOrder from "@/components/checkout/ItemOrder";
+import AddressClient from "@/components/checkout/AddressClient";
+import Services2 from "@/services/profile/services2";
+import { Address } from "@/types/address-types";
 
 // Define CourierOption type
 interface CourierOption {
@@ -85,6 +89,17 @@ const selectStyles = {
 
 export default function OrderedPage() {
   const router = useRouter();
+  const { load, addressData } = Services2();
+  const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
+
+  useEffect(() => {
+    if (addressData && addressData.length > 0) {
+      setSelectedAddress(
+        addressData.find((val: Address) => val.is_primary === true) ||
+          addressData[0]
+      );
+    }
+  }, [addressData]);
   const { isLoading, fetchLatestOrder, cancelOrder } = useOrders();
   const [order, setOrder] = useState<Order | null>(null);
   const [couriers, setCouriers] = useState<CourierOption[]>([]);
@@ -373,62 +388,29 @@ export default function OrderedPage() {
         <div className="lg:col-span-2 space-y-6">
           {/* Courier Selection Card */}
           <Card className="w-full bg-gradient-to-br from-gray-800 to-gray-700 border-gray-600 text-white shadow-lg hover:shadow-xl transition-all duration-300">
-            <CardHeader className="flex flex-row items-center justify-between border-b border-gray-600 pb-4">
-              <div className="flex items-center gap-3">
-                <Truck className="w-6 h-6 text-blue-400" />
-                <CardTitle className="text-xl font-semibold tracking-wide">
-                  Choose Shipping Method
-                </CardTitle>
-              </div>
-            </CardHeader>
-            <CardContent className="pt-4">
-              <div className="space-y-4">
-                <div className="mb-2">
-                  <label className="block text-gray-300 text-sm font-medium mb-2">
-                    Select your preferred courier service:
-                  </label>
-                <ReactSelect
-                    className="text-gray-800 z-50" // Added z-index
-                    placeholder="Choose Courier Delivery"
-                    options={couriers}
-                    value={selectedCourier}
-                    onChange={(selectedOption) => {
-                      setSelectedCourierValue(selectedOption?.value || "");
-                      setSelectedCourier(selectedOption as CourierOption);
-                    }}
-                    isLoading={isLoadingCouriers}
-                    isSearchable={true}
-                    styles={{
-                      ...selectStyles,
-                      menuPortal: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                      }),
-                      menu: (base) => ({
-                        ...base,
-                        zIndex: 9999,
-                        position: 'absolute'
-                      }),
-                    }}
-                    menuPortalTarget={typeof window !== 'undefined' ? document.body : null}
-                    menuPosition="fixed"
-                  />
-                </div>
-                
-                {selectedCourier && (
-                  <div className="flex justify-between items-center mt-3 p-3 bg-blue-900/30 rounded-lg border border-blue-800">
-                    <div className="flex items-center">
-                      <Truck className="h-4 w-4 mr-2 text-blue-400" />
-                      <span className="text-gray-200 text-sm">{selectedCourier.shipping_name}</span>
-                    </div>
-                    <span className="font-medium text-blue-400">
-                      {formatRupiah(selectedCourier.shipping_cost || 0)}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </CardContent>
-          </Card>
+      <CardHeader className="flex flex-row items-center justify-between border-b border-gray-600 pb-4">
+        <div className="flex items-center gap-3">
+          <Truck className="w-6 h-6 text-blue-400" />
+          <CardTitle className="text-xl font-semibold tracking-wide">
+            Choose Shipping Method
+          </CardTitle>
+        </div>
+      </CardHeader>
+      <CardContent className="pt-4">
+      {selectedAddress && <ItemOrder selectedAddress={selectedAddress} setSelectedCourier={setSelectedCourier} />}
+        {/* {selectedCourier && (
+          <div className="flex justify-between items-center mt-3 p-3 bg-blue-900/30 rounded-lg border border-blue-800">
+            <div className="flex items-center">
+              <Truck className="h-4 w-4 mr-2 text-blue-400" />
+              <span className="text-gray-200 text-sm">{selectedCourier.shipping_name}</span>
+            </div>
+            <span className="font-medium text-blue-400">
+              {formatRupiah(selectedCourier.shipping_cost || 0)}
+            </span>
+          </div>
+        )} */}
+      </CardContent>
+    </Card>
 
           {/* Voucher Selector */}
           <div>
@@ -533,9 +515,21 @@ export default function OrderedPage() {
                       <MapPin className="h-4 w-4 text-teal-400" />
                       Delivery Address
                     </span>
-                    <span className="text-gray-200 break-words">
-                      {shipping.address || "Address not available"}
-                    </span>
+                    {selectedAddress ? (
+  <main className="h-auto flex lg:flex-row flex-col max-w-5xl w-full justify-center mx-auto container gap-5">
+    <div className="w-full">
+      <AddressClient
+        addressData={addressData}
+        selectedAddress={selectedAddress}
+        setSelectedAddress={setSelectedAddress}
+      />
+      {/* <ItemOrder selectedAddress={selectedAddress} /> */}
+    </div>
+    {/* <span className="text-gray-200 break-words">
+      {shipping.address || "Address not available"}
+    </span> */}
+  </main>
+) : null}
                   </div>
                 </div>
               </CardContent>

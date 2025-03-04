@@ -45,7 +45,7 @@ const CheckoutPage: React.FC = () => {
                 selectedAddress={selectedAddress}
                 setSelectedAddress={setSelectedAddress}
               />
-              <ItemOrder selectedAddress={selectedAddress} />
+              {/* <ItemOrder selectedAddress={selectedAddress } /> */}
             </div>
             <div className="lg:w-1/3 w-full">
               <ProceedToPaymentButton order_id={""} totalPrice={0} userId={0}  />
