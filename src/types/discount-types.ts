@@ -7,6 +7,7 @@ export interface Discount {
   discount_type: "percentage" | "point";
   discount_value: number;
   minimum_order: number;
+  max_discount_amount?: number; // Added this optional property
   expires_at: string;
   product?: {
     name: string;

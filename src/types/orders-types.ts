@@ -1,29 +1,52 @@
-export interface Orders {
-  order_id: number;
-  user_id: number;
-  store_id: number;
-  order_status: string;
-  total_price: number;
-  created_at: string;
-  updated_at: string;
-  store: {
-    store_name: string;
-    city: string;
-  };
-  OrderItem: OrdersItems[];
+export enum OrderStatus {
+  pending = "pending",
+  awaiting_payment = "awaiting_payment",
+  processing = "processing",
+  shipped = "shipped",
+  completed = "completed",
+  cancelled = "cancelled",
 }
 
-export interface OrdersItems {
-  orderitem_id: number;
-  order_id: number;
+export enum ShippingStatus {
+  pending = "pending",
+  shipped = "shipped",
+  delivered = "delivered",
+}
+
+export interface OrderItem {
   product_id: number;
-  qty: number;
+  name: string;
   price: number;
+  quantity: number;
   total_price: number;
-  product: ProductOrderItem;
+  image: string | null;
 }
 
-export interface ProductOrderItem {
-  name: string;
-  description: string;
+export interface OrderStore {
+  store_id: number;
+  store_name: string;
+  location: string;
+}
+
+export interface OrderShipping {
+  status: ShippingStatus;
+  address: string;
+  cost: number;
+}
+
+export interface Order {
+  order_id: number;
+  order_date: string;
+  status: OrderStatus;
+  total_price: number;
+  total_items: number;
+  created_at: number;
+  store: OrderStore;
+  shipping: OrderShipping | null;
+  items: OrderItem[];
+}
+
+export interface ApiResponse<T> {
+  message: string;
+  data: T;
 }
