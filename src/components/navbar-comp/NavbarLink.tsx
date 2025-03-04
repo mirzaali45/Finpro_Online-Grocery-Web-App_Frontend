@@ -19,7 +19,7 @@ interface NavLinksProps {
 
 export const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
   const [isCustomer, setIsCustomer] = useState(false);
-  const {profile} = ProfileServices();
+  const { profile } = ProfileServices();
 
   // useEffect(() => {
   //   const checkAuthStatus = () => {
@@ -63,7 +63,7 @@ export const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
       localStorage.removeItem("token");
       localStorage.removeItem("is_login");
       localStorage.removeItem("user_id");
-      localStorage.removeItem("exp_token")
+      localStorage.removeItem("exp_token");
 
       await Swal.fire({
         title: "Logged Out!",
@@ -84,7 +84,10 @@ export const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
     { name: "Products", path: "/products" },
     { name: "About Us", path: "/about" },
     { name: "Deals", path: "/deals" },
-    ...((profile?.userId !== "") && (profile?.verified) && (profile?.password_reset_token == null)   
+    ...(profile &&
+    profile.userId &&
+    profile.verified &&
+    profile.password_reset_token === null
       ? [
           { name: "Profile", path: "/profile", icon: User },
           {
@@ -96,6 +99,7 @@ export const NavLinks: React.FC<NavLinksProps> = ({ className }) => {
         ]
       : [{ name: "Login", path: "/login-user-customer" }]),
   ];
+
 
   return (
     <div className="flex flex-col items-center md:flex-row">

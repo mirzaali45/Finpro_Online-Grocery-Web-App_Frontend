@@ -11,7 +11,7 @@ import ReactSelect from "react-select";
 import Image from "next/image";
 import { toast } from "react-toastify";
 import { formatRupiah } from "@/helper/currencyRp";
-import CartTotal from "./PaymentOrder"; // Import the CartTotal component
+import CartTotal from "./PaymentOrder"; 
 import { Address } from "@/types/address-types";
 import { CartData } from "@/types/cart-types";
 import { Minus, Plus, Trash2 } from "lucide-react";
