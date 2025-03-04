@@ -190,7 +190,6 @@ export const revenueService = {
     }
   },
 };
-
 export default revenueService;
 
 
