@@ -88,6 +88,7 @@ export const revenueService = {
     try {
       const url = buildUrl("/revenue-superadmin/allorder", params);
 
+
       const response = await fetchWithTimeout(
         url,
         {
@@ -108,6 +109,7 @@ export const revenueService = {
         };
       }
       
+
       return {
         status: "error",
         message: "Failed to fetch orders",
@@ -179,7 +181,7 @@ export const revenueService = {
           error: "Request timeout",
         };
       }
-      
+
       return {
         status: "error",
         message: "Failed to fetch dashboard statistics",
@@ -188,5 +190,6 @@ export const revenueService = {
     }
   },
 };
-
 export default revenueService;
+
+
