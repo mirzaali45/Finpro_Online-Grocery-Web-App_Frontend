@@ -185,6 +185,7 @@ export const revenueService = {
           error: "Request timeout",
         };
       }
+
       return {
         status: "error",
         message: "Failed to fetch dashboard statistics",
@@ -193,7 +194,6 @@ export const revenueService = {
     }
   },
 };
-
 
 export default revenueService;
 
