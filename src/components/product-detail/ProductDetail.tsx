@@ -5,7 +5,7 @@ import Image from "next/image";
 import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
-import { ShoppingCart, Store } from "lucide-react";
+import { ShoppingCart, Store, Clock, Tag } from "lucide-react";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -29,60 +29,136 @@ export default function ProductDetailClient({
 }: ProductDetailClientProps) {
   const [selectedImage, setSelectedImage] = useState(0);
   const [isAddingToCart, setIsAddingToCart] = useState(false);
+  const [isDiscountValid, setIsDiscountValid] = useState(false);
+  const [actualDiscount, setActualDiscount] = useState<any>(null);
 
-  // Debug logger
+  // Check discount validity and format discount data
   useEffect(() => {
-    if (product.Discount && product.Discount.length > 0) {
-      console.log("Discount info:", {
-        type: product.Discount[0].discount_type,
-        typeToString: String(product.Discount[0].discount_type),
-        value: product.Discount[0].discount_value,
-        isPercentage: product.Discount[0].discount_type === "percentage",
-      });
+    if (!product.Discount || product.Discount.length === 0) {
+      setIsDiscountValid(false);
+      setActualDiscount(null);
+      return;
     }
-  }, [product]);
+
+    // Get the discount from the array
+    const discountData = product.Discount[0];
+    console.log("Raw discount data:", discountData);
+
+    // Check if discount has expired
+    const isValid = () => {
+      if (!discountData.expires_at) return false;
+      const expiryDate = new Date(discountData.expires_at);
+      const currentDate = new Date();
+      return expiryDate > currentDate;
+    };
+
+    // Format the discount type correctly
+    const formatDiscount = () => {
+      // First make a copy to avoid mutation issues
+      const formattedDiscount = { ...discountData };
+
+      // Ensure discount_type is the correct enum value
+      const discountTypeStr = String(
+        formattedDiscount.discount_type
+      ).toLowerCase();
+      // Ensure it's one of the valid enum values
+      formattedDiscount.discount_type =
+        discountTypeStr === "percentage" ? "percentage" : "point";
+
+      // Log what we're working with
+      console.log("Formatted discount:", {
+        type: formattedDiscount.discount_type,
+        value: formattedDiscount.discount_value,
+        expiresAt: formattedDiscount.expires_at,
+      });
+
+      return formattedDiscount;
+    };
+
+    const valid = isValid();
+    setIsDiscountValid(valid);
+
+    if (valid) {
+      setActualDiscount(formatDiscount());
+    } else {
+      setActualDiscount(null);
+    }
+  }, [product.Discount]);
 
   const calculateDiscountedPrice = () => {
-    if (!product.Discount || product.Discount.length === 0) {
+    if (!isDiscountValid || !actualDiscount) {
       return product.price;
     }
 
-    const discount = product.Discount[0];
-    const discountType = String(discount.discount_type).toLowerCase();
+    const discountType = actualDiscount.discount_type.toLowerCase();
+    const discountValue = Number(actualDiscount.discount_value);
 
     if (discountType === "percentage") {
-      return Math.round(
-        product.price - (product.price * discount.discount_value) / 100
-      );
+      // Cap at 100% discount
+      const cappedValue = Math.min(discountValue, 100);
+      return Math.round(product.price - (product.price * cappedValue) / 100);
+    } else if (discountType === "point") {
+      return Math.max(0, product.price - discountValue); // Ensure price doesn't go below 0
     } else {
-      return product.price - discount.discount_value;
+      return product.price; // Fallback to original price if type is unknown
     }
   };
 
   const getDiscountLabel = () => {
-    if (!product.Discount || product.Discount.length === 0) {
+    if (!isDiscountValid || !actualDiscount) {
       return "";
     }
 
-    const discount = product.Discount[0];
-    const discountType = String(discount.discount_type).toLowerCase();
+    const discountType = actualDiscount.discount_type.toLowerCase();
+    const discountValue = Number(actualDiscount.discount_value);
 
     if (discountType === "percentage") {
-      return `${discount.discount_value}% OFF`;
+      // Cap at 100% for display
+      const cappedValue = Math.min(discountValue, 100);
+      return `${cappedValue}% OFF`;
+    } else if (discountType === "point") {
+      return `Rp${discountValue.toLocaleString()} OFF`;
     } else {
-      return `Rp.${discount.discount_value.toLocaleString()} OFF`;
+      return ""; // Return empty string for unknown discount types
     }
+  };
+
+  // Format expiry date for discount if available
+  const formatExpiryDate = () => {
+    if (!isDiscountValid || !actualDiscount || !actualDiscount.expires_at) {
+      return null;
+    }
+
+    const expiryDate = new Date(actualDiscount.expires_at);
+    const now = new Date();
+    const diffTime = expiryDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 3) {
+      return diffDays === 1 ? "Ends tomorrow" : `Ends in ${diffDays} days`;
+    } else {
+      return `Ends: ${expiryDate.toLocaleDateString()}`;
+    }
+  };
+
+  // Check if expiry is soon (within 3 days)
+  const isExpiringSoon = () => {
+    if (!isDiscountValid || !actualDiscount || !actualDiscount.expires_at) {
+      return false;
+    }
+
+    const expiryDate = new Date(actualDiscount.expires_at);
+    const now = new Date();
+    const diffTime = expiryDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3;
   };
 
   const handleAddToCart = async () => {
     try {
-
-      console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
       const userId = localStorage.getItem("userId") || "";
-      console.log("User ID:", userId); // Debugging
       await addToCart(product.product_id, 1, userId);
-      console.log("Product added successfully, showing toast..."); // Debugging
       toast.success(`${product.name} added to cart successfully`);
       onCartUpdate?.();
     } catch (error) {
@@ -98,6 +174,30 @@ export default function ProductDetailClient({
       {/* Image Section */}
       <div className="space-y-6">
         <div className="relative aspect-square rounded-xl overflow-hidden group">
+          {/* Discount badge */}
+          {isDiscountValid && actualDiscount && (
+            <div className="absolute top-4 left-4 z-20">
+              <div className="flex items-center gap-1 px-3 py-1.5 bg-gradient-to-r from-rose-600 to-purple-600 text-white rounded-lg shadow-lg">
+                <Tag className="w-4 h-4" />
+                <span className="text-sm font-bold">{getDiscountLabel()}</span>
+              </div>
+            </div>
+          )}
+
+          {/* Expiry badge */}
+          {isDiscountValid && formatExpiryDate() && (
+            <div className="absolute top-4 right-4 z-20">
+              <div
+                className={`px-3 py-1.5 ${
+                  isExpiringSoon() ? "bg-red-600/90" : "bg-amber-600/80"
+                } text-white text-sm rounded-lg shadow-lg flex items-center gap-1`}
+              >
+                <Clock className="w-4 h-4" />
+                <span className="font-medium">{formatExpiryDate()}</span>
+              </div>
+            </div>
+          )}
+
           <Image
             src={
               product.ProductImage?.[selectedImage]?.url ||
@@ -151,7 +251,7 @@ export default function ProductDetailClient({
           <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-neutral-100 to-neutral-400 mb-4">
             {product.name}
           </h1>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 flex-wrap">
             <div className="inline-block">
               <div className="relative px-4 py-1.5 rounded-full overflow-hidden group">
                 <div className="absolute inset-0 bg-gradient-to-r from-rose-500 via-purple-500 to-blue-500 opacity-75" />
@@ -174,13 +274,13 @@ export default function ProductDetailClient({
         <div className="space-y-4 py-6 border-y border-neutral-800">
           <div className="flex justify-between items-center">
             <span className="text-neutral-400">Price</span>
-            {product.Discount && product.Discount.length > 0 ? (
+            {isDiscountValid && actualDiscount ? (
               <div className="flex flex-col items-end">
                 <span className="text-sm font-medium line-through text-neutral-500">
-                  Rp.{product.price.toLocaleString()}
+                  Rp{product.price.toLocaleString()}
                 </span>
                 <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                  Rp.{calculateDiscountedPrice().toLocaleString()}
+                  Rp{calculateDiscountedPrice().toLocaleString()}
                 </span>
                 <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full mt-1">
                   {getDiscountLabel()}
@@ -188,7 +288,7 @@ export default function ProductDetailClient({
               </div>
             ) : (
               <span className="text-2xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                Rp.{product.price.toLocaleString()}
+                Rp{product.price.toLocaleString()}
               </span>
             )}
           </div>
