@@ -621,7 +621,7 @@ export default function AboutUs() {
               </h2>
               <p className="text-xl text-gray-300 mb-10 max-w-3xl mx-auto leading-relaxed">
                 Discover our premium electronics selection and join thousands of
-                satisfied customers who've elevated their tech experience.
+                satisfied customers who ve elevated their tech experience.
               </p>
 
               <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
