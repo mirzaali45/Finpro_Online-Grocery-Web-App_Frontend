@@ -11,9 +11,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavLogo } from "./navbar-comp/NavbarLogo";
 import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
-import { Menu, X } from "lucide-react"; // Icon untuk mobile menu
+import { Menu, X } from "lucide-react";
 
 export default function Navbar({ className }: NavbarProps) {
+  // State management
   const [modalState, setModalState] = useState<ModalState>({
     isSearchOpen: false,
     isCartOpen: false,
@@ -21,11 +22,12 @@ export default function Navbar({ className }: NavbarProps) {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
-  // Fungsi pencarian
+  // Search functionality
   const handleSearch = useCallback(async (term: string) => {
     if (term.length < 1) {
       setSearchResults([]);
@@ -44,7 +46,7 @@ export default function Navbar({ className }: NavbarProps) {
             product.highlightedName = (
               <>
                 {name.slice(0, index)}
-                <span className="bg-yellow-200 text-black">
+                <span className="bg-yellow-200 text-black font-medium rounded px-1">
                   {name.slice(index, index + searchTerm.length)}
                 </span>
                 {name.slice(index + searchTerm.length)}
@@ -74,22 +76,45 @@ export default function Navbar({ className }: NavbarProps) {
     debouncedSearch(e.target.value);
   };
 
+  // Modal toggles
   const toggleSearch = (isOpen: boolean) => {
     setModalState((prev) => ({ ...prev, isSearchOpen: isOpen }));
+    if (isOpen) setIsMenuOpen(false);
   };
 
-  const toggleCart = (isOpen: boolean) =>
+  const toggleCart = (isOpen: boolean) => {
     setModalState((prev) => ({ ...prev, isCartOpen: isOpen }));
+    if (isOpen) setIsMenuOpen(false);
+  };
 
+  // Scroll and outside click handlers
   useEffect(() => {
+    // Throttle the scroll handler to improve performance
+    let isThrottled = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsNavbarVisible(false);
-      } else if (currentScrollY < lastScrollY.current) {
-        setIsNavbarVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
+      if (isThrottled) return;
+      isThrottled = true;
+
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // Check if scrolled past threshold for styling (but don't re-render if unchanged)
+        if (currentScrollY > 20 !== isScrolled) {
+          setIsScrolled(currentScrollY > 20);
+        }
+
+        // Only hide on significant downward scroll, show immediately on upward scroll
+        if (currentScrollY > lastScrollY.current + 10 && currentScrollY > 100) {
+          setIsNavbarVisible(false);
+        } else if (currentScrollY < lastScrollY.current) {
+          setIsNavbarVisible(true);
+        }
+
+        lastScrollY.current = currentScrollY;
+        isThrottled = false;
+      });
     };
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -102,16 +127,26 @@ export default function Navbar({ className }: NavbarProps) {
           isSearchOpen: false,
           isCartOpen: false,
         }));
-        setIsMenuOpen(false); // Tutup menu saat klik di luar
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Handle ESC key press
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setModalState({ isSearchOpen: false, isCartOpen: false });
+        setIsMenuOpen(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscKey);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscKey);
       debouncedSearch.cancel();
     };
   }, [debouncedSearch]);
@@ -122,32 +157,53 @@ export default function Navbar({ className }: NavbarProps) {
         {isNavbarVisible && (
           <motion.nav
             initial={{ y: -100, opacity: 0 }}
-            animate={{ y: 0, opacity: 1 }}
-            exit={{ y: -100, opacity: 0 }}
-            className={`fixed top-0 left-0 right-0 z-50 bg-neutral-900/80 backdrop-blur-md ${
-              className ?? ""
-            }`}
-            style={{ overflow: "visible" }} // Tambahkan ini
+            animate={{
+              y: 0,
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              y: -100,
+              opacity: 0,
+              transition: { duration: 0.2 },
+            }}
+            className={`fixed top-0 left-0 right-0 z-50 ${
+              isScrolled
+                ? "bg-neutral-900/90 backdrop-blur-lg shadow-lg"
+                : "bg-neutral-900/80 backdrop-blur-md"
+            } transition-all duration-300 ${className ?? ""}`}
           >
-            <div className="max-w-6xl mx-auto px-6 flex items-center justify-between h-16 relative">
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 relative">
               {/* Logo */}
               <NavLogo />
 
               {/* Mobile Menu Toggle */}
-              <button
-                className="lg:hidden"
+              <motion.button
+                className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-neutral-800 transition-colors duration-200"
                 onClick={() => setIsMenuOpen(!isMenuOpen)}
+                whileTap={{ scale: 0.9 }}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
               >
-                {isMenuOpen ? (
-                  <X className="w-6 h-6 text-white" />
-                ) : (
-                  <Menu className="w-6 h-6 text-white" />
-                )}
-              </button>
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isMenuOpen ? "close" : "open"}
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isMenuOpen ? (
+                      <X className="w-6 h-6 text-white" />
+                    ) : (
+                      <Menu className="w-6 h-6 text-white" />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.button>
 
               {/* Navbar Links (Desktop) */}
-              <div className="hidden lg:flex">
-                <NavLinks />
+              <div className="hidden lg:flex items-center justify-center flex-1 px-4">
+                <NavLinks className="flex flex-row items-center justify-center" />
               </div>
 
               {/* Action Buttons */}
@@ -157,17 +213,29 @@ export default function Navbar({ className }: NavbarProps) {
               />
             </div>
 
-            {/* Mobile Menu (Vertikal) */}
+            {/* Mobile Menu */}
             <AnimatePresence>
               {isMenuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="fixed top-16 left-0 w-full h-screen bg-neutral-900/95 backdrop-blur-lg 
-              flex !flex-col items-center gap-6 p-6 lg:hidden"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                    transition: { duration: 0.3 },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                    transition: { duration: 0.2 },
+                  }}
+                  className="lg:hidden overflow-hidden bg-neutral-900/95 backdrop-blur-lg border-t border-neutral-800"
                 >
-                  <NavLinks className="flex !flex-col items-center gap-6 w-full" />
+                  <div className="max-w-6xl mx-auto px-4 py-4">
+                    <NavLinks
+                      className="flex flex-col space-y-1"
+                      isMobile={true}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -176,7 +244,7 @@ export default function Navbar({ className }: NavbarProps) {
       </AnimatePresence>
 
       {/* Modals */}
-      <div ref={modalRef}>
+      <div ref={modalRef} className="z-50">
         <SearchModal
           isOpen={modalState.isSearchOpen}
           onClose={() => toggleSearch(false)}
