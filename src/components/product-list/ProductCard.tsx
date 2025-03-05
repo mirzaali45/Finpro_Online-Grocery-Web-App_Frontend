@@ -9,6 +9,7 @@ import {
   ExternalLink,
   Store,
   MapPin,
+  Tag,
 } from "lucide-react";
 import { generateSlug } from "@/utils/slugUtils";
 import { addToCart } from "@/services/cart.service";
@@ -20,15 +21,42 @@ interface ProductCardProps {
   showDistance?: boolean;
 }
 
-const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
+const ProductCard = ({
+  product,
+  onCartUpdate,
+  showDistance = true,
+}: ProductCardProps) => {
   const [isHovered, setIsHovered] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isLoading, setIsLoading] = useState(false);
+  const [isDiscountValid, setIsDiscountValid] = useState(false);
 
   const images = product.ProductImage || [];
   const hasMultipleImages = images.length > 1;
-  const inventory = product.Inventory?.[0]?.total_qty|| 0;
+  const inventory = product.Inventory?.[0]?.total_qty || 0;
+
+  // Check if discount is valid (not expired)
+  useEffect(() => {
+    const checkDiscountValidity = () => {
+      if (!product.Discount || !product.Discount.length) {
+        setIsDiscountValid(false);
+        return;
+      }
+
+      const discount = product.Discount[0];
+      if (!discount || !discount.expires_at) {
+        setIsDiscountValid(false);
+        return;
+      }
+
+      const expiryDate = new Date(discount.expires_at);
+      const currentDate = new Date();
+      setIsDiscountValid(expiryDate > currentDate);
+    };
+
+    checkDiscountValidity();
+  }, [product.Discount]);
 
   const handleAddToCart = async () => {
     if (isLoading) return;
@@ -84,6 +112,60 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
     }
   }, [isHovered, hasMultipleImages]);
 
+  // Calculate discounted price
+  const getDiscountedPrice = () => {
+    if (!isDiscountValid || !product.Discount || !product.Discount.length) {
+      return product.price;
+    }
+
+    const discount = product.Discount[0];
+    if (discount.discount_type === "percentage") {
+      const discountValue = Math.min(discount.discount_value, 100); // Cap at 100%
+      return product.price - (product.price * discountValue) / 100;
+    } else {
+      return product.price - discount.discount_value;
+    }
+  };
+
+  // Format expiry date for discount if available
+  const formatExpiryDate = () => {
+    if (!isDiscountValid || !product.Discount || !product.Discount.length) {
+      return null;
+    }
+
+    const discount = product.Discount[0];
+    if (!discount.expires_at) return null;
+
+    const expiryDate = new Date(discount.expires_at);
+    const now = new Date();
+    const diffTime = expiryDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 3) {
+      return diffDays === 1 ? "Ends tomorrow" : `Ends in ${diffDays} days`;
+    } else {
+      return `Ends: ${expiryDate.toLocaleDateString()}`;
+    }
+  };
+
+  // Check if expiry is soon (within 3 days)
+  const isExpiringSoon = () => {
+    if (!isDiscountValid || !product.Discount || !product.Discount.length) {
+      return false;
+    }
+
+    const discount = product.Discount[0];
+    if (!discount.expires_at) return false;
+
+    const expiryDate = new Date(discount.expires_at);
+    const now = new Date();
+    const diffTime = expiryDate.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3;
+  };
+
+  const discountedPrice = getDiscountedPrice();
+
   return (
     <div
       className="group relative rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300"
@@ -93,6 +175,33 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
       <div className="absolute inset-0 bg-gradient-to-b from-neutral-800/30 to-neutral-900/30 backdrop-blur-xl rounded-xl border border-neutral-800/50 transition-all duration-500 group-hover:backdrop-blur-2xl" />
 
       <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-rose-500/20 via-purple-500/20 to-blue-500/20 opacity-0 group-hover:opacity-100 transition-opacity duration-500" />
+
+      {/* Discount badge */}
+      {isDiscountValid && product.Discount && product.Discount.length > 0 && (
+        <div className="absolute top-3 left-3 z-20">
+          <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-rose-600 to-purple-600 text-white rounded-lg shadow-lg">
+            <Tag className="w-3 h-3" />
+            <span className="text-xs font-bold">
+              {product.Discount[0].discount_type === "percentage"
+                ? `${Math.min(product.Discount[0].discount_value, 100)}% OFF`
+                : `Rp${product.Discount[0].discount_value.toLocaleString()}`}
+            </span>
+          </div>
+        </div>
+      )}
+
+      {/* Expiry badge */}
+      {isDiscountValid && formatExpiryDate() && (
+        <div className="absolute top-3 right-3 z-20">
+          <div
+            className={`px-2 py-1 ${
+              isExpiringSoon() ? "bg-red-600/90" : "bg-amber-600/80"
+            } text-white text-xs rounded-lg shadow-lg`}
+          >
+            {formatExpiryDate()}
+          </div>
+        </div>
+      )}
 
       <div className="relative p-4 space-y-4">
         <div className="relative h-52 rounded-lg overflow-hidden">
@@ -158,15 +267,15 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
 
         <div className="space-y-3">
           <div>
-            <h3 className="text-lg font-medium text-neutral-100">
+            <h3 className="text-lg font-medium text-neutral-100 line-clamp-1">
               {product.name}
             </h3>
             <div className="flex items-center gap-2 group/store">
               <Store className="w-4 h-4 text-neutral-500 group-hover/store:text-neutral-300 transition-colors" />
-              <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors">
+              <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors line-clamp-1">
                 {product.store.store_name}
               </p>
-              {product.distance !== undefined && (
+              {showDistance && product.distance !== undefined && (
                 <div className="flex items-center ml-auto">
                   <MapPin className="w-4 h-4 text-emerald-500 mr-1" />
                   <p className="text-sm text-emerald-400">
@@ -178,35 +287,44 @@ const ProductCard = ({ product, onCartUpdate }: ProductCardProps) => {
           </div>
 
           <div className="flex flex-col">
-            {product.Discount && product.Discount.length > 0 ? (
+            {isDiscountValid &&
+            product.Discount &&
+            product.Discount.length > 0 ? (
               <>
                 <div className="flex items-center gap-2">
                   <span className="text-sm font-medium line-through text-neutral-500">
-                    Rp.{Math.trunc(product.price).toLocaleString()}
+                    Rp{Math.trunc(product.price).toLocaleString()}
                   </span>
                   <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                    Rp.
-                    {Math.trunc(
-                      product.Discount[0].discount_type === "percentage"
-                        ? product.price - (product.price * product.Discount[0].discount_value) / 100
-                        : product.price - product.Discount[0].discount_value
-                    ).toLocaleString()}
+                    Rp{Math.trunc(discountedPrice).toLocaleString()}
                   </span>
                 </div>
-                <div className="flex items-center">
+                <div className="flex items-center justify-between mt-1">
                   <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full">
                     {product.Discount[0].discount_type === "percentage"
-                      ? `${product.Discount[0].discount_value}% OFF`
-                      : `Rp.${Math.trunc(product.Discount[0].discount_value).toLocaleString()} OFF`}
+                      ? `${Math.min(
+                          product.Discount[0].discount_value,
+                          100
+                        )}% OFF`
+                      : `Rp${Math.trunc(
+                          product.Discount[0].discount_value
+                        ).toLocaleString()} OFF`}
+                  </span>
+                  <span className="text-sm text-neutral-400">
+                    Stock: {inventory}
                   </span>
                 </div>
               </>
             ) : (
-              <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                Rp.{Math.trunc(product.price).toLocaleString()}
-              </span>
+              <div className="flex items-center justify-between">
+                <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
+                  Rp{Math.trunc(product.price).toLocaleString()}
+                </span>
+                <span className="text-sm text-neutral-400">
+                  Stock: {inventory}
+                </span>
+              </div>
             )}
-            <span className="text-sm text-neutral-400">Stock: {inventory}</span>
           </div>
 
           <div className="flex gap-2 pt-2">

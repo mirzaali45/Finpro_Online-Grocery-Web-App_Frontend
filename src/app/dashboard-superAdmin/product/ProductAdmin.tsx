@@ -12,6 +12,7 @@ import { Pagination } from "@/components/product-list/Pagination";
 import { Product, ProductFormData } from "@/types/product-types";
 import { productService } from "@/services/product.service";
 import { formatRupiah } from "@/helper/currencyRp";
+import Swal from "sweetalert2";
 
 export default function ProductAdmin() {
   // State
@@ -106,12 +107,54 @@ export default function ProductAdmin() {
   };
 
   const handleDelete = async (productId: number) => {
-    if (!confirm("Are you sure you want to delete this product?")) return;
-    try {
-      await productService.deleteProduct(productId);
-      await fetchProducts(currentPage);
-    } catch (error) {
-      console.error("Error deleting product:", error);
+    // Show confirmation dialog with SweetAlert2
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "You won't be able to revert this deletion!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      customClass: {
+        confirmButton: "py-2 px-4 mx-2 rounded-lg",
+        cancelButton: "py-2 px-4 mx-2 rounded-lg",
+        popup: "rounded-lg",
+      },
+    });
+
+    // If user confirmed
+    if (result.isConfirmed) {
+      try {
+        await productService.deleteProduct(productId);
+
+        // Show success message
+        Swal.fire({
+          title: "Deleted!",
+          text: "The product has been deleted successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+
+        // Refresh the products list
+        await fetchProducts(currentPage);
+      } catch (error) {
+        // Show error message
+        Swal.fire({
+          title: "Error!",
+          text: "Failed to delete the product. Please try again.",
+          icon: "error",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+        });
+
+        console.error("Error deleting product:", error);
+      }
     }
   };
 
@@ -132,27 +175,46 @@ export default function ProductAdmin() {
   const renderProductCard = (product: Product) => (
     <div
       key={product.product_id}
-      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-shadow"
+      className="bg-white rounded-lg shadow-sm border border-gray-100 overflow-hidden hover:shadow-md transition-all duration-300 transform hover:-translate-y-1 flex flex-col h-full"
     >
-      <div className="p-4">
-        {product.ProductImage?.[0] && (
-          <div className="relative w-full h-48 mb-4">
-            <Image
-              src={product.ProductImage[0].url}
-              alt={product.name}
-              fill
-              className="object-cover rounded-md"
-            />
+      <div className="relative w-full h-48 bg-gray-50">
+        {product.ProductImage?.[0] ? (
+          <Image
+            src={product.ProductImage[0].url}
+            alt={product.name}
+            fill
+            className="object-cover absolute inset-0"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center">
+            <svg
+              className="w-12 h-12 text-gray-300"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"
+              />
+            </svg>
           </div>
         )}
-        <h3 className="text-lg font-semibold mb-2 text-gray-800">
+      </div>
+
+      <div className="p-4 flex flex-col flex-grow">
+        <h3 className="text-lg font-semibold mb-3 text-gray-800 line-clamp-1 hover:line-clamp-none transition-all duration-300">
           {product.name}
         </h3>
 
-        <div className="space-y-2 mb-4">
+        <div className="space-y-2.5 mb-4 flex-grow">
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Category</span>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium truncate max-w-[120px]">
               {product.category.category_name}
             </span>
           </div>
@@ -166,13 +228,13 @@ export default function ProductAdmin() {
 
           <div className="flex items-center justify-between">
             <span className="text-sm text-gray-500">Store</span>
-            <span className="text-sm font-medium">
+            <span className="text-sm font-medium truncate max-w-[120px]">
               {product.store.store_name}
             </span>
           </div>
         </div>
 
-        <div className="flex justify-between items-center pt-2 border-t border-gray-100">
+        <div className="flex justify-between items-center pt-3 border-t border-gray-100 mt-auto">
           <button
             onClick={() => {
               setSelectedProduct(product);
@@ -243,33 +305,17 @@ export default function ProductAdmin() {
           <div className="p-6">
             {products.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-12">
-                <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                  <svg
-                    className="w-8 h-8 text-gray-400"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                    xmlns="http://www.w3.org/2000/svg"
-                  >
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={2}
-                      d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"
-                    />
-                  </svg>
-                </div>
-                <p className="text-lg font-medium text-gray-700 mb-2">
-                  No products found
-                </p>
-                <p className="text-gray-500 text-center mt-2 max-w-md">
-                  Click the &quot;Add Product&quot; button to create your first
-                  product.
+                <p className="text-gray-500 text-center">
+                  No products found. Start by adding a new product.
                 </p>
               </div>
             ) : (
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {products.map(renderProductCard)}
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 justify-center">
+                {products.map((product) => (
+                  <div key={product.product_id}>
+                    {renderProductCard(product)}
+                  </div>
+                ))}
               </div>
             )}
           </div>
