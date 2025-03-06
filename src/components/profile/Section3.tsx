@@ -1,86 +1,73 @@
-import React, { useEffect, useState } from "react";
-import Modal from "../product-management/Modal";
-import CardOrderItems from "./CardOrderItems";
-import { Order, OrderItem, OrderStatus } from "@/types/orders-types"; // Ensure OrderStatus is imported
+import { useEffect, useState } from "react";
+import { orderService } from "@/services/order.service"; // Pastikan ini benar
+import { Order } from "@/types/orders-types"; // Pastikan tipe Order diimport dengan benar
 
-const Section3 = () => {
-  const [ordersData, setOrdersData] = useState<Order[]>([]); // State to hold orders data
-  const [modalDetail, setModalDetail] = useState(false);
-  const [dataDetail, setDataDetail] = useState<OrderItem[]>([]);
+const MyOrders = () => {
+  const [orders, setOrders] = useState<Order[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
 
-  // Assuming you have another method or service to fetch orders data
-  // This is a placeholder for where you would actually fetch your data
+  // Ambil Bearer token dari localStorage, cookie, atau tempat penyimpanan lainnya
+  const token = localStorage.getItem("access_token"); // Ganti dengan cara Anda mendapatkan token
+
   useEffect(() => {
-    // Fetch orders data from an API or other source
-    // You would replace this with your actual data fetching logic
-    async function fetchOrders() {
-      try {
-        // Simulated fetch request (replace with actual API call)
-        const response = await fetch("api/orders"); // Modify with your actual API endpoint
-        const data = await response.json();
-        setOrdersData(data);
-      } catch (error) {
-        console.error("Failed to fetch orders:", error);
+    const fetchOrders = async () => {
+      const token =
+        typeof window !== "undefined" ? localStorage.getItem("token") : null;
+      if (!token) {
+        setError("Token is missing");
+        return;
       }
-    }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const ordersData = await orderService.getMyOrders(token); // Kirim token Bearer
+        setOrders(ordersData.data); // Ambil data pesanan dari response
+      } catch (error: any) {
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
 
     fetchOrders();
-  }, []); // Empty dependency array ensures this runs only once on mount
+  }, [token]);
+
+  if (loading) return <div className="text-center">Loading...</div>;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
-    <>
-      <div className="mt-10 text-center text-white">
-        <h1>My Order</h1>
-      </div>
-      <section className="mt-5 max-w-4xl text-white py-5 mx-auto px-8 pt-8 pb-16 bg-gray-800 rounded-md">
-        <div className="flex justify-between">
-          <h1>Track your orders</h1>
-        </div>
-        <div className="flex flex-wrap mt-5 gap-3 w-full">
-          {ordersData.map((order, index) => (
+    <section>
+      <div className="container mx-auto p-4">
+        <h1 className="text-2xl font-semibold mb-4 text-white">My Orders</h1>
+        <div className="space-y-4 ">
+          {orders.map((order) => (
             <div
-              key={index}
-              className="box-address bg-gray-700 px-5 rounded-md py-4 w-full"
+              key={order.order_id}
+              className="bg-white p-4 shadow-md rounded-md"
             >
-              <h1>
-                <i className="bi-postage-fill mr-3"></i>
-                {order.order_id}
-              </h1>
-              <div className="flex justify-between my-2 items-end">
-                <div className="w-full flex gap-3 flex-wrap">
-                  <p className="text-white bg-gray-600 w-auto py-1 px-4 text-sm rounded-md">
-                    {order.total_price}
-                  </p>
-                  <p className="text-white bg-gray-600 w-auto py-1 px-4 text-sm rounded-md">
-                    x{order.items.length}
-                  </p>
-                  <p className="text-white bg-gray-600 w-auto py-1 px-4 text-sm rounded-md">
-                    {OrderStatus[order.status]}
-                  </p>
-                </div>
-                <button
-                  onClick={() => {
-                    setModalDetail(true);
-                    setDataDetail(order.items);
-                  }}
-                  className="button hover:bg-opacity-100 hover:text-white transition-all ease-in-out bg-blue-500 rounded-md px-3 py-2 bg-opacity-20 text-blue-600"
+              <p className="font-medium">Order ID: {order.order_id}</p>
+              <p>
+                Status:
+                <span
+                  className={`inline-block px-2 py-1 mt-1 rounded-md ${
+                    order.status === "completed"
+                      ? "bg-green-200 text-green-800"
+                      : order.status === "pending"
+                      ? "bg-yellow-200 text-yellow-800"
+                      : "bg-red-200 text-red-800"
+                  }`}
                 >
-                  <i className="bi-eye-fill"></i>
-                </button>
-              </div>
+                  {order.status}
+                </span>
+              </p>
             </div>
           ))}
         </div>
-        <Modal
-          isOpen={modalDetail}
-          onClose={() => setModalDetail(false)}
-          title="Order Items"
-        >
-          <CardOrderItems dataItems={dataDetail} />
-        </Modal>
-      </section>
-    </>
+      </div>
+    </section>
   );
 };
 
-export default Section3;
+export default MyOrders;

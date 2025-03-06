@@ -1,55 +1,59 @@
-import React, { useState } from "react";
-import { useRouter } from "next/navigation";
-import axios from "axios";
+// import { useState } from 'react';
 
-const ProceedToPaymentButton: React.FC<{ order_id: string; totalPrice: number; userId: number }> = ({
-  order_id,
-  totalPrice,
-  userId,
-}) => {
-  const [loading, setLoading] = useState(false); // Handle loading state
-  const router = useRouter(); // Hook untuk navigasi
+// interface PaymentButtonProps {
+//   order_id: string;
+// }
 
-  const handleProceedToPayment = async () => {
-    setLoading(true);
-  
-    try {
-      const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BASE_URL_BE}/payments/create`, // URL backend
-        {
-          order_id,
-          totalPrice,
-          userId,
-        }
-      );
-  
-      const data = response.data;
-  
-      if (data.status === "success") {
-        // Redirect to Midtrans payment page
-        window.location.href = data.redirect_url;
-      } else {
-        alert("Failed to create payment order");
-      }
-    } catch (error) {
-      console.error("Error during payment request:", error);
-      alert("An error occurred while processing the payment. Please try again.");
-    } finally {
-      setLoading(false);
-    }
-  };
-  
-  return (
-    <div className="mt-4">
-      <button
-        onClick={handleProceedToPayment}
-        disabled={loading}
-        className="w-full bg-yellow-500 text-white font-bold py-2 px-4 rounded-lg hover:bg-yellow-600 transition"
-      >
-        {loading ? "Processing..." : "Proceed to Payment"}
-      </button>
-    </div>
-  );
-};
+// const PaymentButton: React.FC<PaymentButtonProps> = ({ order_id }) => {
+//   const [loading, setLoading] = useState<boolean>(false);
+//   const [error, setError] = useState<string | null>(null);
 
-export default ProceedToPaymentButton;
+//   const handlePayment = async () => {
+//     setLoading(true);
+//     setError(null);
+
+//     try {
+//       // Make the API call to your backend to initiate the payment
+//       const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE!}/payment/${order_id}`, {
+//         method: 'POST',
+//       });
+
+//       if (!response.ok) {
+//         throw new Error('Failed to initiate payment');
+//       }
+
+//       const data = await response.json();
+
+//       // Redirect the user to the payment page from Midtrans
+//       if (data.payment_url) {
+//         window.location.href = data.payment_url; // Redirect to Midtrans payment page
+//       } else {
+//         throw new Error('Payment URL not received');
+//       }
+//     } catch (err: any) {
+//       setError(err.message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="text-center">
+//       <button
+//         onClick={handlePayment}
+//         disabled={loading}
+//         className="bg-blue-500 text-white px-6 py-3 rounded-md text-lg font-semibold hover:bg-blue-600 disabled:bg-gray-400"
+//       >
+//         {loading ? 'Processing...' : 'Pay Now'}
+//       </button>
+
+//       {error && (
+//         <div className="mt-3 text-red-500 font-medium">
+//           <p>{error}</p>
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
+
+// export default PaymentButton;
