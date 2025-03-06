@@ -1994,6 +1994,55 @@
       "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
       "module": "Inventory Management",
       "timestamp": "2025-03-06T08:42:42.936Z"
+    },
+    {
+      "id": 286,
+      "action": "Refresh",
+      "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:06.247Z"
+    },
+    {
+      "id": 287,
+      "action": "Add",
+      "description": "{\"items\":[{\"id\":1,\"name\":\"iPhone 15\",\"store\":\"Store 2\",\"quantity\":150},{\"id\":2,\"name\":\"Iphone 14 Pro Max\",\"store\":\"Tech Elite BEC 1\",\"quantity\":40},{\"id\":3,\"name\":\"Asus ROG 13\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":4,\"name\":\"Samsung Galaxy S22\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":5,\"name\":\"Samsung Galaxy S25\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":6,\"name\":\"Oppo A3X\",\"store\":\"Tech Elite BEC 1\",\"quantity\":40},{\"id\":7,\"name\":\"Oppo A60\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":8,\"name\":\"Vivo Y28\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":10,\"name\":\"Iphone XR\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":5},{\"id\":12,\"name\":\"Iphone 13\",\"store\":\"Tech Elite Ciwaruga 1\",\"quantity\":20}],\"totalAddedItems\":10}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:06.607Z"
+    },
+    {
+      "id": 288,
+      "action": "Refresh",
+      "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:06.607Z"
+    },
+    {
+      "id": 289,
+      "action": "Add",
+      "description": "{\"items\":[{\"id\":1,\"name\":\"iPhone 15\",\"store\":\"Store 2\",\"quantity\":150},{\"id\":2,\"name\":\"Iphone 14 Pro Max\",\"store\":\"Tech Elite BEC 1\",\"quantity\":40},{\"id\":3,\"name\":\"Asus ROG 13\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":4,\"name\":\"Samsung Galaxy S22\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":5,\"name\":\"Samsung Galaxy S25\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":6,\"name\":\"Oppo A3X\",\"store\":\"Tech Elite BEC 1\",\"quantity\":40},{\"id\":7,\"name\":\"Oppo A60\",\"store\":\"Tech Elite BEC 1\",\"quantity\":30},{\"id\":8,\"name\":\"Vivo Y28\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":20},{\"id\":10,\"name\":\"Iphone XR\",\"store\":\"Tech Elite Cimahi Mall 1\",\"quantity\":5},{\"id\":12,\"name\":\"Iphone 13\",\"store\":\"Tech Elite Ciwaruga 1\",\"quantity\":20}],\"totalAddedItems\":10}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:06.246Z"
+    },
+    {
+      "id": 290,
+      "action": "Refresh",
+      "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:11.665Z"
+    },
+    {
+      "id": 291,
+      "action": "Refresh",
+      "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:16.816Z"
+    },
+    {
+      "id": 292,
+      "action": "Refresh",
+      "description": "{\"totalItems\":15,\"totalCategories\":6,\"message\":\"Inventory refreshed\"}",
+      "module": "Inventory Management",
+      "timestamp": "2025-03-06T16:43:38.660Z"
     }
   ]
 }

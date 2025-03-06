@@ -92,4 +92,44 @@ export const orderService = {
 
     return await response.json();
   },
+
+  async updateOrder(
+    token: string,
+    orderId: number,
+    totalPrice: number
+  ): Promise<
+    ApiResponse<{ order_id: number; total_price: number; updated_at: string }>
+  > {
+    try {
+      const response = await fetch(`${API_URL}/orders/${orderId}`, {
+        method: "PUT",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ total_price: totalPrice }),
+      });
+
+      if (!response.ok) {
+        const contentType = response.headers.get("content-type");
+
+        if (contentType && contentType.includes("application/json")) {
+          const errorData = await response.json();
+          throw new Error(errorData.msg || "Failed to update order");
+        } else {
+          const errorText = await response.text();
+          throw new Error(errorText || `Server error: ${response.status}`);
+        }
+      }
+
+      return await response.json();
+    } catch (error) {
+      if (error instanceof SyntaxError && error.message.includes("JSON")) {
+        throw new Error(
+          "Invalid response from server. Please try again later."
+        );
+      }
+      throw error;
+    }
+  },
 };
