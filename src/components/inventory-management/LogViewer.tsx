@@ -1,7 +1,15 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { X, RefreshCw, Filter, Calendar, ArrowUpDown } from "lucide-react";
+import {
+  X,
+  RefreshCw,
+  Filter,
+  Calendar,
+  ArrowUpDown,
+  ArrowRightLeft,
+  Download,
+} from "lucide-react";
 import LogService from "@/services/log.service";
 import { InventoryService } from "@/services/useInventoryAdmin";
 import { LogEntry } from "@/types/log-types";
@@ -13,10 +21,10 @@ interface InventoryLogItem {
   quantity: number;
 }
 
-
 export const LogViewer = ({ onClose }: { onClose: () => void }) => {
   const [logs, setLogs] = useState<LogEntry[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isDownloading, setIsDownloading] = useState(false);
   const [inventoryMap, setInventoryMap] = useState<Map<number, Inventory>>(
     new Map()
   );
@@ -44,12 +52,14 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
       // Get logs with filtering
       const logData = await LogService.getLogs(filterOptions);
 
-      // Filter to only show Update and Delete actions if no specific action filter
+      // Filter to only show Update, Delete, and Transfer actions if no specific action filter
       const filteredLogs = filter.action
         ? logData
         : logData.filter(
             (log: LogEntry) =>
-              log.action === "Update" || log.action === "Delete"
+              log.action === "Update" ||
+              log.action === "Delete" ||
+              log.action === "Transfer"
           );
 
       setLogs(filteredLogs);
@@ -114,10 +124,15 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
     }).format(date);
   };
 
+  // Format date for CSV file name
+  const formatDateForFileName = (date: Date) => {
+    return date.toISOString().split("T")[0];
+  };
+
   // Helper function to parse and display log description content
   const renderLogDescription = (log: LogEntry) => {
     try {
-      // For Update and Delete actions, try to parse the description if it's JSON
+      // For Update, Delete, and Transfer actions, try to parse the description if it's JSON
       if (log.description.startsWith("{") || log.description.startsWith("[")) {
         const data = JSON.parse(log.description);
 
@@ -126,47 +141,85 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
           const operation =
             data.updates.operation === "add" ? "increased by" : "decreased by";
           const inventoryItem = inventoryMap.get(data.itemId);
-          console.log("Inventory Map:", inventoryMap);
-          console.log("Inventory Item:", inventoryItem);
-          if (log.action === "Update" && data.updates) {
-            const operation =
-              data.updates.operation === "add"
-                ? "increased by"
-                : "decreased by";
-            const inventoryItem = inventoryMap.get(data.itemId);
 
-            if (inventoryItem) {
-              return (
-                <div>
-                  <span className="font-medium">
-                    {inventoryItem.product.name}
-                  </span>
-                  <div className="text-xs text-gray-500">ID: {data.itemId}</div>
-                  <div className="mt-1">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Store:
-                    </span>{" "}
-                    {inventoryItem.store.store_name} |
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {" "}
-                      Quantity:
-                    </span>{" "}
+          if (inventoryItem) {
+            return (
+              <div>
+                <span className="font-medium">
+                  {inventoryItem.product.name}
+                </span>
+                <div className="text-xs text-gray-500">ID: {data.itemId}</div>
+                <div className="mt-1">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Store:
+                  </span>{" "}
+                  {inventoryItem.store.store_name} |
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {" "}
+                    Warehouse Stock:
+                  </span>{" "}
+                  <span
+                    className={
+                      data.updates.operation === "add"
+                        ? "text-green-600 dark:text-green-400 font-medium"
+                        : "text-amber-600 dark:text-amber-400 font-medium"
+                    }
+                  >
                     {operation} {data.updates.qty || "N/A"}
-                    <span className="text-gray-600 dark:text-gray-400">
-                      Total Now:
-                    </span>{" "}
-                    {inventoryItem.total_qty}
-                  </div>
+                  </span>
                 </div>
-              );
-            }
+              </div>
+            );
           } else {
             // Fallback if inventory item not found in map
             return (
               <div>
                 <span className="font-medium">Item ID: {data.itemId}</span>
                 <div className="mt-1">
-                  Quantity {operation} {data.updates.qty || "N/A"}
+                  Warehouse Stock {operation} {data.updates.qty || "N/A"}
+                </div>
+              </div>
+            );
+          }
+        }
+
+        // Handle Transfer logs
+        if (log.action === "Transfer" && data.transferAmount) {
+          const inventoryItem = inventoryMap.get(data.itemId);
+
+          if (inventoryItem) {
+            return (
+              <div>
+                <span className="font-medium">
+                  {inventoryItem.product.name}
+                </span>
+                <div className="text-xs text-gray-500">ID: {data.itemId}</div>
+                <div className="mt-1">
+                  <span className="text-gray-600 dark:text-gray-400">
+                    Location:
+                  </span>{" "}
+                  {inventoryItem.store.store_name} |
+                  <span className="text-gray-600 dark:text-gray-400">
+                    {" "}
+                    Action:
+                  </span>{" "}
+                  <span className="text-indigo-600 dark:text-indigo-400 font-medium">
+                    Transferred {data.transferAmount} units
+                  </span>{" "}
+                  <span className="text-gray-500 dark:text-gray-400">
+                    from warehouse to store
+                  </span>
+                </div>
+              </div>
+            );
+          } else {
+            // Fallback if inventory item not found in map
+            return (
+              <div>
+                <span className="font-medium">Item ID: {data.itemId}</span>
+                <div className="mt-1">
+                  Transferred {data.transferAmount} units from warehouse to
+                  store
                 </div>
               </div>
             );
@@ -263,6 +316,94 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
     }
   };
 
+  // Helper function to extract text description for CSV export
+  const getPlainTextDescription = (log: LogEntry) => {
+    try {
+      if (log.description.startsWith("{") || log.description.startsWith("[")) {
+        const data = JSON.parse(log.description);
+
+        // Handle Update logs
+        if (log.action === "Update" && data.updates) {
+          const operation =
+            data.updates.operation === "add" ? "increased by" : "decreased by";
+          const inventoryItem = inventoryMap.get(data.itemId);
+
+          if (inventoryItem) {
+            return `${inventoryItem.product.name} at ${inventoryItem.store.store_name} - Warehouse Stock ${operation} ${data.updates.qty}`;
+          } else {
+            return `Item ID ${data.itemId} - Warehouse Stock ${operation} ${data.updates.qty}`;
+          }
+        }
+
+        // Handle Transfer logs
+        if (log.action === "Transfer" && data.transferAmount) {
+          const inventoryItem = inventoryMap.get(data.itemId);
+
+          if (inventoryItem) {
+            return `${inventoryItem.product.name} at ${inventoryItem.store.store_name} - Transferred ${data.transferAmount} units from warehouse to store`;
+          } else {
+            return `Item ID ${data.itemId} - Transferred ${data.transferAmount} units from warehouse to store`;
+          }
+        }
+
+        // Handle Delete logs
+        if (log.action === "Delete") {
+          if (data.item) {
+            const name = data.item.name || `Item ID ${data.item.id}`;
+            return `Deleted ${name} from ${data.item.store}`;
+          } else if (data.items) {
+            return `Deleted ${data.items.length} items`;
+          }
+        }
+      }
+
+      // Default to the raw description
+      return log.description;
+    } catch (e) {
+      return log.description;
+    }
+  };
+
+  // Function to download logs as CSV
+  const downloadLogs = () => {
+    setIsDownloading(true);
+
+    try {
+      // Create CSV header
+      const headers = ["ID", "Action", "Module", "Description", "Timestamp"];
+      const csvContent = [
+        headers.join(","),
+        ...logs.map((log) =>
+          [
+            log.id,
+            log.action,
+            log.module,
+            `"${getPlainTextDescription(log).replace(/"/g, '""')}"`, // Escape quotes for CSV
+            formatDate(log.timestamp),
+          ].join(",")
+        ),
+      ].join("\n");
+
+      // Create download link
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute(
+        "download",
+        `inventory-logs-${formatDateForFileName(new Date())}.csv`
+      );
+      link.style.visibility = "hidden";
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    } catch (error) {
+      console.error("Error downloading logs:", error);
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
   // Helper function to get action-specific styles
   const getActionStyles = (action: string) => {
     switch (action) {
@@ -270,8 +411,30 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
         return "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300";
       case "Delete":
         return "bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-300";
+      case "Transfer":
+        return "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/30 dark:text-indigo-300";
       default:
         return "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300";
+    }
+  };
+
+  // Helper function to get action-specific icons
+  const getActionIcon = (action: string) => {
+    switch (action) {
+      case "Update":
+        return (
+          <ArrowUpDown className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+        );
+      case "Delete":
+        return <X className="w-5 h-5 text-red-600 dark:text-red-400" />;
+      case "Transfer":
+        return (
+          <ArrowRightLeft className="w-5 h-5 text-indigo-600 dark:text-indigo-400" />
+        );
+      default:
+        return (
+          <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400" />
+        );
     }
   };
 
@@ -284,20 +447,35 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
           </h2>
           <div className="flex items-center gap-3">
             <button
+              onClick={downloadLogs}
+              disabled={isDownloading || logs.length === 0}
+              className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 disabled:opacity-50 disabled:hover:bg-transparent dark:disabled:hover:bg-transparent"
+              title="Download logs as CSV"
+            >
+              <Download
+                className={`w-5 h-5 text-gray-600 dark:text-gray-400 ${
+                  isDownloading ? "animate-pulse" : ""
+                }`}
+              />
+            </button>
+            <button
               onClick={() => setShowFilters(!showFilters)}
               className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="Filter logs"
             >
               <Filter className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={fetchLogs}
               className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="Refresh logs"
             >
               <RefreshCw className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
             <button
               onClick={onClose}
               className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+              title="Close"
             >
               <X className="w-5 h-5 text-gray-600 dark:text-gray-400" />
             </button>
@@ -324,6 +502,7 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
                   <option value="">All Actions</option>
                   <option value="Update">Update</option>
                   <option value="Delete">Delete</option>
+                  <option value="Transfer">Transfer</option>
                 </select>
               </div>
 
@@ -400,7 +579,7 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
               <p className="text-gray-500 dark:text-gray-400 text-center max-w-md">
                 {filter.action || filter.startDate || filter.endDate
                   ? "Try adjusting the filters to see more results."
-                  : "No inventory update or deletion logs available."}
+                  : "No inventory logs available."}
               </p>
             </div>
           ) : (
@@ -418,16 +597,12 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
                             ? "bg-blue-100 dark:bg-blue-900/30"
                             : log.action === "Delete"
                             ? "bg-red-100 dark:bg-red-900/30"
+                            : log.action === "Transfer"
+                            ? "bg-indigo-100 dark:bg-indigo-900/30"
                             : "bg-gray-100 dark:bg-gray-800"
                         }`}
                       >
-                        {log.action === "Update" ? (
-                          <ArrowUpDown className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                        ) : log.action === "Delete" ? (
-                          <X className="w-5 h-5 text-red-600 dark:text-red-400" />
-                        ) : (
-                          <Calendar className="w-5 h-5 text-gray-600 dark:text-gray-400" />
-                        )}
+                        {getActionIcon(log.action)}
                       </div>
                     </div>
 
@@ -461,9 +636,21 @@ export const LogViewer = ({ onClose }: { onClose: () => void }) => {
           )}
         </div>
 
-        <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 text-center">
-          Showing {logs.length} logs • Only display Update and Delete actions by
-          default
+        <div className="p-4 border-t border-gray-200 dark:border-gray-700 text-xs text-gray-500 dark:text-gray-400 flex justify-between items-center">
+          <span>
+            Showing {logs.length} logs • Only display Update, Delete and
+            Transfer actions by default
+          </span>
+          {logs.length > 0 && (
+            <button
+              onClick={downloadLogs}
+              disabled={isDownloading}
+              className="flex items-center gap-1 text-blue-600 dark:text-blue-400 hover:underline disabled:opacity-50 disabled:no-underline"
+            >
+              <Download className="w-3 h-3" />
+              {isDownloading ? "Downloading..." : "Download CSV"}
+            </button>
+          )}
         </div>
       </div>
     </div>

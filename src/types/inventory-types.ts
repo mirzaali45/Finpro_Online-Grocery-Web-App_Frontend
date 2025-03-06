@@ -87,3 +87,7 @@ export interface GetLowStockParams {
 export interface ApiError {
   error: string;
 }
+
+export interface TransferInventoryRequest {
+  transferAmount: number;
+}

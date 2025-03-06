@@ -20,30 +20,32 @@ import LogService from "@/services/log.service";
 import { LogViewer } from "@/components/inventory-management/LogViewer";
 import InventoryTable from "@/components/inventory-management/InventoryTable";
 import UpdateInventoryModal from "@/components/inventory-management/UpdateInventoryModal";
+import TransferInventoryModal from "@/components/inventory-management/TransferInventoryModal";
 import { toast } from "sonner";
 import { LogDetails } from "@/types/log-types";
 
 export default function Inventory() {
-  const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
-  const [pagination, setPagination] = useState<PaginationMetadata>({
-    total: 0,
-    page: 1,
-    pageSize: 10,
-    totalPages: 0,
-    hasNextPage: false,
-    hasPrevPage: false,
-  });
-  const [categoriesCount, setCategoriesCount] = useState(0);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isLogViewerOpen, setIsLogViewerOpen] = useState(false);
-  const [selectedInventory, setSelectedInventory] = useState<
-    Inventory | undefined
-  >(undefined);
-  const [isLoading, setIsLoading] = useState(true);
-  const [isRefreshing, setIsRefreshing] = useState(false);
-  const [previousInventoryData, setPreviousInventoryData] = useState<
-    Inventory[]
-  >([]);
+ const [inventoryData, setInventoryData] = useState<Inventory[]>([]);
+ const [pagination, setPagination] = useState<PaginationMetadata>({
+   total: 0,
+   page: 1,
+   pageSize: 10,
+   totalPages: 0,
+   hasNextPage: false,
+   hasPrevPage: false,
+ });
+ const [categoriesCount, setCategoriesCount] = useState(0);
+ const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+ const [isTransferModalOpen, setIsTransferModalOpen] = useState(false);
+ const [isLogViewerOpen, setIsLogViewerOpen] = useState(false);
+ const [selectedInventory, setSelectedInventory] = useState<
+   Inventory | undefined
+ >(undefined);
+ const [isLoading, setIsLoading] = useState(true);
+ const [isRefreshing, setIsRefreshing] = useState(false);
+ const [previousInventoryData, setPreviousInventoryData] = useState<
+   Inventory[]
+ >([]);
 
   const createLog = (
     action: string,
@@ -54,6 +56,17 @@ export default function Inventory() {
       const logDescription = inventory
         ? `Updated ${inventory.product.name} at ${inventory.store.store_name}. 
           Quantity ${details.updates?.operation}: ${details.updates?.qty}`
+        : JSON.stringify(details);
+
+      LogService.createLog({
+        action,
+        description: logDescription,
+        module: "Inventory Management",
+        timestamp: new Date(),
+      });
+    } else if (action === "Transfer") {
+      const logDescription = inventory
+        ? `Transferred ${details.transferAmount} units of ${inventory.product.name} from warehouse to ${inventory.store.store_name} store.`
         : JSON.stringify(details);
 
       LogService.createLog({
@@ -190,6 +203,39 @@ export default function Inventory() {
     }
   };
 
+  const handleTransferInventory = async (
+    invId: number,
+    transferAmount: number
+  ) => {
+    try {
+      await InventoryService.transferToStore(invId, { transferAmount });
+      toast.success("Inventory transferred successfully");
+      const updatedInventory = inventoryData.find(
+        (item) => item.inv_id === invId
+      );
+
+      createLog(
+        "Transfer",
+        {
+          itemId: invId,
+          transferAmount: transferAmount,
+        },
+        updatedInventory
+      );
+
+      fetchInventoryAndCategories(pagination.page);
+      setIsTransferModalOpen(false);
+    } catch (error) {
+      console.error("Error transferring inventory:", error);
+      toast.error("Failed to transfer inventory");
+      createLog("Error", {
+        itemId: invId,
+        message: "Failed to transfer inventory item",
+      });
+      throw error; // Re-throw so the modal can handle the error
+    }
+  };
+
   const handleDeleteInventory = async (invId: number) => {
     if (!window.confirm("Are you sure you want to delete this inventory?"))
       return;
@@ -230,6 +276,17 @@ export default function Inventory() {
     setIsUpdateModalOpen(true);
 
     createLog("Edit", {
+      itemId: inventory.inv_id,
+      productName: inventory.product.name,
+      storeName: inventory.store.store_name,
+    });
+  };
+
+  const handleTransfer = (inventory: Inventory) => {
+    setSelectedInventory(inventory);
+    setIsTransferModalOpen(true);
+
+    createLog("InitiateTransfer", {
       itemId: inventory.inv_id,
       productName: inventory.product.name,
       storeName: inventory.store.store_name,
@@ -358,6 +415,7 @@ export default function Inventory() {
                     inventoryData={inventoryData}
                     onEdit={handleEdit}
                     onDelete={handleDeleteInventory}
+                    onTransfer={handleTransfer}
                   />
                   <div className="flex justify-between items-center p-4 border-t border-gray-200">
                     <div className="text-sm text-gray-500">
@@ -402,6 +460,18 @@ export default function Inventory() {
           }}
           inventory={selectedInventory}
           onSubmit={handleUpdateInventory}
+        />
+      )}
+
+      {isTransferModalOpen && (
+        <TransferInventoryModal
+          isOpen={isTransferModalOpen}
+          onClose={() => {
+            setIsTransferModalOpen(false);
+            setSelectedInventory(undefined);
+          }}
+          inventory={selectedInventory}
+          onSubmit={handleTransferInventory}
         />
       )}
 

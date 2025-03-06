@@ -1,4 +1,11 @@
-import { CreateInventoryRequest, GetInventoryParams, GetLowStockParams, Inventory, UpdateInventoryRequest } from "@/types/inventory-types";
+import {
+  CreateInventoryRequest,
+  GetInventoryParams,
+  GetLowStockParams,
+  Inventory,
+  UpdateInventoryRequest,
+  TransferInventoryRequest,
+} from "@/types/inventory-types";
 
 // Define pagination interfaces
 export interface PaginationMetadata {
@@ -18,20 +25,22 @@ export interface PaginatedResponse<T> {
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export class InventoryService {
-  static async createInventory(formData: CreateInventoryRequest): Promise<Inventory> {
+  static async createInventory(
+    formData: CreateInventoryRequest
+  ): Promise<Inventory> {
     const token = localStorage.getItem("token");
     try {
       const response = await fetch(`${BASE_URL}/inventory`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(formData),
       });
 
       if (!response.ok) {
-        throw new Error('Failed to create inventory');
+        throw new Error("Failed to create inventory");
       }
 
       return response.json();
@@ -40,28 +49,30 @@ export class InventoryService {
     }
   }
 
-  static async getInventory(params?: GetInventoryParams): Promise<PaginatedResponse<Inventory>> {
+  static async getInventory(
+    params?: GetInventoryParams
+  ): Promise<PaginatedResponse<Inventory>> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const queryParams = new URLSearchParams();
       if (params?.page) {
-        queryParams.append('page', params.page.toString());
+        queryParams.append("page", params.page.toString());
       }
       if (params?.store_id) {
-        queryParams.append('store_id', params.store_id.toString());
+        queryParams.append("store_id", params.store_id.toString());
       }
-      
+
       const response = await fetch(`${BASE_URL}/inventory?${queryParams}`, {
         headers: {
           "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
-  
+
       if (!response.ok) {
-        throw new Error('Failed to fetch inventory');
+        throw new Error("Failed to fetch inventory");
       }
-  
+
       return response.json();
     } catch (error) {
       throw error;
@@ -80,7 +91,7 @@ export class InventoryService {
 
   static async getInventoryById(invId: number): Promise<Inventory> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${BASE_URL}/inventory/${invId}`, {
         headers: {
           "Content-Type": "application/json",
@@ -89,7 +100,7 @@ export class InventoryService {
       });
 
       if (!response.ok) {
-        throw new Error('Failed to fetch inventory');
+        throw new Error("Failed to fetch inventory");
       }
 
       return response.json();
@@ -98,47 +109,91 @@ export class InventoryService {
     }
   }
 
-  static async updateInventory(invId: number, data: UpdateInventoryRequest): Promise<Inventory> {
+  static async updateStoreFrontInventory(
+    invId: number,
+    data: UpdateInventoryRequest
+  ): Promise<Inventory> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       if (!token) {
-        throw new Error('No authentication token found');
+        throw new Error("No authentication token found");
       }
-  
+
       const response = await fetch(`${BASE_URL}/inventory/${invId}`, {
-        method: 'PUT',
+        method: "PUT",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(data),
       });
-  
+
       if (!response.ok) {
         const errorData = await response.json().catch(() => null);
-        throw new Error(errorData?.message || 'Failed to update inventory');
+        throw new Error(
+          errorData?.message || "Failed to update store inventory"
+        );
       }
-  
+
       return response.json();
     } catch (error) {
-      console.error('Update inventory error:', error);
+      console.error("Update store inventory error:", error);
+      throw error;
+    }
+  }
+
+  // Backward compatibility
+  static async updateInventory(
+    invId: number,
+    data: UpdateInventoryRequest
+  ): Promise<Inventory> {
+    return this.updateStoreFrontInventory(invId, data);
+  }
+
+  static async transferToStore(
+    invId: number,
+    data: TransferInventoryRequest
+  ): Promise<Inventory> {
+    try {
+      const token = localStorage.getItem("token");
+      if (!token) {
+        throw new Error("No authentication token found");
+      }
+
+      const response = await fetch(`${BASE_URL}/inventory/${invId}/transfer`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        throw new Error(errorData?.message || "Failed to transfer inventory");
+      }
+
+      return response.json();
+    } catch (error) {
+      console.error("Transfer inventory error:", error);
       throw error;
     }
   }
 
   static async deleteInventory(invId: number): Promise<{ message: string }> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const response = await fetch(`${BASE_URL}/inventory/${invId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`
+          Authorization: `Bearer ${token}`,
         },
       });
 
       if (!response.ok) {
-        throw new Error('Failed to delete inventory');
+        throw new Error("Failed to delete inventory");
       }
 
       return response.json();
@@ -147,30 +202,35 @@ export class InventoryService {
     }
   }
 
-  static async getLowStockProducts(params?: GetLowStockParams): Promise<PaginatedResponse<Inventory>> {
+  static async getLowStockProducts(
+    params?: GetLowStockParams
+  ): Promise<PaginatedResponse<Inventory>> {
     try {
-      const token = localStorage.getItem('token');
+      const token = localStorage.getItem("token");
       const queryParams = new URLSearchParams();
-      
+
       if (params?.store_id) {
-        queryParams.append('store_id', params.store_id.toString());
+        queryParams.append("store_id", params.store_id.toString());
       }
       if (params?.threshold) {
-        queryParams.append('threshold', params.threshold.toString());
+        queryParams.append("threshold", params.threshold.toString());
       }
       if (params?.page) {
-        queryParams.append('page', params.page.toString());
+        queryParams.append("page", params.page.toString());
       }
 
-      const response = await fetch(`${BASE_URL}/inventory/low-stock?${queryParams}`, {
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/inventory/low-stock?${queryParams}`,
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error('Failed to fetch low stock products');
+        throw new Error("Failed to fetch low stock products");
       }
 
       return response.json();
@@ -180,7 +240,9 @@ export class InventoryService {
   }
 
   // Legacy method for backward compatibility
-  static async getAllLowStockProducts(params?: Omit<GetLowStockParams, 'page'>): Promise<Inventory[]> {
+  static async getAllLowStockProducts(
+    params?: Omit<GetLowStockParams, "page">
+  ): Promise<Inventory[]> {
     try {
       const response = await this.getLowStockProducts(params);
       return response.data;
