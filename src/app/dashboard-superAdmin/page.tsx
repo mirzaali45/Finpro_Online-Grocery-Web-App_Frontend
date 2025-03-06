@@ -17,7 +17,6 @@ import {
   useOrders,
   useDashboardStats,
 } from "@/components/hooks/useRevenueSuper";
-// Add missing import for InventoryCharts
 import InventoryCharts from "@/components/super-reports/ChartReport";
 
 export default function DashboardSuperAdmin() {
@@ -280,35 +279,6 @@ export default function DashboardSuperAdmin() {
             />
           </TabsContent>
         </Tabs>
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 mb-4">
-        <div className="p-3 sm:p-4 md:p-6">
-          <h2 className="text-base sm:text-lg font-semibold text-gray-800 mb-3 md:mb-4">
-            Recent Activity
-          </h2>
-          <div className="space-y-3 md:space-y-4">
-            <p className="text-sm md:text-base text-gray-600">
-              No recent activity to display.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Inventory Charts Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-        <InventoryCharts data={inventoryData} />
-      </div>
-
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
-        <div className="p-6">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">
-            Recent Activity
-          </h2>
-          <div className="space-y-4">
-            <p className="text-gray-600">No recent activity to display.</p>
-          </div>
-        </div>
       </div>
     </div>
   );

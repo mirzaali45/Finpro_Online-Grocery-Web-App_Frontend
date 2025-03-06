@@ -203,39 +203,52 @@ export const CartModal = ({ isOpen, onClose }: CartModalProps) => {
   const totalPrice = calculateTotalPrice();
   const totalSavings = calculateTotalSavings();
 
- const handleCheckout = async () => {
-   try {
-     setIsLoading(true);
-     onClose(); // Close the cart modal
+const handleCheckout = async () => {
+  try {
+    setIsLoading(true);
+    const token = localStorage.getItem("token");
+    if (!token || !profile?.userId) {
+      showToast("Please log in to checkout", "error");
+      router.push("/login-user-customer");
+      return;
+    }
 
-     const token = localStorage.getItem("token");
-     if (!token || !profile?.userId) {
-       showToast("Please log in to checkout", "error");
-       router.push("/login-user-customer");
-       return;
-     }
+    // Create order using the order service
+    const response = await orderService.createOrderFromCart(
+      token,
+      profile.userId
+    );
 
-     // Create order using the order service
-     const response = await orderService.createOrderFromCart(
-       token,
-       profile.userId
-     );
+    // Show success message
+    showToast(response.message || "Order created successfully!", "success");
 
-     // Show success message
-     showToast(response.message || "Order created successfully!", "success");
+    // Add a small delay before redirect to ensure toast is shown
+    setTimeout(() => {
+      router.push("/ordered");
+    }, 300);
+  } catch (error) {
+    console.error("Checkout error:", error);
 
-     router.push("/ordered");
-   } catch (error) {
-     const errorMessage =
-       error instanceof Error ? error.message : "Failed to create order";
-     showToast(errorMessage, "error");
-     if (errorMessage.includes("toko yang berbeda")) {
-       router.push("/orders/checkout");
-     }
-   } finally {
-     setIsLoading(false);
-   }
- };
+    // Improved error handling
+    let errorMessage;
+    if (error instanceof SyntaxError && error.message.includes("JSON")) {
+      errorMessage =
+        "The server returned an invalid response. Please try again.";
+    } else {
+      errorMessage =
+        error instanceof Error ? error.message : "Failed to create order";
+    }
+
+    showToast(errorMessage, "error");
+
+    if (errorMessage.includes("toko yang berbeda")) {
+
+      router.push("/products");
+    }
+  } finally {
+    setIsLoading(false);
+  }
+};
 
   return (
     <div
