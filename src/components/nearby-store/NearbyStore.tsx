@@ -218,7 +218,6 @@ export default function NearbyStore() {
         <div className="absolute -bottom-[400px] -right-[300px] w-[800px] h-[800px] rounded-full bg-blue-900/20 blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-900/10 blur-3xl"></div>
       </div>
-
       <div className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-20 relative z-10">
         {/* Header */}
         <StoreHeader />

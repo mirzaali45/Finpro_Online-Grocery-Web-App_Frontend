@@ -163,7 +163,10 @@ export default function ProductDetailClient({
       onCartUpdate?.();
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      toast.error("Failed to add product to cart");
+      toast.error("Failed to add product to cart", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
     } finally {
       setIsAddingToCart(false);
     }
