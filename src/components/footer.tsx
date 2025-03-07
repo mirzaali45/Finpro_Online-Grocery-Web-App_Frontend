@@ -3,12 +3,33 @@
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Instagram, Twitter, Facebook } from "lucide-react";
+import { Instagram, Github, Linkedin } from "lucide-react";
 
 export default function Footer() {
+  const teamMembers = [
+    {
+      name: "Dzaky Athariq Ferreira",
+      linkedin: "https://linkedin.com/in/dzaky",
+      github: "https://github.com/dzaky",
+      instagram: "https://instagram.com/dzaky",
+    },
+    {
+      name: "Mirza Ali Yusuf",
+      linkedin: "https://linkedin.com/in/mirza",
+      github: "https://github.com/mirza",
+      instagram: "https://instagram.com/mirza",
+    },
+    {
+      name: "Shania Azzahra",
+      linkedin: "https://linkedin.com/in/shania",
+      github: "https://github.com/shania",
+      instagram: "https://instagram.com/shania",
+    },
+  ];
+
   return (
     <footer className="bg-black text-white pt-16 pb-8">
-      <div className="max-w-[1440px] mx-auto px-20">
+      <div className="max-w-[1440px] mx-auto px-4 md:px-8 lg:px-20">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-12 mb-16">
           {/* Logo and Description */}
           <div>
@@ -49,10 +70,10 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/brands"
+                  href="/our-store"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
-                  Brands
+                  Our Store
                 </Link>
               </li>
               <li>
@@ -72,7 +93,7 @@ export default function Footer() {
             <ul className="space-y-3">
               <li>
                 <Link
-                  href="/shipping"
+                  href="/shipping-info"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Shipping Info
@@ -80,7 +101,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/returns"
+                  href="/returns-info"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Returns
@@ -88,7 +109,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/order-status"
+                  href="/orderstatus-info"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Order Status
@@ -96,7 +117,7 @@ export default function Footer() {
               </li>
               <li>
                 <Link
-                  href="/payment"
+                  href="/payment-info"
                   className="text-gray-400 hover:text-white transition-colors"
                 >
                   Payment Options
@@ -105,28 +126,44 @@ export default function Footer() {
             </ul>
           </div>
 
-          {/* Follow Us */}
+          {/* Our Team */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Follow Us</h3>
-            <div className="flex space-x-4">
-              <Link
-                href="https://instagram.com"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Instagram size={24} />
-              </Link>
-              <Link
-                href="https://twitter.com"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Twitter size={24} />
-              </Link>
-              <Link
-                href="https://facebook.com"
-                className="text-gray-400 hover:text-white transition-colors"
-              >
-                <Facebook size={24} />
-              </Link>
+            <h3 className="text-lg font-semibold mb-4">Our Team</h3>
+            <div className="space-y-4">
+              {teamMembers.map((member, index) => (
+                <div key={index} className="flex flex-col">
+                  <p className="text-white mb-2">{member.name}</p>
+                  <div className="flex space-x-3">
+                    <Link
+                      href={member.linkedin}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-blue-400 transition-colors"
+                      aria-label={`${member.name}'s LinkedIn`}
+                    >
+                      <Linkedin size={20} />
+                    </Link>
+                    <Link
+                      href={member.github}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-purple-400 transition-colors"
+                      aria-label={`${member.name}'s GitHub`}
+                    >
+                      <Github size={20} />
+                    </Link>
+                    <Link
+                      href={member.instagram}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-gray-400 hover:text-pink-400 transition-colors"
+                      aria-label={`${member.name}'s Instagram`}
+                    >
+                      <Instagram size={20} />
+                    </Link>
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         </div>
