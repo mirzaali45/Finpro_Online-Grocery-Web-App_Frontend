@@ -427,7 +427,7 @@ export default function OrderStatusInformation(): JSX.Element {
                             <h4
                               className={`${status.color.text} font-medium mb-2`}
                             >
-                              What's Happening
+                              What s Happening
                             </h4>
                             <ul className="space-y-1 text-gray-300">
                               {status.details.map((detail, index) => (
@@ -453,7 +453,7 @@ export default function OrderStatusInformation(): JSX.Element {
 
                             {status.status === "Pending" && (
                               <p className="mt-4 text-gray-400 text-sm">
-                                You'll receive an email confirmation when your
+                                You ll receive an email confirmation when your
                                 order is verified.
                               </p>
                             )}
@@ -467,7 +467,7 @@ export default function OrderStatusInformation(): JSX.Element {
 
                             {status.status === "Processing" && (
                               <p className="mt-4 text-gray-400 text-sm">
-                                No action needed. We're preparing your items for
+                                No action needed. We re preparing your items for
                                 shipment.
                               </p>
                             )}
@@ -475,7 +475,7 @@ export default function OrderStatusInformation(): JSX.Element {
                             {status.status === "Shipped" && (
                               <p className="mt-4 text-gray-400 text-sm">
                                 Use your tracking number to monitor your
-                                package's journey.
+                                package journey.
                               </p>
                             )}
 
@@ -517,7 +517,7 @@ export default function OrderStatusInformation(): JSX.Element {
                   Login to Your Account
                 </h3>
                 <p className="text-gray-300">
-                  Sign in to your Tech Lite account and go to "My Orders"
+                  Sign in to your Tech Lite account and go to My Orders
                   section.
                 </p>
               </div>
@@ -571,7 +571,7 @@ export default function OrderStatusInformation(): JSX.Element {
                   <div className="mt-2 text-sm text-gray-300">
                     <p>
                       You can also track your order using your order number and
-                      email address from the "Track Order" page in the footer.
+                      email address from the Track Order page in the footer.
                     </p>
                   </div>
                 </div>

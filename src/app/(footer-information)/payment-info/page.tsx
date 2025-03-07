@@ -633,7 +633,7 @@ export default function PaymentInformation(): JSX.Element {
                 </h3>
                 <p className="text-gray-300">
                   Your virtual account number is valid for 24 hours from the
-                  time of checkout. If you don't complete the payment within
+                  time of checkout. If you don t complete the payment within
                   this timeframe, the order will be automatically canceled.
                 </p>
               </div>
@@ -667,7 +667,7 @@ export default function PaymentInformation(): JSX.Element {
                 <p className="text-gray-300">
                   You must pay the exact amount shown in your order. Payments
                   with different amounts will not be automatically processed. If
-                  you've made a payment with a different amount, please contact
+                  you ve made a payment with a different amount, please contact
                   our customer service.
                 </p>
               </div>

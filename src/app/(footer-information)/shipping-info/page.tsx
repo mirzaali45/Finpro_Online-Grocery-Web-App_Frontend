@@ -416,7 +416,7 @@ export default function ShippingInformation(): JSX.Element {
                 </h3>
                 <p className="text-gray-300">
                   Weather conditions and high-volume periods may affect delivery
-                  estimates. We'll notify you of any known delays affecting your
+                  estimates. We ll notify you of any known delays affecting your
                   shipment.
                 </p>
               </div>

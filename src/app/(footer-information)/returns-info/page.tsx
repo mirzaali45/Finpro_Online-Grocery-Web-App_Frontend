@@ -131,7 +131,7 @@ export default function ReturnsInformation(): JSX.Element {
             <div className="h-1 w-32 bg-gradient-to-r from-purple-500 to-blue-500 mt-2"></div>
             <p className="mt-4 text-gray-300">
               Our hassle-free return policy makes it easy to return items if
-              you're not completely satisfied.
+              you re not completely satisfied.
             </p>
           </header>
 
