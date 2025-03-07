@@ -91,7 +91,15 @@ export interface LoginFormSuperValues {
   password: string;
 }
 
+export interface ChangeEmailValues {
+  email: string;
+}
 // Props interfaces
+
+export interface ChangeEmailProps {
+  onSubmit: (values: ChangeEmailValues) => Promise<void>;
+}
+
 export interface RegisterFormCustomerProps {
   onSubmit: (values: RegisterFormCustomerValues) => Promise<void>;
   handleGoogleRegister: () => void;

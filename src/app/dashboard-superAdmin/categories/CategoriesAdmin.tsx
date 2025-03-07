@@ -8,6 +8,7 @@ import { categoryService } from "@/services/category-admin.service";
 import { Category, CategoryFormData } from "@/types/category-types";
 import { toast, ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import Swal from "sweetalert2";
 
 export default function CategoriesAdmin() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -97,22 +98,59 @@ export default function CategoriesAdmin() {
     }
   };
 
-  const handleEdit = (category: Category) => {
-    console.log("Edit category:", category);
-  };
-
   const handleDelete = async (id: number) => {
-    try {
-      await categoryService.deleteCategory(id);
-      toast.success("Category deleted successfully");
-      fetchCategories(pagination.currentPage);
-    } catch (err) {
-      toast.error(
-        err instanceof Error ? err.message : "Failed to delete category"
-      );
-      setError(
-        err instanceof Error ? err.message : "Failed to delete category"
-      );
+    // Show confirmation dialog
+    const result = await Swal.fire({
+      title: "Are you sure?",
+      text: "This category will be permanently deleted!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+      cancelButtonText: "Cancel",
+      reverseButtons: true,
+      background: "#fff",
+      customClass: {
+        confirmButton: "py-2 px-4 mx-2 rounded-lg",
+        cancelButton: "py-2 px-4 mx-2 rounded-lg",
+        popup: "rounded-lg",
+      },
+    });
+
+    // If user confirmed
+    if (result.isConfirmed) {
+      try {
+        await categoryService.deleteCategory(id);
+
+        // Show success message
+        Swal.fire({
+          title: "Deleted!",
+          text: "The category has been deleted successfully.",
+          icon: "success",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+          timer: 2000,
+          timerProgressBar: true,
+        });
+
+        // Refresh the categories list
+        fetchCategories(pagination.currentPage);
+      } catch (err) {
+        // Show error message
+        Swal.fire({
+          title: "Error!",
+          text:
+            err instanceof Error ? err.message : "Failed to delete category",
+          icon: "error",
+          confirmButtonColor: "#3085d6",
+          confirmButtonText: "OK",
+        });
+
+        setError(
+          err instanceof Error ? err.message : "Failed to delete category"
+        );
+      }
     }
   };
 
@@ -211,7 +249,6 @@ export default function CategoriesAdmin() {
                     <CategoryCard
                       key={category.category_id}
                       category={category}
-                      onEdit={handleEdit}
                       onDelete={handleDelete}
                     />
                   ))}

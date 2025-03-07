@@ -22,7 +22,12 @@ export default function FeaturedDiscountCarousel() {
       const data = await fetchDiscounts(1, 5);
 
       if (data.success) {
-        setDiscounts(data.data);
+        // Filter out expired discounts
+        const now = new Date();
+        const validDiscounts = data.data.filter(
+          (discount) => new Date(discount.expires_at) > now
+        );
+        setDiscounts(validDiscounts);
       } else {
         throw new Error("Failed to fetch discounts");
       }
@@ -32,6 +37,7 @@ export default function FeaturedDiscountCarousel() {
       setIsLoading(false);
     }
   };
+
   useEffect(() => {
     let interval: NodeJS.Timeout;
 
@@ -45,6 +51,7 @@ export default function FeaturedDiscountCarousel() {
 
     return () => clearInterval(interval);
   }, [isHovering, discounts.length]);
+
   const getTimeRemaining = (expires: Date) => {
     const now = new Date();
     const diff = new Date(expires).getTime() - now.getTime();
@@ -83,6 +90,7 @@ export default function FeaturedDiscountCarousel() {
       </div>
     );
   }
+
   const getBackgroundColor = (index: number) => {
     const colors = [
       "from-blue-600 to-purple-600",

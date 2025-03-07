@@ -1,15 +1,15 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Product } from "@/types/product-types";
 import { generateSlug } from "@/utils/slugUtils";
-import { 
-  calculateDiscountedPrice, 
-  calculateDiscountPercentage, 
-  hasDiscount 
+import {
+  calculateDiscountedPrice,
+  calculateDiscountPercentage,
+  hasDiscount,
 } from "@/helper/discountCutPrice";
-import { ShoppingCart, ExternalLink, Store, Tag } from "lucide-react";
+import { ShoppingCart, ExternalLink, Store, Tag, Clock } from "lucide-react";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 
@@ -24,16 +24,33 @@ const DiscountProductCard = ({
 }: DiscountProductCardProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [isImageLoading, setIsImageLoading] = useState(true);
+  const [isDiscountValid, setIsDiscountValid] = useState(true);
 
   // Null-safe discount handling
   const discount = product.Discount?.[0] ?? {
-    discount_type: 'percentage',
+    discount_type: "percentage",
     discount_value: 0,
-    expires_at: new Date().toISOString()
+    expires_at: new Date().toISOString(),
   };
 
-  // Check if product has discount
-  if (!hasDiscount(product)) {
+  // Check if discount is expired
+  useEffect(() => {
+    const checkDiscountValidity = () => {
+      if (!discount || !discount.expires_at) {
+        setIsDiscountValid(false);
+        return;
+      }
+
+      const expiryDate = new Date(discount.expires_at);
+      const currentDate = new Date();
+      setIsDiscountValid(expiryDate > currentDate);
+    };
+
+    checkDiscountValidity();
+  }, [discount]);
+
+  // Check if product has discount and if it's not expired
+  if (!hasDiscount(product) || !isDiscountValid) {
     return null;
   }
 
@@ -66,9 +83,32 @@ const DiscountProductCard = ({
     }
   };
 
-  // Format expiry date
-  const expiryDate = new Date(discount.expires_at);
-  const formattedExpiry = expiryDate.toLocaleDateString();
+  // Helper function to format expiry date nicely
+  const formatExpiryDate = (dateString: string) => {
+    const date = new Date(dateString);
+
+    // Get the difference in days between now and expiry date
+    const now = new Date();
+    const diffTime = date.getTime() - now.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+    if (diffDays <= 3) {
+      // Return "Ends in X days" for urgent cases
+      return diffDays === 1 ? "Ends tomorrow" : `Ends in ${diffDays} days`;
+    } else {
+      // Return the normal date format
+      return `Ends: ${date.toLocaleDateString()}`;
+    }
+  };
+
+  // Check if expiry is soon (within 3 days)
+  const isExpiringSoon = () => {
+    const expiryDate = new Date(discount.expires_at);
+    const currentDate = new Date();
+    const diffTime = expiryDate.getTime() - currentDate.getTime();
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays <= 3;
+  };
 
   return (
     <div className="group relative rounded-xl overflow-hidden hover:shadow-2xl transition-all duration-300">
@@ -78,16 +118,29 @@ const DiscountProductCard = ({
 
       {/* Discount badge */}
       <div className="absolute top-3 left-3 z-20">
-        <div className="flex items-center gap-1 px-2 py-1 bg-rose-600 text-white rounded-lg shadow-lg">
+        <div className="flex items-center gap-1 px-2 py-1 bg-gradient-to-r from-rose-600 to-purple-600 text-white rounded-lg shadow-lg">
           <Tag className="w-3 h-3" />
-          <span className="text-xs font-bold">{discountPercentage}% OFF</span>
+          <span className="text-xs font-bold">
+            {discount.discount_type === "percentage"
+              ? `${
+                  discount.discount_value > 100
+                    ? "100"
+                    : discount.discount_value
+                }% OFF`
+              : `Rp${discount.discount_value.toLocaleString()}`}
+          </span>
         </div>
       </div>
 
       {/* Expiry badge */}
       <div className="absolute top-3 right-3 z-20">
-        <div className="px-2 py-1 bg-amber-600/80 text-white text-xs rounded-lg shadow-lg">
-          Ends: {formattedExpiry}
+        <div
+          className={`px-2 py-1 ${
+            isExpiringSoon() ? "bg-red-600/90" : "bg-amber-600/80"
+          } text-white text-xs rounded-lg shadow-lg flex items-center gap-1`}
+        >
+          <Clock className="w-3 h-3" />
+          <span>{formatExpiryDate(discount.expires_at)}</span>
         </div>
       </div>
 
@@ -114,12 +167,12 @@ const DiscountProductCard = ({
         {/* Product details */}
         <div className="space-y-3">
           <div>
-            <h3 className="text-lg font-medium text-neutral-100">
+            <h3 className="text-lg font-medium text-neutral-100 line-clamp-1">
               {product.name}
             </h3>
             <div className="flex items-center gap-2 group/store">
               <Store className="w-4 h-4 text-neutral-500 group-hover/store:text-neutral-300 transition-colors" />
-              <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors">
+              <p className="text-sm text-neutral-400 group-hover/store:text-neutral-300 transition-colors line-clamp-1">
                 {product.store.store_name}
               </p>
             </div>
@@ -129,10 +182,10 @@ const DiscountProductCard = ({
           <div className="flex flex-col">
             <div className="flex items-center gap-2">
               <span className="text-sm font-medium line-through text-neutral-500">
-                Rp.{Math.floor(product.price).toLocaleString()}
+                Rp{Math.floor(product.price).toLocaleString()}
               </span>
               <span className="text-xl font-semibold bg-clip-text text-transparent bg-gradient-to-r from-rose-400 via-purple-400 to-blue-400">
-                Rp.{Math.floor(discountedPrice).toLocaleString()}
+                Rp{Math.floor(discountedPrice).toLocaleString()}
               </span>
             </div>
             <div className="flex items-center justify-between mt-1">
@@ -140,7 +193,7 @@ const DiscountProductCard = ({
                 <span className="text-xs px-2 py-0.5 bg-rose-500/20 text-rose-400 rounded-full">
                   {discount.discount_type === "percentage"
                     ? `${discount.discount_value}% OFF`
-                    : `Rp.${discount.discount_value.toLocaleString()} OFF`}
+                    : `Rp${discount.discount_value.toLocaleString()} OFF`}
                 </span>
               </div>
               <span className="text-sm text-neutral-400">
