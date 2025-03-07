@@ -51,7 +51,7 @@ export default function PaymentPendingPage() {
 
               <div className="mt-4 text-sm text-gray-300">
                 <p>
-                  If you've already completed the payment, please wait for the
+                  If you ve already completed the payment, please wait for the
                   system to update. This may take a few minutes.
                 </p>
               </div>

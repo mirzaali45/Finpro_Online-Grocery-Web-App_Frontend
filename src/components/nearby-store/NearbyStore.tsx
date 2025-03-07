@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
+import Link from "next/link";
 import { StoreData } from "@/types/store-types";
 import { storeService } from "@/services/store-admin.service";
 import { useGeolocation } from "@/components/hooks/useGeolocation";
@@ -84,22 +85,28 @@ export default function NearbyStore() {
         const validStores: StoreWithDistance[] = storesArray
           .filter((store: any) => {
             // Check for required fields
-            const hasStoreId = typeof store.store_id === 'number';
-            const hasValidCoordinates = 
-              typeof store.latitude === 'number' && 
-              typeof store.longitude === 'number';
-            
+            const hasStoreId = typeof store.store_id === "number";
+            const hasValidCoordinates =
+              typeof store.latitude === "number" &&
+              typeof store.longitude === "number";
+
             if (!hasStoreId) {
               console.warn("Store missing ID:", store);
             }
             if (!hasValidCoordinates) {
               console.warn("Store missing valid coordinates:", store);
             }
-            
-            return hasStoreId && hasValidCoordinates && 
-                   store.store_name && store.address && 
-                   store.city && store.province && 
-                   store.subdistrict && store.postcode;
+
+            return (
+              hasStoreId &&
+              hasValidCoordinates &&
+              store.store_name &&
+              store.address &&
+              store.city &&
+              store.province &&
+              store.subdistrict &&
+              store.postcode
+            );
           })
           .map((store: any) => ({
             store_id: store.store_id,
@@ -109,8 +116,14 @@ export default function NearbyStore() {
             city: store.city,
             province: store.province,
             postcode: store.postcode,
-            latitude: typeof store.latitude === 'string' ? parseFloat(store.latitude) : store.latitude,
-            longitude: typeof store.longitude === 'string' ? parseFloat(store.longitude) : store.longitude,
+            latitude:
+              typeof store.latitude === "string"
+                ? parseFloat(store.latitude)
+                : store.latitude,
+            longitude:
+              typeof store.longitude === "string"
+                ? parseFloat(store.longitude)
+                : store.longitude,
             description: store.description,
           }));
 
@@ -185,8 +198,8 @@ export default function NearbyStore() {
   // Render error state
   if (error || locationError || stores.length === 0) {
     return (
-      <ErrorView 
-        error={error || locationError || "No stores found"} 
+      <ErrorView
+        error={error || locationError || "No stores found"}
         debugInfo={debugInfo}
         onRetry={() => {
           setError("");
@@ -205,7 +218,6 @@ export default function NearbyStore() {
         <div className="absolute -bottom-[400px] -right-[300px] w-[800px] h-[800px] rounded-full bg-blue-900/20 blur-3xl"></div>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-indigo-900/10 blur-3xl"></div>
       </div>
-      
       <div className="max-w-[1440px] mx-auto px-4 sm:px-10 lg:px-20 relative z-10">
         {/* Header */}
         <StoreHeader />
@@ -213,23 +225,40 @@ export default function NearbyStore() {
         {/* Map and location info */}
         {location && (
           <>
-            <StoreMapView 
-              location={location} 
-              nearestStores={nearestStores} 
-            />
+            <StoreMapView location={location} nearestStores={nearestStores} />
             <CurrentLocationCard location={location} />
           </>
         )}
 
         {/* Store cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
           {nearestStores.map((store, index) => (
-            <StoreCard 
-              key={store.store_id} 
-              store={store} 
-              index={index} 
-            />
+            <StoreCard key={store.store_id} store={store} index={index} />
           ))}
+        </div>
+
+        {/* Our Store Button */}
+        <div className="flex justify-center mt-12">
+          <Link
+            href="/our-store"
+            className="inline-flex items-center bg-indigo-600 hover:bg-indigo-700 text-white font-medium py-3 px-8 rounded-lg shadow-lg transition-colors duration-200"
+          >
+            <svg
+              className="w-5 h-5 mr-2"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth="2"
+                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"
+              ></path>
+            </svg>
+            Visit Our Store
+          </Link>
         </div>
       </div>
     </section>

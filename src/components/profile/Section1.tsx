@@ -5,8 +5,19 @@ import React, { useEffect, useState } from "react";
 import Modal from "../product-management/Modal";
 import FormSetPassword from "./FormSetPassword";
 import { signOut } from "next-auth/react";
-import { useRouter } from "next/router";
-import { Camera, Edit, Save, Key, User, Mail, Phone, ShieldCheck, Activity } from "lucide-react";
+// import { useRouter } from "next/router";
+import { useRouter } from "next/navigation";
+import {
+  Camera,
+  Edit,
+  Save,
+  Key,
+  User,
+  Mail,
+  Phone,
+  ShieldCheck,
+  Activity,
+} from "lucide-react";
 
 const Section1 = () => {
   const {
@@ -24,9 +35,7 @@ const Section1 = () => {
   const [modalSetPass, setModalSetPass] = useState(false);
   const [modalEnterRefCode, setModalEnterRefCode] = useState(false);
   const [saved, setSaved] = useState(false);
-  
-  
-  
+  const router = useRouter();
   const handleSaveChanges = () => {
     saveChanges();
     setSaved(true);
@@ -59,7 +68,7 @@ const Section1 = () => {
                   className="object-cover"
                 />
               )}
-              
+
               <div className="absolute inset-0 bg-black/30 flex items-center justify-center opacity-0 hover:opacity-100 transition-opacity duration-300">
                 <label className="cursor-pointer w-full h-full flex flex-col items-center justify-center">
                   <Camera className="h-8 w-8 text-white" />
@@ -74,7 +83,7 @@ const Section1 = () => {
                 </label>
               </div>
             </div>
-            
+
             {isChangeAvatar && (
               <button
                 onClick={handleChangeAvatar}
@@ -86,10 +95,8 @@ const Section1 = () => {
               </button>
             )}
           </div>
-          
-         
         </div>
-        
+
         {/* Profile Content */}
         <div className="px-8 pt-20 pb-8">
           <div className="flex flex-col md:flex-row md:justify-between md:items-center mb-8">
@@ -99,10 +106,12 @@ const Section1 = () => {
               </h1>
               <div className="mt-2 inline-flex items-center px-3 py-1 bg-indigo-900/50 rounded-full text-indigo-200 text-sm">
                 <span className="mr-2">Referral Code:</span>
-                <span className="font-mono font-bold">{profile.referral_code}</span>
+                <span className="font-mono font-bold">
+                  {profile.referral_code}
+                </span>
               </div>
             </div>
-            
+
             {profile && !profile.is_google && (
               <button
                 onClick={() => setModalSetPass(true)}
@@ -113,7 +122,7 @@ const Section1 = () => {
               </button>
             )}
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2 group-focus-within:text-indigo-400 transition-colors">
@@ -129,7 +138,7 @@ const Section1 = () => {
                 className="w-full bg-gray-700/50 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white transition-all"
               />
             </div>
-            
+
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2 group-focus-within:text-indigo-400 transition-colors">
                 <User className="w-4 h-4 mr-2" /> Last Name
@@ -144,7 +153,7 @@ const Section1 = () => {
                 className="w-full bg-gray-700/50 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white transition-all"
               />
             </div>
-            
+
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2 group-focus-within:text-indigo-400 transition-colors">
                 <Mail className="w-4 h-4 mr-2" /> Email
@@ -152,8 +161,10 @@ const Section1 = () => {
               <input
                 type="email"
                 value={profile.email}
-                disabled={profile?.is_google ? true : false}
-                onChange={(e) => setProfile({ ...profile, email: e.target.value })}
+                disabled={profile?.is_google || !!profile.email}
+                onChange={(e) =>
+                  setProfile({ ...profile, email: e.target.value })
+                }
                 placeholder="Enter email"
                 className={`w-full bg-gray-700/50 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white transition-all ${
                   profile?.is_google ? "opacity-70 cursor-not-allowed" : ""
@@ -165,8 +176,21 @@ const Section1 = () => {
                   Google account - email cannot be changed
                 </span>
               )}
+
+{!profile?.is_google && profile?.email && (
+  <span className="text-xs text-blue-400 mt-1 flex items-center">
+    <Mail className="w-3 h-3 mr-1" />
+    <span>Your email is set. </span>
+    <button
+      onClick={() => router.push("/reset-email")}
+      className="ml-1 underline hover:text-blue-500"
+    >
+      Change your email
+    </button>
+  </span>
+)}
             </div>
-            
+
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2 group-focus-within:text-indigo-400 transition-colors">
                 <Phone className="w-4 h-4 mr-2" /> Phone
@@ -174,37 +198,46 @@ const Section1 = () => {
               <input
                 type="text"
                 value={profile.phone || ""}
-                onChange={(e) => setProfile({ ...profile, phone: parseInt(e.target.value, 10) })}
+                onChange={(e) =>
+                  setProfile({
+                    ...profile,
+                    phone: parseInt(e.target.value, 10),
+                  })
+                }
                 placeholder="Enter phone number"
                 className="w-full bg-gray-700/50 border border-gray-600 p-3 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500 text-white transition-all"
               />
             </div>
-            
+
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2">
                 <ShieldCheck className="w-4 h-4 mr-2" /> Role
               </label>
               <div className="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg text-gray-300 flex items-center">
-                <span className={`mr-2 inline-block w-2 h-2 rounded-full ${
-                  profile.role === "admin" ? "bg-purple-500" : "bg-blue-500"
-                }`}></span>
+                <span
+                  className={`mr-2 inline-block w-2 h-2 rounded-full ${
+                    profile.role === "admin" ? "bg-purple-500" : "bg-blue-500"
+                  }`}
+                ></span>
                 {profile.role || "User"}
               </div>
             </div>
-            
+
             <div className="group">
               <label className="flex items-center text-gray-400 mb-2">
                 <Activity className="w-4 h-4 mr-2" /> Status
               </label>
               <div className="w-full bg-gray-800 border border-gray-700 p-3 rounded-lg text-gray-300 flex items-center">
-                <span className={`mr-2 inline-block w-2 h-2 rounded-full ${
-                  profile.status === "Active" ? "bg-green-500" : "bg-red-500"
-                }`}></span>
+                <span
+                  className={`mr-2 inline-block w-2 h-2 rounded-full ${
+                    profile.status === "Active" ? "bg-green-500" : "bg-red-500"
+                  }`}
+                ></span>
                 {profile.status || "Inactive"}
               </div>
             </div>
           </div>
-          
+
           <div className="mt-8 flex justify-end">
             <button
               onClick={handleSaveChanges}
@@ -228,7 +261,7 @@ const Section1 = () => {
           </div>
         </div>
       </div>
-      
+
       {/* Modal for setting password */}
       {profile ? (
         <Modal

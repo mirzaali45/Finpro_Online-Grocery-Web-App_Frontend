@@ -35,7 +35,6 @@ const CTASection: React.FC = () => {
               Discover our premium electronics selection and join thousands of
               satisfied customers who ve elevated their tech experience.
             </p>
-
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               {/* Shop Now Button - Matching your screenshot */}
               <Link
@@ -79,7 +78,6 @@ const CTASection: React.FC = () => {
                 </svg>
               </Link>
             </div>
-
             {/* Newsletter subscription */}
             <div className="mt-12 max-w-md mx-auto">
               <div className="relative">
