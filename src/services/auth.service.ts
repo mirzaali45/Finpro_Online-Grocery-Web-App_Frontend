@@ -254,4 +254,55 @@ export class AuthService {
       return null;
     }
   }
+  static async requestChangeEmail(newEmail: string): Promise<{ status: string; message: string }> {
+    try {
+      const response = await fetch(`${base_url_be}/auth/request-change-email`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
+        credentials: "include",
+        body: JSON.stringify({ newEmail }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.message || "Request change email failed");
+      }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("An unexpected error occurred");
+    }
+  }
+
+  static async verifyChangeEmail(token: string): Promise<{ status: string; message: string }> {
+    try {
+      const response = await fetch(`${base_url_be}/auth/verify-change-email?token=${token}`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+      });
+
+      // if (!response.ok) {
+      //   const error = await response.json();
+      //   throw new Error(error.message || "Invalid or expired token");
+      // }
+
+      const data = await response.json();
+      return data;
+    } catch (error) {
+      if (error instanceof Error) {
+        throw error;
+      }
+      throw new Error("An unexpected error occurred");
+    }
+  }
 }
