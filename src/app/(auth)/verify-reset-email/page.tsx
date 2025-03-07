@@ -15,8 +15,11 @@ export default function VerifyResetEmail() {
 
   useEffect(() => {
     if (!token) {
-      toast.error("Invalid verification link.");
-      router.push("/");
+    toast.info("Redirecting to homepage...", {
+        position: "bottom-right",
+        autoClose: 3000,
+    });
+    router.push("/");
       return;
     }
 
