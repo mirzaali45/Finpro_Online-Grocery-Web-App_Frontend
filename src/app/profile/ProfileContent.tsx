@@ -9,6 +9,7 @@ import Section3 from "@/components/profile/Section3";
 import { VoucherList } from "@/components/voucher-customer/VoucherList";
 import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 import SearchOrder from "@/components/profile/searchOrder";
+import OrderConfirmation from "@/components/profile/order-Confirmation";
 
 function ProfileContent() {
   const router = useRouter();
@@ -49,10 +50,11 @@ function ProfileContent() {
           <h1 className="text-3xl font-bold text-white">My Profile</h1>
         </header>
         <main className="space-y-8">
-          <SearchOrder/>
           <Section1 />
           <Section2 />
           <Section3 />
+          <SearchOrder/>
+          <OrderConfirmation/>
           <VoucherList />
         </main>
         <ToastContainerElement />
