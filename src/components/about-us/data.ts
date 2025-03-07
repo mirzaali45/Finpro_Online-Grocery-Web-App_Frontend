@@ -47,9 +47,9 @@ export const team: TeamMember[] = [
 
 // Stats data
 export const stats: StatItem[] = [
-  { count: "2+", label: "Founder Experience" },
-  { count: "10,000+", label: "Happy Customers" },
-  { count: "1,500+", label: "Products" },
+  { count: "3", label: "Founder Experience" },
+  { count: "100+", label: "Happy Customers" },
+  { count: "20+", label: "Products" },
   { count: "24/7", label: "Customer Support" },
 ];
 

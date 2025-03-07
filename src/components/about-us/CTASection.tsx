@@ -3,6 +3,7 @@ import React, { useRef } from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 import { fadeIn } from "./animationVariant";
+import Swal from "sweetalert2";
 
 const CTASection: React.FC = () => {
   const ctaRef = useRef<HTMLDivElement>(null);
@@ -35,7 +36,6 @@ const CTASection: React.FC = () => {
               Discover our premium electronics selection and join thousands of
               satisfied customers who ve elevated their tech experience.
             </p>
-
             <div className="flex flex-col sm:flex-row justify-center space-y-4 sm:space-y-0 sm:space-x-6">
               {/* Shop Now Button - Matching your screenshot */}
               <Link
@@ -58,9 +58,10 @@ const CTASection: React.FC = () => {
                 </svg>
               </Link>
 
-              {/* Contact Us Button - Matching your screenshot */}
               <Link
-                href="/contact"
+                href="https://wa.me/6282119016272?text=Halo%20kak,%20aku%20tertarik%20sama%20produknya.%20Apakah%20produk%20ready%20dan%20siap%20kirim%20?"
+                target="_blank"
+                rel="noopener noreferrer"
                 className="bg-transparent border border-white/30 rounded-md py-3 px-6 text-white font-medium flex items-center justify-center group transition-all duration-300 hover:border-white/70"
               >
                 <span>Contact Us</span>
@@ -79,17 +80,38 @@ const CTASection: React.FC = () => {
                 </svg>
               </Link>
             </div>
-
             {/* Newsletter subscription */}
             <div className="mt-12 max-w-md mx-auto">
               <div className="relative">
                 <div className="relative flex bg-[#0a0a20] border border-white/20 rounded-md overflow-hidden">
                   <input
                     type="email"
+                    id="userEmail"
                     placeholder="Enter your email"
                     className="flex-1 bg-transparent border-0 outline-none px-4 py-3 text-white placeholder-gray-400"
                   />
-                  <button className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium px-6 py-3">
+                  <button
+                    onClick={() => {
+                      const emailInput = document.getElementById(
+                        "userEmail"
+                      ) as HTMLInputElement;
+                      const email = emailInput?.value.trim();
+
+                      if (!email) {
+                        Swal.fire({
+                          icon: "warning",
+                          title: "Oops!",
+                          text: "Silakan masukkan email terlebih dahulu!",
+                          confirmButtonColor: "#6366f1",
+                        });
+                        return;
+                      }
+
+                      const gmailUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=finalprojectkel@gmail.com&su=Subscribe&body=Halo, saya ingin berlangganan newsletter. Email saya: ${email}`;
+                      window.open(gmailUrl, "_blank");
+                    }}
+                    className="bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium px-6 py-3"
+                  >
                     Subscribe
                   </button>
                 </div>
@@ -98,6 +120,7 @@ const CTASection: React.FC = () => {
                 Stay updated with our latest products and exclusive offers
               </p>
             </div>
+            ;
           </motion.div>
         </div>
       </div>

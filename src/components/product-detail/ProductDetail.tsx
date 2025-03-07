@@ -6,6 +6,7 @@ import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 import { ShoppingCart, Store, Clock, Tag } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -157,13 +158,32 @@ export default function ProductDetailClient({
   const handleAddToCart = async () => {
     try {
       setIsAddingToCart(true);
-      const userId = localStorage.getItem("userId") || "";
+      const userId = localStorage.getItem("userId");
+
+      // Cek apakah user sudah login
+      if (!userId) {
+        Swal.fire({
+          icon: "warning",
+          title: "Please log in",
+          text: "You need to log in to add items to your cart.",
+          confirmButtonColor: "#6366f1",
+        });
+        return;
+      }
+
       await addToCart(product.product_id, 1, userId);
-      toast.success(`${product.name} added to cart successfully`);
+      toast.success(`${product.name} added to cart successfully`, {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+
       onCartUpdate?.();
     } catch (error) {
       console.error("Failed to add to cart:", error);
-      toast.error("Failed to add product to cart");
+      toast.error("Failed to add product to cart", {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
     } finally {
       setIsAddingToCart(false);
     }
