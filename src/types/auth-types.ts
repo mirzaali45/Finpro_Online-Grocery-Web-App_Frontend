@@ -72,6 +72,7 @@ export interface VerifyAndSetPassValues {
   phone: string;
   password: string;
   confirmPassword: string;
+  referralCode: "";
 }
 
 export interface VerifyResetPassValues {
@@ -90,7 +91,15 @@ export interface LoginFormSuperValues {
   password: string;
 }
 
+export interface ChangeEmailValues {
+  email: string;
+}
 // Props interfaces
+
+export interface ChangeEmailProps {
+  onSubmit: (values: ChangeEmailValues) => Promise<void>;
+}
+
 export interface RegisterFormCustomerProps {
   onSubmit: (values: RegisterFormCustomerValues) => Promise<void>;
   handleGoogleRegister: () => void;

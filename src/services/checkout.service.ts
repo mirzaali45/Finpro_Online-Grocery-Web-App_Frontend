@@ -1,7 +1,13 @@
 import axios from "axios";
 
-const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BASE_URL_BE! || "http://localhost:8000/api", // Ganti dengan URL backend Anda
-});
+const API_URL = `${process.env.NEXT_PUBLIC_BASE_URL_BE!}`;
 
-export default api;
+/**
+ * Fetch all cart items
+ */
+export const fetchCart = async () => {
+  const response = await axios.get(`${API_URL}/payments/create`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` },
+  });
+  return response.data;
+};

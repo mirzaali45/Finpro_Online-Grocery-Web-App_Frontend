@@ -12,7 +12,7 @@ import {
   FolderKanban,
   Boxes,
   PackageOpen,
-  Clipboard
+  Clipboard,
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import Swal from "sweetalert2";
@@ -33,45 +33,62 @@ export default function Sidebar({
   const pathname = usePathname();
   const { profile } = ProfileServices();
   const [activeLink, setActiveLink] = useState(pathname);
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     setActiveLink(pathname);
   }, [pathname]);
 
+  // Check if device is mobile
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+
+    // Initial check
+    checkMobile();
+
+    // Add event listener for window resize
+    window.addEventListener("resize", checkMobile);
+
+    // Cleanup
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const sidebarLinks = [
     {
       title: "Dashboard",
-      icon: <LayoutDashboard className="h-5 w-5" />,
+      icon: <LayoutDashboard className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/",
     },
     {
       title: "My Store",
-      icon: <StoreIcon className="h-5 w-5" />,
+      icon: <StoreIcon className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/store",
     },
     {
       title: "User Management",
-      icon: <Users className="h-5 w-5" />,
+      icon: <Users className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/user",
     },
     {
       title: "Categories",
-      icon: <FolderKanban className="h-5 w-5" />,
+      icon: <FolderKanban className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/categories",
     },
     {
       title: "Product",
-      icon: <Boxes className="h-5 w-5" />,
+      icon: <Boxes className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/product",
     },
     {
       title: "Inventory",
-      icon: <PackageOpen className="h-5 w-5" />,
+      icon: <PackageOpen className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/inventory",
     },
     {
       title: "Reports",
-      icon: <Clipboard className="h-5 w-5" />,
+      icon: <Clipboard className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/reports",
     },
   ].filter(Boolean);
@@ -110,22 +127,7 @@ export default function Sidebar({
 
   return (
     <>
-      {/* Mobile Sidebar Toggle Button */}
-      <button
-        onClick={() => setIsSidebarOpen(!isSidebarOpen)}
-        className="fixed top-4 left-4 z-50 md:hidden bg-blue-600 p-2.5 rounded-full shadow-xl text-white hover:bg-blue-700 transition-all duration-200"
-        aria-label="Toggle Sidebar"
-      >
-        {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-      </button>
-
-      {/* Backdrop for mobile */}
-      {isSidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-50 z-30 md:hidden backdrop-blur-sm"
-          onClick={() => setIsSidebarOpen(false)}
-        />
-      )}
+      {/* Mobile Sidebar Toggle Button - removed as we now have this in the layout */}
 
       {/* Sidebar */}
       <aside
@@ -135,58 +137,56 @@ export default function Sidebar({
       >
         <div className="flex flex-col h-full">
           {/* Sidebar Header */}
-          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-6 text-white">
+          <div className="bg-gradient-to-r from-blue-600 to-indigo-700 p-4 sm:p-6 text-white">
             <div className="flex items-center space-x-3">
-              <div className="w-10 h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center text-white font-bold backdrop-blur-sm">
+              <div className="w-8 h-8 sm:w-10 sm:h-10 bg-white bg-opacity-20 rounded-lg flex items-center justify-center text-white text-sm sm:text-base font-bold backdrop-blur-sm">
                 SA
               </div>
-              <h2 className="text-xl font-bold">Super Admin</h2>
+              <h2 className="text-lg sm:text-xl font-bold">Super Admin</h2>
             </div>
             <button
               onClick={() => setIsSidebarOpen(false)}
-              className="absolute top-6 right-4 md:hidden text-white hover:text-red-200 transition-colors"
+              className="absolute top-4 sm:top-6 right-3 sm:right-4 md:hidden text-white hover:text-red-200 transition-colors"
               aria-label="Close Sidebar"
             >
-              <X className="h-6 w-6" />
+              <X className="h-5 w-5 sm:h-6 sm:w-6" />
             </button>
           </div>
 
           {/* Sidebar Links */}
-          <nav className="flex-1 p-4 space-y-1.5 overflow-y-auto">
+          <nav className="flex-1 p-3 sm:p-4 space-y-1 sm:space-y-1.5 overflow-y-auto">
             {sidebarLinks.map((link) => (
               <Link
                 key={link.href}
                 href={link.href}
                 onClick={() => {
                   setActiveLink(link.href);
-                  setIsSidebarOpen(false);
+                  if (isMobile) setIsSidebarOpen(false);
                 }}
-                className={`flex items-center space-x-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                className={`flex items-center space-x-2 sm:space-x-3 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl transition-all duration-200 text-sm sm:text-base ${
                   activeLink === link.href
                     ? "bg-blue-600 text-white shadow-md"
                     : "text-gray-700 hover:bg-blue-50 hover:text-blue-700"
                 }`}
               >
-                <div className="transition-all duration-200">
-                  {link.icon}
-                </div>
+                <div className="transition-all duration-200">{link.icon}</div>
                 <span className="font-medium">{link.title}</span>
                 {activeLink === link.href && (
-                  <div className="ml-auto w-2 h-2 bg-white rounded-full" />
+                  <div className="ml-auto w-1.5 sm:w-2 h-1.5 sm:h-2 bg-white rounded-full" />
                 )}
               </Link>
             ))}
           </nav>
 
           {/* Sidebar Footer */}
-          <div className="p-6 border-t border-gray-200">
+          <div className="p-3 sm:p-6 border-t border-gray-200">
             <button
               onClick={handleLogout}
-              className="flex w-full items-center justify-center space-x-2 px-4 py-3 rounded-xl
+              className="flex w-full items-center justify-center space-x-2 px-3 sm:px-4 py-2 sm:py-3 rounded-lg sm:rounded-xl
                 bg-red-50 text-red-600 hover:bg-red-100 hover:text-red-700 hover:shadow-md
-                transition-all duration-200 font-medium"
+                transition-all duration-200 font-medium text-sm sm:text-base"
             >
-              <LogOut className="h-5 w-5 transition-transform duration-200" />
+              <LogOut className="h-4 w-4 sm:h-5 sm:w-5 transition-transform duration-200" />
               <span>Logout</span>
             </button>
           </div>

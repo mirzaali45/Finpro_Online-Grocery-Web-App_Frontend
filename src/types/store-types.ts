@@ -14,6 +14,7 @@ export interface StoreData {
   description?: string;
 }
 
+
 export interface EditData {
   store_name: string;
   address: string;

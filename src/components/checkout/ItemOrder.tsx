@@ -1,45 +1,36 @@
-import { fetchCartId } from "@/services/cart.service";
-import { CheckPricing } from "@/services/cek-ongkir/CekOngkirApi";
-import { productService } from "@/services/product.service";
-import ProfileServices from "@/services/profile/services1";
-import Services2 from "@/services/profile/services2";
-import { Address } from "@/types/address-types";
-import { CartData } from "@/types/cart-types";
-import { Product } from "@/types/product-types";
-import { MapPin } from "lucide-react";
-import ReactSelect from "react-select";
 import React, { useEffect, useState } from "react";
+// import ProfileServices from "@/services/profile/services1";
+import Services2 from "@/services/profile/services2";
+import { CheckPricing } from "@/services/cek-ongkir/CekOngkirApi";
+import ReactSelect from "react-select";
+import { Address } from "@/types/address-types";
 
-interface CourierOption {
-  shipping_name: string;
-  shipping_cost: number;
-  value: string;
-  label: string;
-}
+
+import { CourierOption } from "@/types/courir-types";
+
+
 
 interface Props {
   selectedAddress: Address;
+  setSelectedCourier: (courier: CourierOption | null) => void; // Tambahkan prop ini untuk mengangkat state ke parent
 }
 
-export default function ItemOrder({ selectedAddress }: Props) {
-  const { profile } = ProfileServices();
+const ItemOrder: React.FC<Props> = ({ selectedAddress, setSelectedCourier }) => {
+  // const { profile } = ProfileServices();
   const { load, addressData } = Services2();
-  const [cartData, setCartData] = useState<CartData[] | null>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState("");
   const [couriers, setCouriers] = useState<CourierOption[]>([]);
+  const [selectedCourierValue, setSelectedCourierValue] = useState<string>("");
 
-  // Store postcode (replace with actual store postcode)
   const STORE_POSTCODE = 40973;
 
   const getCourier = async () => {
     try {
       setIsLoading(true);
-      // Ensure postcode is converted to a number
       const customerPostcode = selectedAddress?.postcode
         ? parseInt(selectedAddress.postcode, 10)
         : STORE_POSTCODE;
-
       const response = await CheckPricing(customerPostcode, STORE_POSTCODE);
 
       const resCargo = response.data?.calculate_cargo || [];
@@ -69,10 +60,10 @@ export default function ItemOrder({ selectedAddress }: Props) {
     }
   };
 
+
   useEffect(() => {
-    if (addressData && selectedAddress?.postcode) {
-      getCourier();
-    }
+    if (addressData && selectedAddress?.postcode) getCourier();
+   
   }, [addressData, selectedAddress]);
 
   return (
@@ -83,8 +74,14 @@ export default function ItemOrder({ selectedAddress }: Props) {
           className="text-black"
           placeholder="Choose Courier Delivery"
           options={couriers}
+          onChange={(selectedOption) => {
+            setSelectedCourierValue(selectedOption?.value || "");
+            setSelectedCourier(selectedOption as CourierOption || null); // Kirim kurir yang dipilih ke parent
+          }}
         />
       </div>
     </div>
   );
-}
+};
+
+export default ItemOrder;

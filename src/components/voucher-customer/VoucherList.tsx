@@ -240,6 +240,8 @@ export const VoucherList: React.FC = () => {
                         ? voucher.discount.store.store_name
                         : "All Tech Lite Store"}
                     </span>
+
+
                   </div>
 
                   <div className="flex items-center gap-3 text-gray-300">

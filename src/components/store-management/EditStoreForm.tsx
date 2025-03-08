@@ -11,8 +11,10 @@ import {
   Popup,
   useMapEvents,
 } from "react-leaflet";
-import L from "leaflet";
+import L, { LatLngTuple } from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { User } from "@/types/user-types";
+import { SelectField } from "./StoreSelectFields";
 
 L.Icon.Default.mergeOptions({
   iconRetinaUrl: "/marker-icon-2x.png",
@@ -23,12 +25,14 @@ L.Icon.Default.mergeOptions({
 interface EditStoreFormProps {
   formData: StoreData;
   errors: FormErrorsWithIndex;
-  handleChange: (e: React.ChangeEvent<HTMLInputElement>) => void;
+  handleChange: (e: React.ChangeEvent<any>) => void;
   setFormData: React.Dispatch<React.SetStateAction<StoreData>>;
   handleSubmit: (e: React.FormEvent) => Promise<void>;
   isSubmitting: boolean;
   dataStore: StoreData;
+  users: User[];
 }
+
 function MapClickHandler({
   setFormData,
 }: {
@@ -55,11 +59,15 @@ export default function EditStoreForm({
   handleSubmit,
   isSubmitting,
   dataStore,
+  users,
 }: EditStoreFormProps) {
-  // State untuk menyimpan posisi marker
+  const DEFAULT_LAT = -6.19676128457438;
+  const DEFAULT_LNG = 106.83754574840799;
+
+  // Pastikan nilai awal `markerPosition` sesuai tipe [number, number]
   const [markerPosition, setMarkerPosition] = useState<[number, number]>([
-    formData.latitude || -6.19676128457438,
-    formData.longitude || 106.83754574840799,
+    formData.latitude ?? DEFAULT_LAT,
+    formData.longitude ?? DEFAULT_LNG,
   ]);
 
   const handleNumberChange =
@@ -68,16 +76,16 @@ export default function EditStoreForm({
       const value = e.target.value;
       setFormData((prev) => ({
         ...prev,
-        [fieldName]: value ? parseFloat(value) : undefined,
+        [fieldName]: value ? parseFloat(value) : 0,
       }));
     };
-  // Efek untuk mengatur default values saat formData berubah
+
   useEffect(() => {
     if (formData) {
       setMarkerPosition([
-        formData.latitude || -6.19676128457438,
-        formData.longitude || 106.83754574840799,
-      ] as [number, number]);
+        formData.latitude ?? DEFAULT_LAT,
+        formData.longitude ?? DEFAULT_LNG,
+      ]);
     }
   }, [formData]);
 
@@ -154,7 +162,7 @@ export default function EditStoreForm({
           label="Latitude"
           Icon={MapPin}
           type="number"
-          value={formData.latitude?.toString()}
+          value={formData.latitude?.toString() ?? "0"}
           error={errors.latitude?.toString()}
           onChange={handleNumberChange("latitude")}
         />
@@ -163,9 +171,24 @@ export default function EditStoreForm({
           label="Longitude"
           Icon={MapPin}
           type="number"
-          value={formData.longitude?.toString()}
+          value={formData.longitude?.toString() ?? "0"}
           error={errors.longitude?.toString()}
           onChange={handleNumberChange("longitude")}
+        />
+      </div>
+
+      <div className="grid grid-cols-2">
+        <SelectField
+          name="user_id"
+          label="Store Admin"
+          Icon={MapPin}
+          value={formData.user_id}
+          error={errors.user_id}
+          onChange={handleChange}
+          options={users?.map((v: User) => ({
+            value: v.user_id,
+            label: `${v.first_name} ${v.last_name}`,
+          }))}
         />
       </div>
 

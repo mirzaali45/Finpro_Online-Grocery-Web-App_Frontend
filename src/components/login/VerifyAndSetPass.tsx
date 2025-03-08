@@ -25,6 +25,7 @@ const VerifyAndSetPass: React.FC<VerifyAndSetPassProps> = ({ onSubmit }) => {
     phone: "",
     password: "",
     confirmPassword: "",
+    referralCode: "", 
   };
 
   const fields: FieldConfig[] = [
@@ -32,6 +33,7 @@ const VerifyAndSetPass: React.FC<VerifyAndSetPassProps> = ({ onSubmit }) => {
     { name: "firstName", label: "First Name", type: "text" },
     { name: "lastName", label: "Last Name", type: "text" },
     { name: "phone", label: "Phone", type: "text", required: true },
+    { name: "referralCode", label: "Referral Code", type: "text" },
   ];
 
   const handleSubmit = async (

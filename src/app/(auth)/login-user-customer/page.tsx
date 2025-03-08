@@ -30,7 +30,7 @@ export default function StoreLoginPage() {
 
       if (response.user.role === "customer") {
         toast.dismiss();
-        toast.success("Login successful! Redirecting...", {
+        toast.success("Login successful!", {
           position: "bottom-right",
           autoClose: 1500,
           theme: "colored",
@@ -72,24 +72,24 @@ export default function StoreLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-black to-gray-800 flex items-center justify-center py-20 px-4">
+    <div className="min-h-screen w-full bg-gradient-to-br from-black to-gray-800 flex items-center justify-center py-20 px-4 mt-10">
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
         animate={{ opacity: 1, scale: 1 }}
         transition={{ duration: 0.5 }}
-        className="h-[90vh] w-[85vw] rounded-2xl overflow-hidden relative"
+        className="h-auto md:h-[90vh] w-full rounded-2xl overflow-hidden relative"
       >
         {/* Background Effects */}
-        <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 via-purple-500/20 to-pink-500/20" />
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+        <div className="absolute inset-0 bg-gradient-to-br from-gray-900 via-gray-800 to-black" />
 
-        <div className="relative h-full w-full flex">
+        <div className="relative h-full w-full flex flex-col md:flex-row">
           {/* Left Section */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.2, duration: 0.5 }}
-            className="w-[60%] p-10"
+            className="md:w-3/5 p-6 md:p-10"
           >
             <div className="h-full flex flex-col justify-center space-y-8">
               {/* Video Section */}
@@ -105,20 +105,20 @@ export default function StoreLoginPage() {
               </div>
 
               {/* Content Section */}
-              <div className="space-y-8">
+              <div className="space-y-6">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.4 }}
-                  className="space-y-4"
+                  className="space-y-3"
                 >
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-8 h-8 text-blue-400" />
-                    <h2 className="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
+                    <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
                       Welcome to TechElite
                     </h2>
                   </div>
-                  <p className="text-xl text-gray-300 pl-11">
+                  <p className="text-lg md:text-xl text-gray-300 pl-11">
                     Your premium tech shopping destination
                   </p>
                 </motion.div>
@@ -128,7 +128,7 @@ export default function StoreLoginPage() {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
-                  className="grid grid-cols-2 gap-4"
+                  className="grid grid-cols-1 sm:grid-cols-2 gap-4"
                 >
                   <div className="flex items-center gap-3 bg-white/5 p-4 rounded-xl backdrop-blur-sm hover:bg-white/10 transition-colors">
                     <Laptop className="w-6 h-6 text-purple-400" />
@@ -156,9 +156,9 @@ export default function StoreLoginPage() {
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="w-[70%] flex justify-center items-center bg-white/5 backdrop-blur-md border-l border-white/10"
+            className="md:w-[40%] flex justify-center items-center bg-white/5 backdrop-blur-md border-t md:border-l border-white/10 p-6 md:p-10"
           >
-            <div className="w-full px-8">
+            <div className="w-full max-w-md md:max-w-lg px-6 md:px-8">
               <LoginUser
                 onSubmit={handleSubmit}
                 handleGoogleLogin={handlegoogle}
@@ -182,5 +182,9 @@ export default function StoreLoginPage() {
         />
       </motion.div>
     </div>
+
+
+
+
   );
 }

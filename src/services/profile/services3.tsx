@@ -1,11 +1,11 @@
 "use client";
 import { ordersCust } from "@/components/hooks/OrdersCust";
-import { Orders } from "@/types/orders-types";
+import { Order } from "@/types/orders-types";
 import { useEffect, useState } from "react";
 import { toast } from "react-toastify";
 
 const Services3 = () => {
-  const [ordersData, setOrdersData] = useState<Orders[]>([]);
+  const [ordersData, setOrdersData] = useState<Order[]>([]);
   const [load, setLoad] = useState(false);
 
   useEffect(() => {

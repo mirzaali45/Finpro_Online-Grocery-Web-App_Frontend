@@ -1,15 +1,13 @@
-import { Pencil, Trash2, Image as ImageIcon } from "lucide-react";
+import { Trash2, Image as ImageIcon } from "lucide-react";
 import { Category } from "@/types/category-types";
 
 interface CategoryCardProps {
   category: Category;
-  onEdit: (category: Category) => void;
   onDelete: (id: number) => void;
 }
 
 export default function CategoryCard({
   category,
-  onEdit,
   onDelete,
 }: CategoryCardProps) {
   return (
@@ -32,12 +30,6 @@ export default function CategoryCard({
           <div className="flex justify-between items-start mb-2">
             <h3 className="text-lg font-semibold">{category.category_name}</h3>
             <div className="flex gap-2">
-              <button
-                onClick={() => onEdit(category)}
-                className="text-blue-600 hover:text-blue-700 dark:text-blue-400"
-              >
-                <Pencil size={18} />
-              </button>
               <button
                 onClick={() => onDelete(category.category_id)}
                 className="text-red-600 hover:text-red-700 dark:text-red-400"

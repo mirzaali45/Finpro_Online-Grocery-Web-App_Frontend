@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useRef, useEffect } from "react";
 import { productService } from "@/services/product.service";
 import debounce from "lodash/debounce";
-import { NavbarProps, ModalState, Product, } from "@/types/product-types";
+import { NavbarProps, ModalState, Product } from "@/types/product-types";
 import { SearchModal } from "@/components/navbar-comp/SearchModal";
 import { CartModal } from "@/components/navbar-comp/CartModal";
 import { generateSlug } from "../utils/slugUtils";
@@ -11,10 +11,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { NavLogo } from "./navbar-comp/NavbarLogo";
 import { NavLinks } from "./navbar-comp/NavbarLink";
 import { ActionButtons } from "./navbar-comp/ActionButton";
-import { Menu, X } from "lucide-react"; // Icon untuk mobile menu
-
+import { Menu, X } from "lucide-react";
 
 export default function Navbar({ className }: NavbarProps) {
+  // State management
   const [modalState, setModalState] = useState<ModalState>({
     isSearchOpen: false,
     isCartOpen: false,
@@ -22,11 +22,12 @@ export default function Navbar({ className }: NavbarProps) {
   const [searchResults, setSearchResults] = useState<Product[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isNavbarVisible, setIsNavbarVisible] = useState(true);
-  const [isHovered, setIsHovered] = useState(false);
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // State untuk mobile menu
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
   const modalRef = useRef<HTMLDivElement>(null);
   const lastScrollY = useRef(0);
 
+  // Search functionality
   const handleSearch = useCallback(async (term: string) => {
     if (term.length < 1) {
       setSearchResults([]);
@@ -34,8 +35,8 @@ export default function Navbar({ className }: NavbarProps) {
     }
     setIsLoading(true);
     try {
-      const response = await productService.getProducts(); 
-      const filtered = response.products 
+      const response = await productService.getProducts();
+      const filtered = response.products
         .filter((product: Product) => {
           const name = product.name.toLowerCase();
           const searchTerm = term.toLowerCase();
@@ -45,7 +46,7 @@ export default function Navbar({ className }: NavbarProps) {
             product.highlightedName = (
               <>
                 {name.slice(0, index)}
-                <span className="bg-yellow-200 text-black">
+                <span className="bg-yellow-200 text-black font-medium rounded px-1">
                   {name.slice(index, index + searchTerm.length)}
                 </span>
                 {name.slice(index + searchTerm.length)}
@@ -75,22 +76,45 @@ export default function Navbar({ className }: NavbarProps) {
     debouncedSearch(e.target.value);
   };
 
+  // Modal toggles
   const toggleSearch = (isOpen: boolean) => {
     setModalState((prev) => ({ ...prev, isSearchOpen: isOpen }));
+    if (isOpen) setIsMenuOpen(false);
   };
 
-  const toggleCart = (isOpen: boolean) =>
+  const toggleCart = (isOpen: boolean) => {
     setModalState((prev) => ({ ...prev, isCartOpen: isOpen }));
+    if (isOpen) setIsMenuOpen(false);
+  };
 
+  // Scroll and outside click handlers
   useEffect(() => {
+    // Throttle the scroll handler to improve performance
+    let isThrottled = false;
+
     const handleScroll = () => {
-      const currentScrollY = window.scrollY;
-      if (currentScrollY > lastScrollY.current && currentScrollY > 100) {
-        setIsNavbarVisible(false);
-      } else if (currentScrollY < lastScrollY.current) {
-        setIsNavbarVisible(true);
-      }
-      lastScrollY.current = currentScrollY;
+      if (isThrottled) return;
+      isThrottled = true;
+
+      // Use requestAnimationFrame for better performance
+      requestAnimationFrame(() => {
+        const currentScrollY = window.scrollY;
+
+        // Check if scrolled past threshold for styling (but don't re-render if unchanged)
+        if (currentScrollY > 20 !== isScrolled) {
+          setIsScrolled(currentScrollY > 20);
+        }
+
+        // Only hide on significant downward scroll, show immediately on upward scroll
+        if (currentScrollY > lastScrollY.current + 10 && currentScrollY > 100) {
+          setIsNavbarVisible(false);
+        } else if (currentScrollY < lastScrollY.current) {
+          setIsNavbarVisible(true);
+        }
+
+        lastScrollY.current = currentScrollY;
+        isThrottled = false;
+      });
     };
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -103,82 +127,115 @@ export default function Navbar({ className }: NavbarProps) {
           isSearchOpen: false,
           isCartOpen: false,
         }));
-        setIsMenuOpen(false); // Tutup menu saat klik di luar
+        setIsMenuOpen(false);
+      }
+    };
+
+    // Handle ESC key press
+    const handleEscKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        setModalState({ isSearchOpen: false, isCartOpen: false });
+        setIsMenuOpen(false);
       }
     };
 
     window.addEventListener("scroll", handleScroll);
     document.addEventListener("mousedown", handleClickOutside);
+    document.addEventListener("keydown", handleEscKey);
 
     return () => {
       window.removeEventListener("scroll", handleScroll);
       document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("keydown", handleEscKey);
       debouncedSearch.cancel();
     };
   }, [debouncedSearch]);
-
-  const navVariants = {
-    hidden: { opacity: 0, y: -100, transition: { duration: 0.5 } },
-    visible: { opacity: 1, y: 0, transition: { duration: 0.5 } },
-    hover: { scale: 1.02, boxShadow: "0 10px 30px -10px rgba(255,255,255,0.1)" },
-  };
 
   return (
     <>
       <AnimatePresence>
         {isNavbarVisible && (
           <motion.nav
-            initial="hidden"
-            animate="visible"
-            exit="hidden"
-            variants={navVariants}
-            whileHover="hover"
-            onHoverStart={() => setIsHovered(true)}
-            onHoverEnd={() => setIsHovered(false)}
-            className={`fixed top-0 left-0 right-0 z-50 ${className ?? ""}`}
+            initial={{ y: -100, opacity: 0 }}
+            animate={{
+              y: 0,
+              opacity: 1,
+              transition: { duration: 0.2, ease: "easeOut" },
+            }}
+            exit={{
+              y: -100,
+              opacity: 0,
+              transition: { duration: 0.2 },
+            }}
+            className={`fixed top-0 left-0 right-0 z-50 ${
+              isScrolled
+                ? "bg-neutral-900/90 backdrop-blur-lg shadow-lg"
+                : "bg-neutral-900/80 backdrop-blur-md"
+            } transition-all duration-300 ${className ?? ""}`}
           >
-            <motion.div
-              initial={{ scaleX: 0 }}
-              animate={{ scaleX: 1 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-              className="h-[1px] w-full origin-left bg-gradient-to-r from-rose-500/50 via-purple-500/50 to-blue-500/50"
-            />
-            <div className="relative">
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: isHovered ? 0.2 : 0.1 }}
-                className="absolute inset-0 bg-gradient-to-r from-rose-500/10 via-purple-500/10 to-blue-500/10 blur-2xl"
-              />
-              <div className="absolute inset-0 bg-neutral-900/80 backdrop-blur-lg" />
+            <div className="max-w-6xl mx-auto px-4 sm:px-6 flex items-center justify-between h-16 relative">
+              {/* Logo */}
+              <NavLogo />
 
-              <div className="relative max-w-6xl mx-auto px-6">
-                <div className="flex items-center justify-between h-16">
-                  <NavLogo />
-                  {/* Mobile Menu Toggle */}
-                  <div className="lg:hidden">
-                    <button onClick={() => setIsMenuOpen(!isMenuOpen)}>
-                      {isMenuOpen ? <X className="w-6 h-6 text-white" /> : <Menu className="w-6 h-6 text-white" />}
-                    </button>
-                  </div>
-                  {/* Links hanya muncul di layar lg ke atas */}
-                  <div className="hidden lg:flex">
-                    <NavLinks />
-                  </div>
-                  <ActionButtons toggleSearch={toggleSearch} toggleCart={toggleCart} />
-                </div>
+              {/* Mobile Menu Toggle */}
+              <motion.button
+                className="lg:hidden flex items-center justify-center w-10 h-10 rounded-full hover:bg-neutral-800 transition-colors duration-200"
+                onClick={() => setIsMenuOpen(!isMenuOpen)}
+                whileTap={{ scale: 0.9 }}
+                aria-label={isMenuOpen ? "Close menu" : "Open menu"}
+              >
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={isMenuOpen ? "close" : "open"}
+                    initial={{ rotate: -90, opacity: 0 }}
+                    animate={{ rotate: 0, opacity: 1 }}
+                    exit={{ rotate: 90, opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
+                    {isMenuOpen ? (
+                      <X className="w-6 h-6 text-white" />
+                    ) : (
+                      <Menu className="w-6 h-6 text-white" />
+                    )}
+                  </motion.div>
+                </AnimatePresence>
+              </motion.button>
+
+              {/* Navbar Links (Desktop) */}
+              <div className="hidden lg:flex items-center justify-center flex-1 px-4">
+                <NavLinks className="flex flex-row items-center justify-center" />
               </div>
+
+              {/* Action Buttons */}
+              <ActionButtons
+                toggleSearch={toggleSearch}
+                toggleCart={toggleCart}
+              />
             </div>
 
             {/* Mobile Menu */}
             <AnimatePresence>
               {isMenuOpen && (
                 <motion.div
-                  initial={{ opacity: 0, y: -20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  className="absolute top-16 left-0 w-full bg-neutral-900/95 backdrop-blur-lg p-4 flex flex-col gap-3 items-center lg:hidden"
+                  initial={{ opacity: 0, height: 0 }}
+                  animate={{
+                    opacity: 1,
+                    height: "auto",
+                    transition: { duration: 0.3 },
+                  }}
+                  exit={{
+                    opacity: 0,
+                    height: 0,
+                    transition: { duration: 0.2 },
+                  }}
+                  className="lg:hidden overflow-hidden bg-neutral-900/95 backdrop-blur-lg border-t border-neutral-800"
                 >
-                  <NavLinks />
+                  <div className="max-w-6xl mx-auto px-4 py-4">
+                    <NavLinks
+                      className="flex flex-col space-y-1"
+                      isMobile={true}
+                    />
+                  </div>
                 </motion.div>
               )}
             </AnimatePresence>
@@ -186,9 +243,19 @@ export default function Navbar({ className }: NavbarProps) {
         )}
       </AnimatePresence>
 
-      <div ref={modalRef}>
-        <SearchModal isOpen={modalState.isSearchOpen} onClose={() => toggleSearch(false)} onSearch={handleSearchInput} isLoading={isLoading} searchResults={searchResults} />
-        <CartModal isOpen={modalState.isCartOpen} onClose={() => toggleCart(false)} />
+      {/* Modals */}
+      <div ref={modalRef} className="z-50">
+        <SearchModal
+          isOpen={modalState.isSearchOpen}
+          onClose={() => toggleSearch(false)}
+          onSearch={handleSearchInput}
+          isLoading={isLoading}
+          searchResults={searchResults}
+        />
+        <CartModal
+          isOpen={modalState.isCartOpen}
+          onClose={() => toggleCart(false)}
+        />
       </div>
     </>
   );
