@@ -174,6 +174,7 @@ export default function ProductDetailClient({
           autoClose: 3000,
         });
       }
+
     } finally {
       setIsAddingToCart(false);
     }
