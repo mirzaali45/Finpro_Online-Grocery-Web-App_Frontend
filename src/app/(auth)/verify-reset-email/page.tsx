@@ -15,6 +15,7 @@ export default function VerifyResetEmail() {
 
   useEffect(() => {
     if (!token) {
+
       toast.info("Redirecting to homepage...", {
         position: "bottom-right",
       });
@@ -23,12 +24,14 @@ export default function VerifyResetEmail() {
       setTimeout(() => {
         router.push("/");
       }, 3000);
+
       return;
     }
 
     const verifyEmail = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/auth/verify-change-email`, {
+
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -43,13 +46,16 @@ export default function VerifyResetEmail() {
           setSuccess(true);
 
           // Hapus tanda reset email dari localStorage
+
           localStorage.removeItem("verify_token");
           localStorage.removeItem("token"); // Tambahkan ini agar token lama benar-benar hilang
+
 
           setTimeout(() => {
             router.push("/login-user-customer"); // Redirect ke login setelah sukses
           }, 3000);
         } else {
+
           toast.error(data.message || "Verification failed! Redirecting to homepage...");
           
           setTimeout(() => {

@@ -13,14 +13,11 @@ export const useStoreOrders = (initialParams?: OrdersQueryParams) => {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<OrdersResponse | null>(null);
 
-  // Use current date with noon to prevent timezone issues
   const currentDate = new Date(new Date().setHours(12, 0, 0, 0));
 
-  // Default to 30 days before current date
   const defaultStartDate = new Date(currentDate);
   defaultStartDate.setDate(currentDate.getDate() - 30);
 
-  // Use a state that tracks changes more explicitly
   const [params, setParams] = useState<OrdersQueryParams>({
     startDate:
       initialParams?.startDate || format(defaultStartDate, "yyyy-MM-dd"),
@@ -28,72 +25,75 @@ export const useStoreOrders = (initialParams?: OrdersQueryParams) => {
     status: initialParams?.status,
   });
 
-  // Create a memoized fetch function
   const fetchData = useCallback(async () => {
-    console.group("Fetching Store Orders");
-    console.log("Current Params:", params);
-
     setLoading(true);
     setError(null);
 
     try {
-      // Validate date parameters
-      if (!params.startDate || !params.endDate) {
-        throw new Error("Start and end dates are required");
-      }
-
-      const response = await revenueStoreService.getStoreOrders(params);
-
-      console.log("Fetched Response:", response);
-      console.groupEnd();
-
+      console.log("Fetching orders with params:", params);
+      // Add timestamp to avoid caching issues
+      const paramsWithTimestamp = {
+        ...params,
+        _t: Date.now(),
+      };
+      const response = await revenueStoreService.getStoreOrders(
+        paramsWithTimestamp
+      );
+      console.log("Orders response:", response);
       setData(response);
     } catch (err) {
-      console.error("Fetch Error:", err);
-      console.groupEnd();
-
+      console.error("Error fetching orders:", err);
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
       setLoading(false);
     }
-  }, [params.startDate, params.endDate, params.status]);
+  }, [params]);
 
-  // Trigger fetch when parameters change
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  // Enhanced parameter setting with validation
   const updateParams = useCallback((newParams: Partial<OrdersQueryParams>) => {
+    console.log("Updating order params:", newParams);
     setParams((prev) => {
       const updated = { ...prev, ...newParams };
 
-      // Date range validation
-      const startDate = new Date(updated.startDate || "");
-      const endDate = new Date(updated.endDate || "");
+      // Validate date range if both dates are provided
+      if (updated.startDate && updated.endDate) {
+        const startDate = new Date(updated.startDate);
+        const endDate = new Date(updated.endDate);
 
-      if (startDate > endDate) {
-        console.warn("Invalid date range: Start date cannot be after end date");
-        return prev; // Return previous state if invalid
+        if (startDate > endDate) {
+          console.warn(
+            "Invalid date range: Start date cannot be after end date"
+          );
+          return prev;
+        }
       }
 
       return updated;
     });
   }, []);
 
-  // Add a specialized function for date range changes
+  // New method that directly accepts start and end date strings
   const setDateRange = useCallback(
-    (days: number) => {
-      // Use noon to prevent timezone issues
-      const endDate = new Date(new Date().setHours(12, 0, 0, 0));
-      const startDate = new Date(endDate);
-      startDate.setDate(endDate.getDate() - days);
+    (startDateStr: string, endDateStr: string) => {
+      console.log(`Setting date range: ${startDateStr} to ${endDateStr}`);
+
+      if (!startDateStr && !endDateStr) {
+        // Clear date range
+        updateParams({
+          startDate: undefined,
+          endDate: undefined,
+        });
+        return;
+      }
 
       updateParams({
-        startDate: format(startDate, "yyyy-MM-dd"),
-        endDate: format(endDate, "yyyy-MM-dd"),
+        startDate: startDateStr,
+        endDate: endDateStr,
       });
     },
     [updateParams]
@@ -106,7 +106,7 @@ export const useStoreOrders = (initialParams?: OrdersQueryParams) => {
     refetch: fetchData,
     setParams: updateParams,
     setDateRange,
-    params, // Export current params for UI state comparisons
+    params,
   };
 };
 
@@ -123,45 +123,68 @@ export const useRevenueByPeriod = (initialParams?: RevenueQueryParams) => {
   });
 
   const fetchData = useCallback(async () => {
-    console.group("Fetching Revenue By Period");
-    console.log("Current Params:", params);
-
     setLoading(true);
     setError(null);
 
     try {
-      const response = await revenueStoreService.getRevenueByPeriod(params);
+      console.log(
+        `Fetching revenue with year: ${params.year}, period: ${params.period}`
+      );
 
-      console.log("Fetched Response:", response);
-      console.groupEnd();
+      // Clear previous data to ensure UI updates
+      setData(null);
+
+      // Use a new request each time
+      const paramsCopy = {
+        ...params,
+        _t: Date.now(),
+      };
+
+      const response = await revenueStoreService.getRevenueByPeriod(paramsCopy);
+
+      // Log the response for debugging
+      console.log(
+        `Revenue data for ${params.period} ${
+          params.period === "monthly" ? params.year : ""
+        }:`,
+        response.revenue && response.revenue.length
+          ? `${response.revenue.length} data points`
+          : "No data"
+      );
 
       setData(response);
     } catch (err) {
-      console.error("Fetch Error:", err);
-      console.groupEnd();
-
+      console.error("Error fetching revenue:", err);
       setError(
         err instanceof Error ? err.message : "An unknown error occurred"
       );
     } finally {
       setLoading(false);
     }
-  }, [params.period, params.year]);
+  }, [params]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
   const updateParams = useCallback((newParams: Partial<RevenueQueryParams>) => {
+    console.log("Updating revenue params:", newParams);
     setParams((prev) => ({ ...prev, ...newParams }));
   }, []);
+
+  // Add a direct refresh method that forces a new API call
+  const refreshData = useCallback(() => {
+    console.log("Manually refreshing revenue data...");
+    fetchData();
+  }, [fetchData]);
 
   return {
     data,
     loading,
     error,
     refetch: fetchData,
+    refresh: refreshData, // Add new refresh method
     setParams: updateParams,
-    params, // Export current params for easier access
+    params,
   };
 };

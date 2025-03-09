@@ -185,7 +185,6 @@ export class AuthService {
 
       if (data.token) {
         // Explicitly log token storage for debugging
-        console.log("Token received:", data.token);
         localStorage.setItem("token", data.token);
         localStorage.setItem("exp_token", "24 Hours");
       }
