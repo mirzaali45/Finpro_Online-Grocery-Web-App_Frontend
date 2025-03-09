@@ -295,6 +295,16 @@ export default function DashboardSuperAdmin() {
           </TabsContent>
         </Tabs>
       </div>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-100">
+        <div className="p-6">
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">
+            Recent Activity
+          </h2>
+          <div className="space-y-4">
+            <p className="text-gray-600">No recent activity to display.</p>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

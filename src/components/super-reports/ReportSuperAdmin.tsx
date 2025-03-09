@@ -50,7 +50,6 @@ export default function InventoryReportComponent() {
     e.preventDefault();
     updateFilters(filterValues);
   };
-
   return (
     <div>
       {/* Header with title and actions */}
@@ -71,7 +70,6 @@ export default function InventoryReportComponent() {
           </button>
         </div>
       </div>
-
       {/* Filter Form */}
       <div className="bg-white shadow-sm rounded-lg p-6 mb-8 border">
         <h2 className="flex items-center gap-2 text-lg font-semibold mb-4">
@@ -135,7 +133,6 @@ export default function InventoryReportComponent() {
               placeholder="Threshold value"
             />
           </div>
-
           <div className="flex items-end mb-4">
             <div className="flex items-center h-10">
               <input
@@ -154,7 +151,6 @@ export default function InventoryReportComponent() {
               </label>
             </div>
           </div>
-
           <div className="md:col-span-2 lg:col-span-4 flex justify-end">
             <button
               type="submit"
@@ -165,7 +161,6 @@ export default function InventoryReportComponent() {
           </div>
         </form>
       </div>
-
       {/* Loading and Error States */}
       {isLoading && (
         <div className="text-center py-8">
@@ -173,7 +168,6 @@ export default function InventoryReportComponent() {
           <p className="mt-2 text-gray-600">Loading inventory report...</p>
         </div>
       )}
-
       {error && (
         <div className="bg-red-50 border-l-4 border-red-500 p-4 mb-8">
           <div className="flex">
@@ -188,7 +182,6 @@ export default function InventoryReportComponent() {
           </div>
         </div>
       )}
-
       {/* Dashboard Overview */}
       {data && !isLoading && (
         <>
@@ -245,12 +238,10 @@ export default function InventoryReportComponent() {
               </div>
             </div>
           </div>
-
           {/* Charts Section */}
           <div className="bg-white shadow-sm rounded-lg p-6 mb-8 border">
             <InventoryCharts data={data} />
           </div>
-
           {/* Store Summary */}
           <h2 className="flex items-center gap-2 text-xl font-bold mb-4">
             <Store className="h-5 w-5" />
@@ -322,7 +313,6 @@ export default function InventoryReportComponent() {
               </table>
             </div>
           </div>
-
           {/* Detailed Inventory */}
           <h2 className="flex items-center gap-2 text-xl font-bold mb-4">
             <Package className="h-5 w-5" />

@@ -147,6 +147,7 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
+      console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
       await addToCart(product.product_id, 1);
       toast.success(`${product.name} added to cart!`, {
