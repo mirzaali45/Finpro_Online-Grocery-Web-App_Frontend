@@ -157,35 +157,35 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
-
       console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
-      const userId = localStorage.getItem("userId");
-
-      // Cek apakah user sudah login
-      if (!userId) {
+      
+      // No need to check for userId here, the addToCart function will handle it
+      await addToCart(product.product_id, 1);
+      
+      toast.success(`${product.name} added to cart successfully`, {
+        position: "bottom-right",
+        autoClose: 3000,
+      });
+  
+      onCartUpdate?.();
+    } catch (error) {
+      console.error("Failed to add to cart:", error);
+      
+      // Handle specific error for authentication
+      if (error instanceof Error && error.message === "User not authenticated") {
         Swal.fire({
           icon: "warning",
           title: "Please log in",
           text: "You need to log in to add items to your cart.",
           confirmButtonColor: "#6366f1",
         });
-        return;
+      } else {
+        toast.error("Failed to add product to cart", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
       }
-
-      await addToCart(product.product_id, 1, userId);
-      toast.success(`${product.name} added to cart successfully`, {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
-
-      onCartUpdate?.();
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-      toast.error("Failed to add product to cart", {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
     } finally {
       setIsAddingToCart(false);
     }
