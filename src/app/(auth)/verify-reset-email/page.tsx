@@ -49,8 +49,11 @@ export default function VerifyResetEmail() {
 
           localStorage.removeItem("verify_token");
           localStorage.removeItem("token"); // Tambahkan ini agar token lama benar-benar hilang
+<<<<<<< HEAD
 
 
+=======
+>>>>>>> 922a2b194d45e3f63cfca8d03b7b7e901a8fb12f
           setTimeout(() => {
             router.push("/login-user-customer"); // Redirect ke login setelah sukses
           }, 3000);

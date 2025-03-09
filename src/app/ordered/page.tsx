@@ -177,7 +177,6 @@ export default function OrderedPage() {
       toast.error("Failed to update price");
     }
   };
-
   // Load order
   useEffect(() => {
     const getLatestOrder = async () => {
