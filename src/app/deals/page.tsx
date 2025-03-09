@@ -1,4 +1,6 @@
 import React from "react";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import FeaturedDiscountCarousel from "@/components/customer-discount/FeaturedDealCarousel";
 import DiscountsList from "@/components/customer-discount/DiscountVoucher";
 import DiscountProductsContainer from "@/components/customer-discount/DiscountProductContainer";
@@ -84,6 +86,21 @@ export default function DealsPage() {
           <DiscountProductsContainer />
         </section>
       </div>
+
+      {/* Toast Container for notifications */}
+      <ToastContainer
+        position="bottom-right"
+        autoClose={3000}
+        hideProgressBar={false}
+        newestOnTop
+        closeOnClick
+        rtl={false}
+        pauseOnFocusLoss
+        draggable
+        pauseOnHover
+        theme="dark"
+        limit={3}
+      />
     </main>
   );
 }

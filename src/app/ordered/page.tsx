@@ -20,6 +20,7 @@ import VoucherSelector from "@/components/ordered-component/VoucherSelector";
 import { getAuthToken } from "@/utils/forAuth";
 import { orderService } from "@/services/order.service";
 import { paymentService } from "@/services/payment.service";
+import { voucherService } from "@/services/voucher.service";
 
 // Define CourierOption type
 export interface CourierOption {
@@ -42,6 +43,7 @@ export default function OrderedPage() {
   const [isCancelling, setIsCancelling] = useState(false);
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [applyingVoucher, setApplyingVoucher] = useState(false);
 
   useEffect(() => {
     if (addressData && addressData.length > 0) {
@@ -243,19 +245,50 @@ export default function OrderedPage() {
     setSelectedVoucher(voucher);
 
     if (!order) return;
+    setApplyingVoucher(true);
 
     try {
-      // Now update the database with the new calculated price
-      await updateDatabasePrice();
-
       if (voucher) {
-        toast.success(`Voucher ${voucher.voucher_code} applied successfully!`);
+        // Use the new voucherService.useVoucher method to apply the voucher directly
+        const useVoucherResult = await voucherService.useVoucher(
+          voucher.voucher_code,
+          order.order_id
+        );
+
+        if (useVoucherResult.success) {
+          // Update order with the new price and discount from the API response
+          const latestOrder = await fetchLatestOrder();
+          if (latestOrder) {
+            setOrder(latestOrder);
+            toast.success(
+              `Voucher ${voucher.voucher_code} applied successfully!`
+            );
+            console.log("Voucher applied, details:", {
+              discountAmount: useVoucherResult.discountAmount,
+              newTotalPrice: useVoucherResult.newTotalPrice,
+            });
+          }
+        } else {
+          // If the API call was successful but the voucher couldn't be applied
+          toast.error(useVoucherResult.message || "Could not apply voucher");
+          setSelectedVoucher(null);
+        }
       } else {
+        // If voucher is null, update the price without a voucher
+        await updateDatabasePrice();
         toast.success("Voucher removed");
       }
     } catch (error) {
       console.error("Error applying voucher:", error);
-      toast.error("Failed to apply voucher changes");
+      if (error instanceof Error) {
+        toast.error(error.message);
+      } else {
+        toast.error("Failed to apply voucher");
+      }
+      // Reset voucher selection on error
+      setSelectedVoucher(null);
+    } finally {
+      setApplyingVoucher(false);
     }
   };
 
@@ -358,6 +391,7 @@ export default function OrderedPage() {
                 onSelectVoucher={handleSelectVoucher}
                 storeId={order.store?.store_id}
                 orderTotal={order.total_price}
+                isLoading={applyingVoucher}
               />
             </div>
 
@@ -414,7 +448,7 @@ export default function OrderedPage() {
               isCancelling={isCancelling}
               setOrder={setOrder}
               onInitiatePayment={handleInitiatePayment}
-              isUpdating={isUpdating}
+              isUpdating={isUpdating || applyingVoucher}
             />
           </div>
         </div>

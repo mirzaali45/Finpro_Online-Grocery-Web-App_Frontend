@@ -17,7 +17,6 @@ import {
   useOrders,
   useDashboardStats,
 } from "@/components/hooks/useRevenueSuper";
-import InventoryCharts from "@/components/super-reports/ChartReport";
 
 export default function DashboardSuperAdmin() {
   const [totalUsers, setTotalUsers] = useState(0);
@@ -32,6 +31,9 @@ export default function DashboardSuperAdmin() {
     isLoading: statsLoading,
     error: statsError,
   } = useDashboardStats();
+
+  // Add state to control the active tab
+  const [activeTab, setActiveTab] = useState("overview");
 
   // Period filter states
   const [startDate, setStartDate] = useState<Date | undefined>(
@@ -75,6 +77,8 @@ export default function DashboardSuperAdmin() {
   // Revenue dashboard functions
   // Apply revenue filters
   const applyRevenueFilters = () => {
+    // Stay on the revenue tab when applying filters
+    setActiveTab("revenue");
     fetchRevenue({
       period: periodType,
       startDate: startDate ? format(startDate, "yyyy-MM-dd") : undefined,
@@ -84,16 +88,22 @@ export default function DashboardSuperAdmin() {
 
   // Handle orders page change
   const handlePageChange = (page: number) => {
+    // Stay on the orders tab when changing pages
+    setActiveTab("orders");
     updateParams({ page });
   };
 
   // Handle orders search
   const handleSearch = () => {
+    // Stay on the orders tab when searching
+    setActiveTab("orders");
     fetchOrders();
   };
 
   // Handle orders status filter change
   const handleStatusChange = (status: string) => {
+    // Stay on the orders tab when changing status filter
+    setActiveTab("orders");
     setStatusFilter(status === "all" ? undefined : (status as OrderStatus));
     updateParams({
       status: status === "all" ? undefined : (status as OrderStatus),
@@ -103,6 +113,8 @@ export default function DashboardSuperAdmin() {
 
   // Handle orders page size change
   const handlePageSizeChange = (size: string) => {
+    // Stay on the orders tab when changing page size
+    setActiveTab("orders");
     const newSize = parseInt(size);
     setPageSize(newSize);
     updateParams({ limit: newSize, page: 1 });
@@ -130,7 +142,6 @@ export default function DashboardSuperAdmin() {
         const errorMessage = err instanceof Error ? err.message : String(err);
         setError(errorMessage);
         setIsLoading(false);
-        console.error("Failed to load dashboard data:", err);
       }
     };
 
@@ -157,8 +168,8 @@ export default function DashboardSuperAdmin() {
       color: "bg-purple-500",
     },
     {
-      title: "Active Sessions",
-      value: "89",
+      title: "Total Store",
+      value: totalStoreAdmin.toLocaleString(),
       icon: <PieChart className="h-5 w-5 sm:h-6 sm:w-6" />,
       color: "bg-orange-500",
     },
@@ -229,7 +240,11 @@ export default function DashboardSuperAdmin() {
           Revenue & Orders Dashboard
         </h2>
 
-        <Tabs defaultValue="overview" className="space-y-6 md:space-y-8">
+        <Tabs
+          value={activeTab}
+          onValueChange={setActiveTab}
+          className="space-y-6 md:space-y-8"
+        >
           <TabsList className="grid w-full grid-cols-3 text-xs sm:text-sm md:text-base">
             <TabsTrigger value="overview">Overview</TabsTrigger>
             <TabsTrigger value="revenue">Revenue</TabsTrigger>
@@ -280,12 +295,6 @@ export default function DashboardSuperAdmin() {
           </TabsContent>
         </Tabs>
       </div>
-      
-      {/* Inventory Charts Section */}
-      <div className="bg-white rounded-lg shadow-sm border border-gray-100 p-6 mb-6">
-        <InventoryCharts data={inventoryData} />
-      </div>
-      
       <div className="bg-white rounded-lg shadow-sm border border-gray-100">
         <div className="p-6">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">

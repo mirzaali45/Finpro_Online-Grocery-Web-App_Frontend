@@ -394,10 +394,10 @@ export default function InventoryReportComponent() {
                         Rp {item.product.price.toLocaleString()}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.current_quantity}
+                        {item.total_quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {item.total_quantity}
+                        {item.current_quantity}
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                         Rp {item.stockValue.toLocaleString()}

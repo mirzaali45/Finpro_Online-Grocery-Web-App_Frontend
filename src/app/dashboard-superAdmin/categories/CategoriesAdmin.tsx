@@ -82,10 +82,10 @@ export default function CategoriesAdmin() {
       submitData.append("description", formData.description);
 
       if (categoryImage) {
-        submitData.append("thumbnail", categoryImage);
+        submitData.append("image", categoryImage);
       }
 
-      await categoryService.createCategory(submitData);
+      await categoryService.createCategoryWithImage(submitData);
 
       toast.success("Category created successfully");
       setIsModalOpen(false);
