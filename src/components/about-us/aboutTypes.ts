@@ -12,6 +12,9 @@ export type TeamMember = {
   name: string;
   role: string;
   imagePath: string;
+  linkedin: string;
+  github: string;
+  instagram: string;
 };
 
 // Stat item type

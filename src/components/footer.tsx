@@ -1,5 +1,3 @@
-"use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -9,21 +7,21 @@ export default function Footer() {
   const teamMembers = [
     {
       name: "Dzaky Athariq Ferreira",
-      linkedin: "https://linkedin.com/in/dzaky",
-      github: "https://github.com/dzaky",
-      instagram: "https://instagram.com/dzaky",
+      linkedin: "https://www.linkedin.com/in/dzaky-athariq-ferreira-s-tr-t-a820b3180/",
+      github: "https://github.com/crayoninvok",
+      instagram: "https://instagram.com/dzakyathariq",
     },
     {
       name: "Mirza Ali Yusuf",
-      linkedin: "https://linkedin.com/in/mirza",
-      github: "https://github.com/mirza",
-      instagram: "https://instagram.com/mirza",
+      linkedin: "https://www.linkedin.com/in/mirzaaliyusuf",
+      github: "https://github.com/mirzaali45",
+      instagram: "https://www.instagram.com/mirzaaliyusuf",
     },
     {
       name: "Shania Azzahra",
-      linkedin: "https://linkedin.com/in/shania",
-      github: "https://github.com/shania",
-      instagram: "https://instagram.com/shania",
+      linkedin: "https://www.linkedin.com/in/shania-azzahra-41b28b348",
+      github: "https://github.com/sasa1599",
+      instagram: "https://www.instagram.com/shnazzhar?igsh=MXBta3ZubjJqcXphcA%3D%3D&utm_source=qr",
     },
   ];
 
