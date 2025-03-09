@@ -158,10 +158,11 @@ export default function ProductDetailClient({
   const handleAddToCart = async () => {
     try {
       setIsAddingToCart(true);
-      const userId = localStorage.getItem("userId");
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId") ?? "";
 
       // Cek apakah user sudah login
-      if (!userId) {
+      if (!token) {
         Swal.fire({
           icon: "warning",
           title: "Please log in",

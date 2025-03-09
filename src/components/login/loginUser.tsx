@@ -226,15 +226,12 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
             transition={{ delay: 0.7 }}
             className="mt-6"
           >
-            <div className="relative">
-              <div className="absolute inset-0 flex items-center">
-                <div className="w-full border-t border-gray-300/20"></div>
-              </div>
-              <div className="relative flex justify-center text-sm">
-                <span className="px-2 bg-transparent text-gray-300">
-                  Or continue with
-                </span>
-              </div>
+            <div className="flex items-center my-4">
+              <div className="flex-grow border-t border-gray-300/20"></div>
+              <span className="px-4 text-gray-300 text-sm">
+                Or continue with
+              </span>
+              <div className="flex-grow border-t border-gray-300/20"></div>
             </div>
 
             <motion.button
@@ -262,16 +259,6 @@ const LoginUser: React.FC<LoginFormCustomerProps> = ({
                 className="text-blue-400 hover:text-blue-300 transition-colors"
               >
                 Register here
-              </motion.a>
-            </p>
-            <p>
-              Want to login as super admin?{" "}
-              <motion.a
-                whileHover={{ color: "#60A5FA" }}
-                href="/login-super-admin"
-                className="text-blue-400 hover:text-blue-300 transition-colors"
-              >
-                Login as admin
               </motion.a>
             </p>
             <p className="text-xs text-gray-500">
