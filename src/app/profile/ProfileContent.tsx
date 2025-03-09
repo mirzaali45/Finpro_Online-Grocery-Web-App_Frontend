@@ -5,7 +5,6 @@ import { useRouter } from "next/navigation";
 import ToastContainerElement from "@/components/ToastContainerElement";
 import Section1 from "@/components/profile/Section1";
 import Section2 from "@/components/profile/Section2";
-import Section3 from "@/components/profile/Section3";
 import { VoucherList } from "@/components/voucher-customer/VoucherList";
 import { withAuth } from "@/components/high-ordered-component/AdminGuard";
 import SearchOrder from "@/components/profile/searchOrder";
@@ -52,7 +51,7 @@ function ProfileContent() {
         <main className="space-y-8">
           <Section1 />
           <Section2 />
-          <Section3 />
+          {/* <Section3 /> */}
           <SearchOrder/>
           <OrderConfirmation/>
           <VoucherList />

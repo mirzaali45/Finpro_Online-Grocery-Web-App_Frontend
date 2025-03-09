@@ -59,78 +59,89 @@ const SearchOrder = () => {
   };
 
   return (
-    <div className="container mx-auto p-4">
-      <h1 className="text-2xl font-bold mb-4">Search Orders</h1>
+    <div className="container mx-auto p-6 sm:p-8 md:p-12">
+      <h1 className="text-3xl font-bold mb-6 text-center text-white">Search Orders</h1>
 
       {/* Jika token tidak ada */}
-      {error && !loading && <div className="text-red-500">{error}</div>}
+      {error && !loading && (
+        <div className="bg-red-100 text-red-500 p-4 rounded-md shadow-sm mb-6">
+          {error}
+        </div>
+      )}
 
-      <div className="mb-4">
+      <div className="mb-6 flex flex-col sm:flex-row justify-center gap-4">
         {/* Input untuk orderId */}
         <input
           type="text"
           value={orderId}
           onChange={(e) => setOrderId(e.target.value)}
           placeholder="Order ID"
-          className="border p-2 rounded mr-2"
+          className="border p-3 rounded-lg shadow-md w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         {/* Input untuk orderDate */}
         <input
           type="date"
           value={orderDate}
           onChange={(e) => setOrderDate(e.target.value)}
-          className="border p-2 rounded mr-2"
+          className="border p-3 rounded-lg shadow-md w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         {/* Tombol untuk memulai pencarian */}
         <button
           onClick={fetchOrders}
-          className="bg-blue-500 text-white p-2 rounded ml-2"
+          className="bg-blue-600 text-white p-3 rounded-lg shadow-md hover:bg-blue-700 transition duration-300 ease-in-out w-full sm:w-auto"
         >
           Search
         </button>
       </div>
 
       {/* Menampilkan status loading */}
-      {loading && <div>Loading...</div>}
+      {loading && (
+        <div className="text-center text-gray-600">
+          <div className="animate-spin inline-block w-8 h-8 border-t-4 border-blue-600 rounded-full border-4 border-transparent"></div>
+          <p className="mt-2">Loading...</p>
+        </div>
+      )}
 
       {/* Menampilkan hasil pencarian */}
-      <div className="mt-4">
+      <div className="mt-8">
         {orders.length > 0 ? (
           orders.map((order: any) => (
             <div
               key={order.order_id}
-              className="bg-white p-4 mb-2 rounded shadow"
+              className="bg-white p-6 mb-6 rounded-lg shadow-lg transition-all hover:scale-105 duration-300 ease-in-out"
             >
-              <p className="font-semibold">Order No: {order.order_id}</p>
-              <p>Status: {order.order_status}</p>
-              <p>
+              <p className="font-semibold text-lg text-gray-800">Order No: {order.order_id}</p>
+              <p className="text-gray-600">Status: {order.order_status}</p>
+              <p className="text-gray-600">
                 Order Date: {new Date(order.created_at).toLocaleDateString()}
               </p>
-              <div>
+
+              <div className="mt-4">
                 <p className="font-semibold">Order Items:</p>
                 {order.OrderItem.map((item: any) => (
-                  <div key={item.orderitem_id}>
-                    <p>Product ID: {item.product_id}</p>
-                    <p>Quantity: {item.qty}</p>
-                    <p>Price: {item.price}</p>
-                    <p>Total Price: {item.total_price}</p>
+                  <div key={item.orderitem_id} className="ml-4">
+                    <p className="text-gray-600">Product ID: {item.product_id}</p>
+                    <p className="text-gray-600">Quantity: {item.qty}</p>
+                    <p className="text-gray-600">Price: {item.price}</p>
+                    <p className="text-gray-600">Total Price: {item.total_price}</p>
                   </div>
                 ))}
               </div>
-              <div>
+
+              <div className="mt-4">
                 <p className="font-semibold">Shipping Details:</p>
                 {order.Shipping.map((shipping: any) => (
-                  <div key={shipping.shipping_id}>
-                    <p>Shipping Cost: {shipping.shipping_cost}</p>
-                    <p>Shipping Address: {shipping.shipping_address}</p>
-                    <p>Status: {shipping.shipping_status}</p>
+                  <div key={shipping.shipping_id} className="ml-4">
+                    <p className="text-gray-600">Shipping Cost: {shipping.shipping_cost}</p>
+                    <p className="text-gray-600">Shipping Address: {shipping.shipping_address}</p>
+                    <p className="text-gray-600">Status: {shipping.shipping_status}</p>
                   </div>
                 ))}
               </div>
             </div>
           ))
         ) : (
-          <div>No orders found.</div>
+          <div className="text-center text-gray-600">No orders found.</div>
         )}
       </div>
     </div>

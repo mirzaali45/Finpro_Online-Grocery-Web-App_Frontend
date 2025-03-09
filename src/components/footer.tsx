@@ -15,7 +15,7 @@ export default function Footer() {
     },
     {
       name: "Mirza Ali Yusuf",
-      linkedin: "https://linkedin.com/in/mirza",
+      linkedin: "https://linkedin.com/in/mirzaaliyusuf",
       github: "https://github.com/mirza",
       instagram: "https://instagram.com/mirza",
     },
