@@ -23,7 +23,6 @@ export class UserManagementService {
 
       // Fetch pages until there are no more
       while (hasMorePages) {
-        console.log(`Fetching users page ${currentPage}...`);
 
         const response = await fetch(
           `${base_url_be}/super-admin/showallusers?page=${currentPage}&limit=50`,
@@ -49,11 +48,9 @@ export class UserManagementService {
         hasMorePages = apiResponse.pagination?.hasNextPage || false;
         currentPage++;
       }
-
-      console.log(`Total users fetched across all pages: ${allUsers.length}`);
       return allUsers;
     } catch (error) {
-      console.error("Error fetching all users:", error);
+
       throw error;
     }
   }
@@ -67,10 +64,8 @@ export class UserManagementService {
       const filteredUsers = allUsers.filter(
         (user) => user.role !== "super_admin"
       );
-      console.log(`Total non-super-admin users: ${filteredUsers.length}`);
       return filteredUsers;
     } catch (error) {
-      console.error("Error getting all users:", error);
       throw error;
     }
   }
@@ -84,10 +79,8 @@ export class UserManagementService {
       const storeAdmins = allUsers.filter(
         (user) => user.role === "store_admin"
       );
-      console.log(`Total store admins: ${storeAdmins.length}`);
       return storeAdmins;
     } catch (error) {
-      console.error("Error getting store admins:", error);
       throw error;
     }
   }
@@ -99,10 +92,8 @@ export class UserManagementService {
     try {
       const allUsers = await this.getAllUsersFromAllPages();
       const customers = allUsers.filter((user) => user.role === "customer");
-      console.log(`Total customers: ${customers.length}`);
       return customers;
     } catch (error) {
-      console.error("Error getting customers:", error);
       throw error;
     }
   }

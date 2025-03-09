@@ -15,19 +15,13 @@ export const formatDateParam = (
   if (!dateStr) return undefined;
 
   try {
-    // Parse the input date string
     const parsedDate = parse(dateStr, "yyyy-MM-dd", new Date());
-
-    // For end date, add a day and subtract 1ms to get end of day
     if (isEndDate) {
       const nextDay = addDays(parsedDate, 1);
       return nextDay.toISOString();
     }
-
-    // For start date, return the date at midnight
     return parsedDate.toISOString();
   } catch (e) {
-    console.error("Date formatting error:", e);
     return dateStr;
   }
 };
@@ -73,31 +67,21 @@ class RevenueStoreService {
   }
 
   async getStoreOrders(params?: OrdersQueryParams): Promise<OrdersResponse> {
-    console.log("Fetching Store Orders with Params:", params);
-
     const queryString = this.formatQueryParams(params);
-    console.log("Constructed Query String:", queryString);
-
     try {
       const fullUrl = `${base_url_be}/revenueorder${queryString}`;
-      console.log("Full API URL:", fullUrl);
-
       const response = await fetch(fullUrl, {
         method: "GET",
         headers: this.getAuthHeader(),
       });
 
-      console.log("Response Status:", response.status);
-
       if (!response.ok) {
         const errorText = await response.text();
-        console.error("Error Response Text:", errorText);
         throw await this.handleErrorResponse(response);
       }
 
       return await response.json();
     } catch (error) {
-      console.error("Detailed Error fetching store orders:", error);
       throw error;
     }
   }
@@ -122,7 +106,6 @@ class RevenueStoreService {
 
       return await response.json();
     } catch (error) {
-      console.error("Error fetching revenue by period:", error);
       throw error;
     }
   }
@@ -140,7 +123,6 @@ class RevenueStoreService {
       errorData.message || errorData.error || `API error: ${response.status}`;
 
     if (response.status === 401 || response.status === 403) {
-      console.error("Unauthorized access:", errorMessage);
     }
 
     return new Error(errorMessage);
