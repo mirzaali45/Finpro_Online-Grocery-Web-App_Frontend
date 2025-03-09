@@ -6,6 +6,7 @@ import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 import { ShoppingCart, Store, Clock, Tag } from "lucide-react";
+import Swal from "sweetalert2";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -156,6 +157,7 @@ export default function ProductDetailClient({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
+
       });
 
       onCartUpdate?.();
@@ -174,7 +176,6 @@ export default function ProductDetailClient({
           autoClose: 3000,
         });
       }
-
     } finally {
       setIsAddingToCart(false);
     }

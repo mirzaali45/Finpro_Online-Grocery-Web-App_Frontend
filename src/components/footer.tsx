@@ -22,7 +22,6 @@ export default function Footer() {
       linkedin: "https://www.linkedin.com/in/shania-azzahra-41b28b348",
       github: "https://github.com/sasa1599",
       instagram: "https://www.instagram.com/shnazzhar?igsh=MXBta3ZubjJqcXphcA%3D%3D&utm_source=qr",
-
     },
   ];
 

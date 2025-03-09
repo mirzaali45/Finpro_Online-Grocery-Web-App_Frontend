@@ -49,13 +49,10 @@ export default function VerifyResetEmail() {
 
           localStorage.removeItem("verify_token");
           localStorage.removeItem("token"); // Tambahkan ini agar token lama benar-benar hilang
-
-
           setTimeout(() => {
             router.push("/login-user-customer"); // Redirect ke login setelah sukses
           }, 3000);
         } else {
-
           toast.error(data.message || "Verification failed! Redirecting to homepage...");
           
           setTimeout(() => {
