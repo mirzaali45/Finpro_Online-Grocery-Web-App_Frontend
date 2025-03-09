@@ -98,7 +98,7 @@ export const StoreInventoryCharts: React.FC<StoreInventoryChartsProps> = ({ repo
     
     const categoryEntry = categoryMap.get(item.category);
     if (categoryEntry) {
-      categoryEntry.quantity += item.current_quantity;
+      categoryEntry.quantity += item.total_quantity;
       categoryEntry.value += item.estimated_value;
     }
   });
@@ -111,20 +111,20 @@ export const StoreInventoryCharts: React.FC<StoreInventoryChartsProps> = ({ repo
   const productData: ProductChartData[] = [...report.inventory]
     .sort((a: InventoryItem, b: InventoryItem) => 
       chartType === 'quantity' 
-        ? b.current_quantity - a.current_quantity 
+        ? b.total_quantity - a.total_quantity 
         : b.estimated_value - a.estimated_value
     )
     .slice(0, 5)
     .map((item: InventoryItem) => ({
       name: item.product_name,
-      [chartType]: chartType === 'quantity' ? item.current_quantity : item.estimated_value
+      [chartType]: chartType === 'quantity' ? item.total_quantity : item.estimated_value
     }));
   
   // Prepare data for stock status chart
   const stockStatusData: StockStatusData[] = [
-    { name: 'Low Stock', value: report.inventory.filter(item => item.current_quantity < 10).length },
-    { name: 'Adequate', value: report.inventory.filter(item => item.current_quantity >= 10 && item.current_quantity < 50).length },
-    { name: 'Well Stocked', value: report.inventory.filter(item => item.current_quantity >= 50).length }
+    { name: 'Low Stock', value: report.inventory.filter(item => item.total_quantity < 10).length },
+    { name: 'Adequate', value: report.inventory.filter(item => item.total_quantity >= 10 && item.total_quantity < 50).length },
+    { name: 'Well Stocked', value: report.inventory.filter(item => item.total_quantity >= 50).length }
   ];
   
   // Format y-axis tick values based on chart type
@@ -347,7 +347,7 @@ export const StoreInventoryCharts: React.FC<StoreInventoryChartsProps> = ({ repo
                 <Legend />
                 <Line
                   type="monotone"
-                  dataKey={chartType === 'quantity' ? 'current_quantity' : 'estimated_value'}
+                  dataKey={chartType === 'quantity' ? 'total_quantity' : 'estimated_value'}
                   name={chartType === 'quantity' ? 'Units' : 'Value'}
                   stroke="#8b5cf6"
                   activeDot={{ r: 8 }}

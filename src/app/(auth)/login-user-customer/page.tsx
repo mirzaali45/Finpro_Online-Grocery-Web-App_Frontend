@@ -97,7 +97,7 @@ export default function StoreLoginPage() {
                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent z-10" />
                 <iframe
                   className="w-full h-full"
-                  src="https://www.youtube.com/embed/eDqfg_LexCQ?autoplay=1&loop=1&playlist=eDqfg_LexCQ&controls=0&modestbranding=1"
+                  src="https://www.youtube.com/embed/eDqfg_LexCQ?autoplay=1&loop=1&playlist=eDqfg_LexCQ&controls=0&modestbranding=1&mute=1"
                   title="TechElite Promo Video"
                   allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                   allowFullScreen

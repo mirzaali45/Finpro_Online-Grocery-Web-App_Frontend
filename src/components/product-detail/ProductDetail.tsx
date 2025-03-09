@@ -6,7 +6,6 @@ import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 import { ShoppingCart, Store, Clock, Tag } from "lucide-react";
-import Swal from "sweetalert2";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -43,7 +42,6 @@ export default function ProductDetailClient({
 
     // Get the discount from the array
     const discountData = product.Discount[0];
-    console.log("Raw discount data:", discountData);
 
     // Check if discount has expired
     const isValid = () => {
@@ -65,14 +63,6 @@ export default function ProductDetailClient({
       // Ensure it's one of the valid enum values
       formattedDiscount.discount_type =
         discountTypeStr === "percentage" ? "percentage" : "point";
-
-      // Log what we're working with
-      console.log("Formatted discount:", {
-        type: formattedDiscount.discount_type,
-        value: formattedDiscount.discount_value,
-        expiresAt: formattedDiscount.expires_at,
-      });
-
       return formattedDiscount;
     };
 
@@ -157,33 +147,34 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
+      console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
-      const userId = localStorage.getItem("userId");
-
-      // Cek apakah user sudah login
-      if (!userId) {
-        Swal.fire({
-          icon: "warning",
-          title: "Please log in",
-          text: "You need to log in to add items to your cart.",
-          confirmButtonColor: "#6366f1",
-        });
-        return;
-      }
-
-      await addToCart(product.product_id, 1, userId);
-      toast.success(`${product.name} added to cart successfully`, {
+      await addToCart(product.product_id, 1);
+      toast.success(`${product.name} added to cart!`, {
         position: "bottom-right",
         autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
       });
 
       onCartUpdate?.();
     } catch (error) {
-      console.error("Failed to add to cart:", error);
-      toast.error("Failed to add product to cart", {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
+      if (
+        error instanceof Error &&
+        error.message === "User not authenticated"
+      ) {
+        toast.error("Please log in to add items to your cart", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
+      } else {
+        toast.error("Failed to add product to cart", {
+          position: "bottom-right",
+          autoClose: 3000,
+        });
+      }
     } finally {
       setIsAddingToCart(false);
     }

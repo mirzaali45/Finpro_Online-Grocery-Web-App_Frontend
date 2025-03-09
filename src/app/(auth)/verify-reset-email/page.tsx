@@ -15,24 +15,29 @@ export default function VerifyResetEmail() {
 
   useEffect(() => {
     if (!token) {
-    toast.info("Redirecting to homepage...", {
+
+      toast.info("Redirecting to homepage...", {
         position: "bottom-right",
-        autoClose: 3000,
-    });
-    router.push("/");
+      });
+
+      // Beri delay sebelum redirect agar toast bisa muncul
+      setTimeout(() => {
+        router.push("/");
+      }, 3000);
+
       return;
     }
 
     const verifyEmail = async () => {
       try {
         const res = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/auth/verify-change-email`, {
-            method: "POST",
-            headers: {
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({ token }),
-          });
-          
+
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ token }),
+        });
 
         const data = await res.json();
 
@@ -41,18 +46,28 @@ export default function VerifyResetEmail() {
           setSuccess(true);
 
           // Hapus tanda reset email dari localStorage
-          localStorage.removeItem("verify_reset_email");
+
+          localStorage.removeItem("verify_token");
+          localStorage.removeItem("token"); // Tambahkan ini agar token lama benar-benar hilang
+
 
           setTimeout(() => {
             router.push("/login-user-customer"); // Redirect ke login setelah sukses
           }, 3000);
         } else {
-          toast.error(data.message);
-          router.push("/");
+
+          toast.error(data.message || "Verification failed! Redirecting to homepage...");
+          
+          setTimeout(() => {
+            router.push("/");
+          }, 3000); // Delay sebelum redirect ke home
         }
       } catch (error) {
-        toast.error("Something went wrong!");
-        router.push("/");
+        toast.error("Something went wrong! Please try again later.");
+        
+        setTimeout(() => {
+          router.push("/");
+        }, 3000); // Delay sebelum redirect ke home saat error
       } finally {
         setLoading(false);
       }
@@ -74,8 +89,8 @@ export default function VerifyResetEmail() {
             {loading
               ? "Please wait while we verify your email..."
               : success
-              ? "Your email has been successfully verified. Login With Your New Email"
-              : "Invalid or expired verification link."}
+              ? "Your email has been successfully verified. Login with your new email."
+              : "Invalid or expired verification link. Redirecting to homepage..."}
           </p>
         </div>
       </div>
