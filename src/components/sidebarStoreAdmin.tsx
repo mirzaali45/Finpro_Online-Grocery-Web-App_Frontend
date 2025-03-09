@@ -13,6 +13,7 @@ import {
   BarChart3,
   Menu,
   X,
+  BringToFront,
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 
@@ -36,6 +37,11 @@ const Sidebar = () => {
       title: "Reports",
       icon: <BarChart3 size={20} />,
       href: "/dashboard-storeAdmin/reports",
+    },
+    {
+      title: "Order Managements",
+      icon: <BringToFront size={20} />,
+      href: "/dashboard-storeAdmin/store-Ordermanagements",
     },
   ];
 

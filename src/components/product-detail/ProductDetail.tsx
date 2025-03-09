@@ -159,21 +159,11 @@ export default function ProductDetailClient({
     try {
       console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
-      
-      // No need to check for userId here, the addToCart function will handle it
-      await addToCart(product.product_id, 1);
-      
-      toast.success(`${product.name} added to cart successfully`, {
-        position: "bottom-right",
-        autoClose: 3000,
-      });
-  
-      onCartUpdate?.();
-    } catch (error) {
-      console.error("Failed to add to cart:", error);
-      
-      // Handle specific error for authentication
-      if (error instanceof Error && error.message === "User not authenticated") {
+      const token = localStorage.getItem("token");
+      const userId = localStorage.getItem("userId") ?? "";
+
+      // Cek apakah user sudah login
+      if (!token) {
         Swal.fire({
           icon: "warning",
           title: "Please log in",

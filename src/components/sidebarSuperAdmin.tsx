@@ -13,6 +13,7 @@ import {
   Boxes,
   PackageOpen,
   Clipboard,
+  BringToFront,
 } from "lucide-react";
 import { AuthService } from "@/services/auth.service";
 import Swal from "sweetalert2";
@@ -90,6 +91,11 @@ export default function Sidebar({
       title: "Reports",
       icon: <Clipboard className="h-4 w-4 sm:h-5 sm:w-5" />,
       href: "/dashboard-superAdmin/reports",
+    },
+    {
+      title: "Order Management",
+      icon: <BringToFront className="h-4 w-4 sm:h-5 sm:w-5" />,
+      href: "/dashboard-superAdmin/orderManagements",
     },
   ].filter(Boolean);
 
