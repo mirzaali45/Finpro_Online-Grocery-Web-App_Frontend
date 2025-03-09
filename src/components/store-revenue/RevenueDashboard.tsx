@@ -186,11 +186,12 @@ const RevenueDashboard: React.FC = () => {
         <div className="flex items-center gap-4">
           <div className="flex items-center gap-2">
             <span className="text-sm font-medium">View:</span>
-            <div className="flex bg-muted rounded-md overflow-hidden">
+            <div className="flex bg-gray-200 rounded-md overflow-hidden">
               <Button
                 variant={selectedView === "line" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setSelectedView("line")}
+                className="cursor-pointer hover:bg-gray-300"
               >
                 Line
               </Button>
@@ -198,6 +199,7 @@ const RevenueDashboard: React.FC = () => {
                 variant={selectedView === "bar" ? "default" : "ghost"}
                 size="sm"
                 onClick={() => setSelectedView("bar")}
+                className="cursor-pointer hover:bg-gray-300"
               >
                 Bar
               </Button>
@@ -210,12 +212,16 @@ const RevenueDashboard: React.FC = () => {
               value={selectedYear.toString()}
               onValueChange={handleYearChange}
             >
-              <SelectTrigger className="w-32">
+              <SelectTrigger className="w-32 bg-gray-200 cursor-pointer hover:bg-gray-300">
                 <SelectValue placeholder={selectedYear.toString()} />
               </SelectTrigger>
-              <SelectContent>
+              <SelectContent className="bg-gray-100">
                 {generateYearOptions().map((year) => (
-                  <SelectItem key={year} value={year.toString()}>
+                  <SelectItem
+                    key={year}
+                    value={year.toString()}
+                    className="cursor-pointer hover:bg-gray-200"
+                  >
                     {year}
                   </SelectItem>
                 ))}

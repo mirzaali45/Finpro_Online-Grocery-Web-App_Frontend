@@ -408,8 +408,9 @@ const DiscountForm: React.FC<DiscountFormProps> = ({
 
         <Button
           type="submit"
-          className="w-full mt-4 text-sm sm:text-base py-2"
+          className="w-full mt-4 text-sm sm:text-base py-2 text-white bg-gray-800 hover:bg-gray-900 cursor-pointer"
           disabled={isLoading}
+          onClick={handleSubmit}
         >
           {isLoading ? "Creating..." : "Create Discount"}
         </Button>
