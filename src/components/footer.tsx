@@ -1,28 +1,3 @@
-"use client";
-
-import React from "react";
-import Image from "next/image";
-import Link from "next/link";
-import { Instagram, Github, Linkedin } from "lucide-react";
-
-export default function Footer() {
-  const teamMembers = [
-    {
-      name: "Dzaky Athariq Ferreira",
-      linkedin: "https://linkedin.com/in/dzaky",
-      github: "https://github.com/dzaky",
-      instagram: "https://instagram.com/dzaky",
-    },
-    {
-      name: "Mirza Ali Yusuf",
-      linkedin: "https://www.linkedin.com/in/mirzaaliyusuf",
-      github: "https://github.com/mirza",
-      instagram: "https://instagram.com/mirza",
-    },
-    {
-      name: "Shania Azzahra",
-      linkedin: ""use client";
-
 import React from "react";
 import Image from "next/image";
 import Link from "next/link";
