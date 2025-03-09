@@ -31,14 +31,16 @@ export const team: TeamMember[] = [
       "https://res.cloudinary.com/dak07ttxh/image/upload/v1741170079/image_mwnbft.jpg",
     linkedin: "https://www.linkedin.com/in/shania-azzahra-41b28b348",
     github: "https://github.com/sasa1599",
-    instagram: "https://www.instagram.com/shnazzhar?igsh=MXBta3ZubjJqcXphcA%3D%3D&utm_source=qr",
+    instagram:
+      "https://www.instagram.com/shnazzhar?igsh=MXBta3ZubjJqcXphcA%3D%3D&utm_source=qr",
   },
   {
     name: "Dzaky Athariq Ferreira",
     role: "Founder",
     imagePath:
       "https://res.cloudinary.com/dak07ttxh/image/upload/v1741170286/0d4cb028-cd28-4e64-83e0-a6472d3142ef_wpkjbv.jpg",
-    linkedin: "https://www.linkedin.com/in/dzaky-athariq-ferreira-s-tr-t-a820b3180/",
+    linkedin:
+      "https://www.linkedin.com/in/dzaky-athariq-ferreira-s-tr-t-a820b3180/",
     github: "https://github.com/crayoninvok",
     instagram: "https://instagram.com/dzakyathariq",
   },
@@ -46,7 +48,7 @@ export const team: TeamMember[] = [
     name: "Mirza Ali Yusuf",
     role: "Founder",
     imagePath:
-      "https://res.cloudinary.com/dak07ttxh/image/upload/v1741170284/03e02e7d-3a8e-40ca-adb1-9385899ac277_uriylx.jpg",
+      "https://res.cloudinary.com/dak07ttxh/image/upload/v1741559886/DSC08142_11zon_onhi3c.jpg",
     linkedin: "https://www.linkedin.com/in/mirzaaliyusuf",
     github: "https://github.com/mirzaali45",
     instagram: "https://www.instagram.com/mirzaaliyusuf",
