@@ -22,7 +22,6 @@ import { orderService } from "@/services/order.service";
 import { paymentService } from "@/services/payment.service";
 import { voucherService } from "@/services/voucher.service";
 
-
 // Define CourierOption type
 export interface CourierOption {
   shipping_name: string;
@@ -45,7 +44,6 @@ export default function OrderedPage() {
   const [selectedVoucher, setSelectedVoucher] = useState<Voucher | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [applyingVoucher, setApplyingVoucher] = useState(false);
-
 
   useEffect(() => {
     if (addressData && addressData.length > 0) {
@@ -277,7 +275,6 @@ export default function OrderedPage() {
       } else {
         // If voucher is null, update the price without a voucher
         await updateDatabasePrice();
-
         toast.success("Voucher removed");
       }
     } catch (error) {
@@ -291,7 +288,6 @@ export default function OrderedPage() {
       setSelectedVoucher(null);
     } finally {
       setApplyingVoucher(false);
-
     }
   };
 
@@ -395,7 +391,6 @@ export default function OrderedPage() {
                 storeId={order.store?.store_id}
                 orderTotal={order.total_price}
                 isLoading={applyingVoucher}
-
               />
             </div>
 

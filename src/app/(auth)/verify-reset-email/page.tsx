@@ -53,6 +53,7 @@ export default function VerifyResetEmail() {
             router.push("/login-user-customer"); // Redirect ke login setelah sukses
           }, 3000);
         } else {
+
           toast.error(data.message || "Verification failed! Redirecting to homepage...");
           
           setTimeout(() => {

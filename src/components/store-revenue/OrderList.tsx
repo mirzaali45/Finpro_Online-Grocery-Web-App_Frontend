@@ -263,17 +263,52 @@ const OrderList: React.FC = () => {
         <h2 className="text-xl sm:text-2xl font-bold">Order Management</h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Select value={selectedFilter} onValueChange={handleFilterChange}>
-            <SelectTrigger className="w-full sm:w-40">
+            <SelectTrigger className="w-full sm:w-40 bg-gray-200 cursor-pointer hover:bg-gray-300">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Status</SelectItem>
-              <SelectItem value="completed">Completed</SelectItem>
-              <SelectItem value="shipped">Shipped</SelectItem>
-              <SelectItem value="processing">Processing</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
-              <SelectItem value="awaiting_payment">Awaiting Payment</SelectItem>
-              <SelectItem value="cancelled">Cancelled</SelectItem>
+            <SelectContent className="bg-gray-100">
+              <SelectItem
+                value="all"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                All Status
+              </SelectItem>
+              <SelectItem
+                value="completed"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Completed
+              </SelectItem>
+              <SelectItem
+                value="shipped"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Shipped
+              </SelectItem>
+              <SelectItem
+                value="processing"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Processing
+              </SelectItem>
+              <SelectItem
+                value="pending"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Pending
+              </SelectItem>
+              <SelectItem
+                value="awaiting_payment"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Awaiting Payment
+              </SelectItem>
+              <SelectItem
+                value="cancelled"
+                className="cursor-pointer hover:bg-gray-200"
+              >
+                Cancelled
+              </SelectItem>
             </SelectContent>
           </Select>
           <div className="flex items-center gap-2 ml-auto sm:ml-0">

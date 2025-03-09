@@ -6,7 +6,6 @@ import { Product } from "@/types/product-types";
 import { addToCart } from "@/services/cart.service";
 import { toast } from "react-toastify";
 import { ShoppingCart, Store, Clock, Tag } from "lucide-react";
-import Swal from "sweetalert2";
 
 interface ProductDetailClientProps {
   product: Product;
@@ -148,6 +147,7 @@ export default function ProductDetailClient({
 
   const handleAddToCart = async () => {
     try {
+      console.log("Adding to cart..."); // Debugging
       setIsAddingToCart(true);
       await addToCart(product.product_id, 1);
       toast.success(`${product.name} added to cart!`, {
@@ -157,7 +157,6 @@ export default function ProductDetailClient({
         closeOnClick: true,
         pauseOnHover: true,
         draggable: true,
-
       });
 
       onCartUpdate?.();
