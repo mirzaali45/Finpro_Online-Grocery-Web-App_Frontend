@@ -7,8 +7,6 @@ import { storeService } from "@/services/store-admin.service";
 import { useGeolocation } from "@/components/hooks/useGeolocation";
 import { sortByDistance } from "@/utils/distanceCalc";
 import { storeDebugHelper } from "@/utils/storeDebugerHelper";
-
-// Import sub-components
 import StoreHeader from "@/components/nearby-store/components-nearby-store/StoreHeader";
 import StoreMapView from "@/components/nearby-store/components-nearby-store/StoreMapView";
 import CurrentLocationCard from "@/components/nearby-store/components-nearby-store/CurrentLocationCard";
@@ -71,16 +69,8 @@ export default function NearbyStore() {
       try {
         const fetchedStores = await storeService.getStores();
 
-        // Log the raw response for debugging
-        storeDebugHelper.logStoreResponse(fetchedStores, "Raw API Response");
-
         // Extract stores array using helper (works with any format)
         const storesArray = storeDebugHelper.extractStores(fetchedStores);
-
-        // Log the extracted stores
-        console.log("Extracted stores array:", storesArray);
-        console.log("Stores array length:", storesArray.length);
-
         // Validate stores have required fields
         const validStores: StoreWithDistance[] = storesArray
           .filter((store: any) => {
@@ -89,13 +79,6 @@ export default function NearbyStore() {
             const hasValidCoordinates =
               typeof store.latitude === "number" &&
               typeof store.longitude === "number";
-
-            if (!hasStoreId) {
-              console.warn("Store missing ID:", store);
-            }
-            if (!hasValidCoordinates) {
-              console.warn("Store missing valid coordinates:", store);
-            }
 
             return (
               hasStoreId &&
@@ -127,8 +110,6 @@ export default function NearbyStore() {
             description: store.description,
           }));
 
-        console.log("Valid stores with required fields:", validStores.length);
-
         // Set debug info for UI
         if (validStores.length === 0) {
           setDebugInfo(
@@ -157,7 +138,6 @@ export default function NearbyStore() {
           setNearestStores(validStores.slice(0, 3));
         }
       } catch (error) {
-        console.error("Store fetch error:", error);
         const errorMsg =
           error instanceof Error
             ? error.message

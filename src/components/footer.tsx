@@ -40,7 +40,7 @@ export default function Footer() {
                 height={30}
                 className="object-contain"
               />
-              <span className="text-xl font-bold">TechElite</span>
+              <span className="text-xl font-bold">Techlite</span>
             </Link>
             <p className="text-gray-400 text-sm">
               Your premium tech destination.
@@ -169,7 +169,7 @@ export default function Footer() {
 
         {/* Copyright */}
         <div className="border-t border-gray-800 pt-8 text-center text-gray-400 text-sm">
-          © 2025 TechElite. All rights reserved.
+          © 2025 Techlite. All rights reserved.
         </div>
       </div>
     </footer>

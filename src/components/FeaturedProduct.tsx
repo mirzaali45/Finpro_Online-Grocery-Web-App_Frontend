@@ -53,7 +53,6 @@ export default function FeaturedProducts() {
       setProducts(featuredProducts);
       setSortedProducts(featuredProducts);
     } catch (error) {
-      console.error("Error fetching featured products:", error);
     } finally {
       setLoading(false);
     }

@@ -31,7 +31,6 @@ const DiscountsList: React.FC = () => {
           });
 
           setDiscounts(activeDiscounts);
-          console.log("Active discounts:", activeDiscounts);
         } else {
           setError("Failed to fetch discounts");
         }

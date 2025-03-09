@@ -146,7 +146,7 @@ export default function Hero() {
             className="relative mb-4"
           >
             <span className="text-lg md:text-xl uppercase tracking-[0.2em] font-medium text-white/50">
-              TechElite Presents
+              Techllite Presents
             </span>
           </motion.div>
         </div>

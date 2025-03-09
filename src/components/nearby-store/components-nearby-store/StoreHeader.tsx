@@ -24,7 +24,7 @@ export default function StoreHeader() {
       <div className="h-1 w-20 bg-gradient-to-r from-gray-700 to-gray-600 mx-auto rounded-full mb-6"></div>
 
       <p className="mt-4 text-gray-400 max-w-2xl mx-auto">
-        Discover TechElite stores in your area for the best tech shopping
+        Discover Techlite stores in your area for the best tech shopping
         experience
       </p>
     </motion.div>
