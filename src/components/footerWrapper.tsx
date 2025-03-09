@@ -19,6 +19,8 @@ export default function FooterWrapper() {
     "/dashboard-storeAdmin/discount",
     "/dashboard-storeAdmin/reports",
     "/dashboard-superAdmin/reports",
+    "/dashboard-superAdmin/orderManagements",
+    "/dashboard-storeAdmin/store-Ordermanagements",
   ];
 
   return noFooterRoutes.includes(pathname) ? null : <Footer />;
