@@ -286,7 +286,7 @@ export default function ProductForm({
         fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/category?all=true`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/store`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/store?getAll=true`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
