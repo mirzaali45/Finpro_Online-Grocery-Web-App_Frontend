@@ -263,6 +263,7 @@ const OrderList: React.FC = () => {
         <h2 className="text-xl sm:text-2xl font-bold">Order Management</h2>
         <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full sm:w-auto">
           <Select value={selectedFilter} onValueChange={handleFilterChange}>
+
             <SelectTrigger className="w-full sm:w-40 bg-gray-200 cursor-pointer hover:bg-gray-300">
               <SelectValue placeholder="Filter status" />
             </SelectTrigger>
