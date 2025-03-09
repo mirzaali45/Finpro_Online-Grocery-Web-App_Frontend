@@ -29,12 +29,15 @@ export interface OrderStore {
 }
 
 export interface OrderShipping {
+  length: number;
   status: ShippingStatus;
   address: string;
   cost: number;
 }
 
 export interface Order {
+  order_status(order_status: any): import("react").ReactNode;
+  Shipping: any;
   order_id: number;
   order_date: string;
   status: OrderStatus;
