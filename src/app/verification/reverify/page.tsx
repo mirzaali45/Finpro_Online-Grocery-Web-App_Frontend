@@ -30,6 +30,9 @@ export default function ReverifyPage() {
         toast.dismiss(); // Hapus loading toast
 
         if (response.ok) {
+          localStorage.removeItem("verify_token");
+          localStorage.removeItem("token");
+
           toast.success("Email successfully changed! Redirecting to login...", {
             autoClose: 3000,
             theme: "colored",

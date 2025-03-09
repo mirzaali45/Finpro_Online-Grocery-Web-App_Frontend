@@ -65,6 +65,45 @@ class VoucherService {
     }
   }
 
+  async useVoucher(
+    voucher_code: string,
+    order_id: number
+  ): Promise<{
+    success: boolean;
+    message: string;
+    discountAmount?: number;
+    newTotalPrice?: number;
+    voucher?: any;
+  }> {
+    try {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        throw new Error("Authentication required");
+      }
+
+      const response = await fetch(`${this.baseUrl}/voucher/use`, {
+        method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ voucher_code, order_id }),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || "Failed to use voucher");
+      }
+
+      return data;
+    } catch (error) {
+      console.error("Error using voucher:", error);
+      throw error;
+    }
+  }
+
   async deleteVoucher(
     voucher_id: number
   ): Promise<{ success: boolean; message: string }> {

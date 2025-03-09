@@ -24,10 +24,6 @@ const DiscountProductsContainer = () => {
     }
   };
 
-  const handleCartUpdate = () => {
-    // This would update the cart if needed
-  };
-
   if (loading) {
     return (
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
@@ -57,7 +53,6 @@ const DiscountProductsContainer = () => {
         <DiscountProductCard
           key={product.product_id}
           product={product}
-          onCartUpdate={handleCartUpdate}
         />
       ))}
     </div>

@@ -117,10 +117,10 @@ export const OrdersTab: React.FC<OrdersTabProps> = ({
             value={statusFilter || "all"}
             onValueChange={handleStatusChange}
           >
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[180px] bg-neutral-200">
               <SelectValue placeholder="Filter by status" />
             </SelectTrigger>
-            <SelectContent>
+            <SelectContent className="bg-neutral-400 ">
               <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value={OrderStatus.pending}>Pending</SelectItem>
               <SelectItem value={OrderStatus.awaiting_payment}>

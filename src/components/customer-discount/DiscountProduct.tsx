@@ -73,11 +73,20 @@ const DiscountProductCard = ({
       await addToCart(product.product_id, 1, userId);
 
       // Using toast without inline configuration - relies on global ToastContainer
-      toast.success(`${product.name} added to cart!`);
+      toast.success(`${product.name} added to cart!`, {
+        position: "bottom-right",
+        autoClose: 3000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+      });
       onCartUpdate?.();
     } catch (error) {
-      console.error("Failed to add to cart:", error);
-      toast.error("Failed to add product to cart");
+       toast.error("Please log in to add items to your cart", {
+         position: "bottom-right",
+         autoClose: 3000,
+       });
     } finally {
       setIsLoading(false);
     }

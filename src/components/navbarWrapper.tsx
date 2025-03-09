@@ -20,6 +20,8 @@ export default function NavbarWrapper() {
     "/dashboard-storeAdmin/products",
     "/dashboard-storeAdmin/reports",
     "/dashboard-superAdmin/reports",
+    "/dashboard-superAdmin/orderManagements",
+    "/dashboard-storeAdmin/store-Ordermanagements",
   ];
 
   return noNavbarRoutes.includes(pathname) ? null : <Navbar />;
