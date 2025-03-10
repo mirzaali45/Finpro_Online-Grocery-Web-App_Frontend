@@ -1,8 +1,8 @@
-// ShippingMethodCard.tsx
 import React, { useEffect, useState } from "react";
 import { Address } from "@/types/address-types";
 import { CourierOption } from "@/app/ordered/page";
 import { formatRupiah } from "@/helper/currencyRp";
+import { CheckPricing } from "@/services/cek-ongkir/CekOngkirApi";
 
 interface ShippingMethodCardProps {
   selectedAddress: Address | null;
@@ -10,72 +10,73 @@ interface ShippingMethodCardProps {
     React.SetStateAction<CourierOption | null>
   >;
   onCourierSelect: (courier: CourierOption | null) => Promise<void>;
+  defaultCourier: CourierOption | null; // Add this prop to pass selected courier
 }
 
 const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
   selectedAddress,
   setSelectedCourier,
   onCourierSelect,
+  defaultCourier, // Get the default courier option from parent
 }) => {
   const [courierOptions, setCourierOptions] = useState<CourierOption[]>([]);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [selectedOption, setSelectedOption] = useState<string | null>(null); // Store selected courier's value
+  const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
 
-  // Simulate fetching courier options based on the selected address
+  const STORE_POSTCODE = 40973;
+
+  const getCourier = async () => {
+    try {
+      if (!selectedAddress?.postcode) return;
+      const customerPostcode = parseInt(selectedAddress.postcode, 10);
+      const response = await CheckPricing(customerPostcode, STORE_POSTCODE);
+
+      const resCargo = response.data?.calculate_cargo || [];
+      const resRegular = response.data?.calculate_reguler || [];
+
+      const formattedCouriers: CourierOption[] = [
+        ...resCargo,
+        ...resRegular,
+      ].map((courier) => ({
+        ...courier,
+        value: courier.shipping_name,
+        label: `${courier.shipping_name} - Rp ${courier.shipping_cost
+          .toLocaleString()
+          .replaceAll(",", ".")}`,
+      }));
+
+      setCourierOptions(formattedCouriers);
+      setError("");
+    } catch (error) {
+      setError(
+        error instanceof Error
+          ? error.message
+          : "Failed to load courier options"
+      );
+    }
+  };
+
   useEffect(() => {
-    const fetchCourierOptions = async () => {
-      if (!selectedAddress) return;
-
-      setIsLoading(true);
-      try {
-        // Simulate API call delay
-        await new Promise((resolve) => setTimeout(resolve, 500));
-
-        // Simulated courier options data
-        // In a real app, this would come from an API
-        const options: CourierOption[] = [
-          {
-            shipping_name: "Economy Delivery",
-            shipping_cost: 10000,
-            value: "economy",
-            label: "Economy Delivery (2-3 days) - Rp 10,000",
-            estimated_days: "2-3 days",
-          },
-          {
-            shipping_name: "Regular Delivery",
-            shipping_cost: 20000,
-            value: "regular",
-            label: "Regular Delivery (1-2 days) - Rp 20,000",
-            estimated_days: "1-2 days",
-          },
-          {
-            shipping_name: "Same Day Delivery",
-            shipping_cost: 40000,
-            value: "sameday",
-            label: "Same Day Delivery - Rp 40,000",
-            estimated_days: "Today",
-          },
-        ];
-
-        setCourierOptions(options);
-      } catch (error) {
-        console.error("Error fetching courier options:", error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchCourierOptions();
+    if (selectedAddress) {
+      getCourier();
+    }
   }, [selectedAddress]);
 
+  useEffect(() => {
+    // Set the default courier option if available
+    if (defaultCourier) {
+      setSelectedOption(defaultCourier.value);
+      setSelectedCourier(defaultCourier);
+    }
+  }, [defaultCourier, setSelectedCourier, selectedOption]);
+
   const handleOptionChange = async (value: string) => {
-    setSelectedOption(value);
+    setSelectedOption(value); // Update langsung di UI
     const selectedCourier =
       courierOptions.find((option) => option.value === value) || null;
     setSelectedCourier(selectedCourier);
 
-    // Show updating state
     setUpdating(true);
     try {
       await onCourierSelect(selectedCourier);
@@ -99,15 +100,15 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
         )}
       </div>
       <div className="p-4">
-        {isLoading ? (
-          <div className="flex justify-center py-8">
-            <div className="animate-spin rounded-full h-10 w-10 border-t-2 border-blue-500"></div>
-          </div>
-        ) : !selectedAddress ? (
+        {!selectedAddress ? (
           <div className="bg-amber-900/30 border border-amber-800 rounded-lg p-4">
             <p className="text-amber-200">
               Please select a shipping address first
             </p>
+          </div>
+        ) : error ? (
+          <div className="bg-red-900/30 border border-red-800 rounded-lg p-4">
+            <p className="text-red-200">{error}</p>
           </div>
         ) : (
           <>
@@ -115,21 +116,32 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
               {courierOptions.map((option) => (
                 <div
                   key={option.value}
-                  className={`
-                    flex items-center space-x-3 border ${
-                      selectedOption === option.value
-                        ? "border-blue-500 bg-blue-900/20"
-                        : "border-gray-700 bg-gray-800"
-                    }
-                    rounded-lg p-3 hover:bg-gray-700 transition cursor-pointer
-                    ${updating ? "opacity-70 pointer-events-none" : ""}
-                  `}
+                  className={`flex items-center space-x-3 border 
+      ${
+        selectedOption === option.value
+          ? "border-blue-500 bg-blue-900/20 ring-2 ring-blue-500"
+          : "border-gray-700 bg-gray-800"
+      }
+      rounded-lg p-3 hover:bg-gray-700 transition cursor-pointer
+      ${updating ? "opacity-70 pointer-events-none" : ""}`}
                   onClick={() => !updating && handleOptionChange(option.value)}
                 >
                   <div className="flex-shrink-0">
-                    <div className="w-5 h-5 rounded-full border border-gray-500 flex items-center justify-center">
+                    <div
+                      className={`w-5 h-5 rounded-full border ${
+                        selectedOption === option.value
+                          ? "border-blue-500 bg-blue-500"
+                          : "border-gray-500"
+                      } flex items-center justify-center`}
+                    >
                       {selectedOption === option.value && (
-                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
+                        <svg
+                          className="w-3 h-3 text-white"
+                          fill="currentColor"
+                          viewBox="0 0 16 16"
+                        >
+                          <path d="M13.78 3.22a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06L7 8.94l5.72-5.72a.75.75 0 0 1 1.06 0z" />
+                        </svg>
                       )}
                     </div>
                   </div>
@@ -138,7 +150,7 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
                       {option.shipping_name}
                     </div>
                     <div className="text-sm text-gray-400">
-                      Estimated delivery: {option.estimated_days}
+                      Estimated delivery: {option.estimated_days || "2-3 days"}
                     </div>
                     <div className="font-semibold mt-1 text-blue-400">
                       {formatRupiah

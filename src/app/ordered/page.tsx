@@ -382,6 +382,7 @@ export default function OrderedPage() {
               selectedAddress={selectedAddress}
               setSelectedCourier={setSelectedCourier}
               onCourierSelect={handleCourierChange}
+              defaultCourier={null}
             />
 
             {/* Voucher Selector */}
