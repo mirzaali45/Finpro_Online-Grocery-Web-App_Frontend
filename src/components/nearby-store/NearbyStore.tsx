@@ -79,7 +79,6 @@ export default function NearbyStore() {
             const hasValidCoordinates =
               typeof store.latitude === "number" &&
               typeof store.longitude === "number";
-
             return (
               hasStoreId &&
               hasValidCoordinates &&

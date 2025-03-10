@@ -46,7 +46,7 @@ const RegisterCustomer: React.FC<RegisterFormCustomerProps> = ({
             <StoreIcon className="h-12 w-12 text-blue-600" />
           </div>
           <h2 className="mt-4 text-3xl font-bold text-gray-900">
-            Register TechElite
+            Register Techlite
           </h2>
           <p className="mt-2 text-sm text-gray-600">
             Let&apos;s create an account
