@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Order } from "@/types/orderStoreAdmin-types"; // Menggunakan tipe yang sudah didefinisikan untuk Store Admin // Pagination component
 import PaginationStr from "@/components/store-Ordermanagements/paginationStr";
 import OrderCardStr from "@/components/store-Ordermanagements/orderCarsStr";
+import { formatRupiah } from "@/helper/currencyRp";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
@@ -121,7 +122,11 @@ const Orders = () => {
       {/* Orders List */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {orders.map((order) => (
-          <OrderCardStr key={order.order_id} order={order} />
+          <OrderCardStr
+            key={order.order_id}
+            order={order}
+            formattedTotalPrice={formatRupiah(order.total_price)} // Pass the formatted price
+          />
         ))}
       </div>
 

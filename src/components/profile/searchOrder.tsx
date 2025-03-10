@@ -1,4 +1,5 @@
-// pages/index.tsx
+"use client"; // Menandakan bahwa komponen ini dijalankan di sisi klien
+
 import { useEffect, useState } from "react";
 
 const SearchOrder = () => {
@@ -56,6 +57,15 @@ const SearchOrder = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Helper function to format price in IDR format
+  const formatIDR = (amount: number) => {
+    return new Intl.NumberFormat("id-ID", {
+      style: "currency",
+      currency: "IDR",
+      maximumFractionDigits: 0,
+    }).format(amount);
   };
 
   return (
@@ -122,8 +132,8 @@ const SearchOrder = () => {
                   <div key={item.orderitem_id} className="ml-4">
                     <p className="text-gray-600">Product ID: {item.product_id}</p>
                     <p className="text-gray-600">Quantity: {item.qty}</p>
-                    <p className="text-gray-600">Price: {item.price}</p>
-                    <p className="text-gray-600">Total Price: {item.total_price}</p>
+                    <p className="text-gray-600">Price: {formatIDR(item.price)}</p> {/* Format price in IDR */}
+                    <p className="text-gray-600">Total Price: {formatIDR(item.total_price)}</p> {/* Format total price in IDR */}
                   </div>
                 ))}
               </div>
@@ -132,7 +142,7 @@ const SearchOrder = () => {
                 <p className="font-semibold">Shipping Details:</p>
                 {order.Shipping.map((shipping: any) => (
                   <div key={shipping.shipping_id} className="ml-4">
-                    <p className="text-gray-600">Shipping Cost: {shipping.shipping_cost}</p>
+                    <p className="text-gray-600">Shipping Cost: {formatIDR(shipping.shipping_cost)}</p> {/* Format shipping cost in IDR */}
                     <p className="text-gray-600">Shipping Address: {shipping.shipping_address}</p>
                     <p className="text-gray-600">Status: {shipping.shipping_status}</p>
                   </div>

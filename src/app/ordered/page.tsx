@@ -14,7 +14,6 @@ import OrderDetailsCard from "@/components/ordered-component/OrderDetailsCard";
 import ShippingInfoCard from "@/components/ordered-component/ShippingInfoCard";
 import PageHeader from "@/components/ordered-component/PageHeader";
 import OrderConfirmationBanner from "@/components/ordered-component/OrderConfirmationBanner";
-import LoadingState from "@/components/ordered-component/LoadingState";
 import EmptyOrderState from "@/components/ordered-component/EmptyOrderState";
 import VoucherSelector from "@/components/ordered-component/VoucherSelector";
 import { getAuthToken } from "@/utils/forAuth";
@@ -35,7 +34,7 @@ export default function OrderedPage() {
   const router = useRouter();
   const { load, addressData } = Services2();
   const [selectedAddress, setSelectedAddress] = useState<Address | null>(null);
-  const { isLoading, fetchLatestOrder, cancelOrder } = useOrders();
+  const { fetchLatestOrder, cancelOrder } = useOrders();
   const [order, setOrder] = useState<Order | null>(null);
   const [selectedCourier, setSelectedCourier] = useState<CourierOption | null>(
     null
@@ -58,44 +57,35 @@ export default function OrderedPage() {
   const calculateTotalPrice = (): number => {
     if (!order) return 0;
 
-    // Start with the base product price (from order items)
     let basePrice = 0;
 
-    // Calculate base price from items if available
     if (order.items && order.items.length > 0) {
       basePrice = order.items.reduce((total, item) => {
         return total + item.price * (item.quantity || 1);
       }, 0);
     } else {
-      // If items aren't available, use the order's total_price as base
       basePrice = order.total_price;
     }
 
-    // Add shipping cost if a courier is selected
     const shippingCost = selectedCourier ? selectedCourier.shipping_cost : 0;
 
-    // Calculate discount amount
     let discountAmount = 0;
     if (selectedVoucher) {
       if (selectedVoucher.discount.discount_type === "percentage") {
-        // For percentage discounts, apply to the subtotal (basePrice)
         discountAmount = Math.round(
           (basePrice * selectedVoucher.discount.discount_value) / 100
         );
       } else {
-        // For fixed discounts, use the discount value directly
         discountAmount = selectedVoucher.discount.discount_value;
       }
     }
 
-    // Calculate final price: base price + shipping - discount
     const finalPrice = basePrice + shippingCost - discountAmount;
 
-    // Make sure price doesn't go below zero
     return Math.max(0, finalPrice);
   };
 
-  // Calculate discount amount for display
+  // Calculate discount amount
   const calculateDiscount = (): number => {
     if (!selectedVoucher || !order) return 0;
 
@@ -127,7 +117,6 @@ export default function OrderedPage() {
         return;
       }
 
-      // Calculate the total price
       const newTotalPrice = calculateTotalPrice();
 
       console.log("Updating database price:", {
@@ -137,7 +126,6 @@ export default function OrderedPage() {
         finalPrice: newTotalPrice,
       });
 
-      // Update order in database with the calculated price
       const result = await orderService.updateOrder(
         token,
         order.order_id,
@@ -146,9 +134,7 @@ export default function OrderedPage() {
 
       console.log("Update order result:", result);
 
-      // Refresh order data
       const latestOrder = await fetchLatestOrder();
-
       if (latestOrder) {
         setOrder(latestOrder);
         console.log(
@@ -167,26 +153,140 @@ export default function OrderedPage() {
     }
   };
 
-  // Manual update price button handler
-  const handleManualPriceUpdate = async () => {
+  // Handle courier selection
+  const handleCourierChange = async (courier: CourierOption | null) => {
+    setSelectedCourier(courier);
+
+    if (!order) return;
+
     try {
       await updateDatabasePrice();
-      toast.success("Price updated successfully");
+      toast.success(`Shipping method updated: ${courier?.shipping_name}`);
     } catch (error) {
-      console.error("Error manually updating price:", error);
-      toast.error("Failed to update price");
+      console.error("Error updating shipping method:", error);
+      toast.error("Failed to update shipping method");
     }
   };
 
-  // Load order
+  // Handle voucher selection
+  const handleSelectVoucher = async (voucher: Voucher | null) => {
+    setSelectedVoucher(voucher);
+
+    if (!order) return;
+    setApplyingVoucher(true);
+
+    try {
+      if (voucher) {
+        const useVoucherResult = await voucherService.useVoucher(
+          voucher.voucher_code,
+          order.order_id
+        );
+
+        if (useVoucherResult.success) {
+          const latestOrder = await fetchLatestOrder();
+          if (latestOrder) {
+            setOrder(latestOrder);
+            toast.success(
+              `Voucher ${voucher.voucher_code} applied successfully!`
+            );
+          }
+        } else {
+          toast.error(useVoucherResult.message || "Could not apply voucher");
+          setSelectedVoucher(null);
+        }
+      } else {
+        await updateDatabasePrice();
+        toast.success("Voucher removed");
+      }
+    } catch (error) {
+      console.error("Error applying voucher:", error);
+      toast.error("Failed to apply voucher");
+      setSelectedVoucher(null);
+    } finally {
+      setApplyingVoucher(false);
+    }
+  };
+
+  // Handle order cancellation
+  const handleCancelOrder = async (orderId: number) => {
+    setIsCancelling(true);
+    try {
+      await cancelOrder(orderId);
+      const latestOrder = await fetchLatestOrder();
+      if (latestOrder) {
+        setOrder(latestOrder);
+        toast.success("Order cancelled successfully.");
+
+        // Redirect to the Home page after canceling the order
+        router.push("/"); // This line will redirect to the Home page
+      }
+    } catch (error) {
+      console.error("Error cancelling order:", error);
+      toast.error("Failed to cancel order");
+    } finally {
+      setIsCancelling(false);
+    }
+  };
+
+  // Handle payment initiation
+  const handleInitiatePayment = async () => {
+    if (!order || !selectedCourier) {
+      toast.error(
+        "Please select a shipping method before proceeding to payment"
+      );
+      return;
+    }
+
+    await updateDatabasePrice();
+
+    setIsUpdating(true);
+    try {
+      const token = await getAuthToken();
+      if (!token) {
+        toast.error("Authentication error");
+        return;
+      }
+
+      const shippingMethod = {
+        name: selectedCourier.shipping_name,
+        cost: selectedCourier.shipping_cost,
+      };
+
+      const finalPrice = getFinalPrice();
+
+      console.log("Initiating payment:", {
+        orderId: order.order_id,
+        databasePrice: order.total_price,
+        finalCalculatedPrice: finalPrice,
+        shippingMethod,
+        discount: selectedVoucher ? calculateDiscount() : 0,
+      });
+
+      const paymentResponse = await paymentService.initiatePayment(
+        token,
+        order.order_id,
+        shippingMethod
+      );
+
+      if (paymentResponse.success && paymentResponse.payment_url) {
+        window.location.href = paymentResponse.payment_url;
+      } else {
+        toast.error("Failed to initiate payment");
+      }
+    } catch (error) {
+      console.error("Payment initiation error:", error);
+      toast.error("An error occurred during payment initiation");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   useEffect(() => {
     const getLatestOrder = async () => {
       try {
         const latestOrder = await fetchLatestOrder();
 
         if (latestOrder) {
-          console.log("Latest order fetched:", latestOrder);
-          console.log("Order status:", latestOrder.status);
           setOrder(latestOrder);
         } else {
           toast.error("Could not find your order");
@@ -201,169 +301,10 @@ export default function OrderedPage() {
     getLatestOrder();
   }, [fetchLatestOrder, router]);
 
-  const handleCancelOrder = async (orderId: number) => {
-    setIsCancelling(true);
-    try {
-      await cancelOrder(orderId);
-      // Refresh the order data
-      const latestOrder = await fetchLatestOrder();
-      if (latestOrder) {
-        setOrder(latestOrder);
-      }
-    } catch (error) {
-      console.error("Error cancelling order:", error);
-    } finally {
-      setIsCancelling(false);
-    }
-  };
-
-  // Handle courier selection
-  const handleCourierChange = async (courier: CourierOption | null) => {
-    // Update the state first for immediate UI feedback
-    setSelectedCourier(courier);
-
-    if (!order) return;
-
-    try {
-      // Now update the database with the new calculated price
-      await updateDatabasePrice();
-
-      if (courier) {
-        toast.success(`Shipping method updated: ${courier.shipping_name}`);
-      } else {
-        toast.success("Shipping method removed");
-      }
-    } catch (error) {
-      console.error("Error updating shipping method:", error);
-      toast.error("Failed to update shipping method");
-    }
-  };
-
-  // Handle voucher selection
-  const handleSelectVoucher = async (voucher: Voucher | null) => {
-    // Update the state first for immediate UI feedback
-    setSelectedVoucher(voucher);
-
-    if (!order) return;
-    setApplyingVoucher(true);
-
-    try {
-      if (voucher) {
-        // Use the new voucherService.useVoucher method to apply the voucher directly
-        const useVoucherResult = await voucherService.useVoucher(
-          voucher.voucher_code,
-          order.order_id
-        );
-
-        if (useVoucherResult.success) {
-          // Update order with the new price and discount from the API response
-          const latestOrder = await fetchLatestOrder();
-          if (latestOrder) {
-            setOrder(latestOrder);
-            toast.success(
-              `Voucher ${voucher.voucher_code} applied successfully!`
-            );
-            console.log("Voucher applied, details:", {
-              discountAmount: useVoucherResult.discountAmount,
-              newTotalPrice: useVoucherResult.newTotalPrice,
-            });
-          }
-        } else {
-          // If the API call was successful but the voucher couldn't be applied
-          toast.error(useVoucherResult.message || "Could not apply voucher");
-          setSelectedVoucher(null);
-        }
-      } else {
-        // If voucher is null, update the price without a voucher
-        await updateDatabasePrice();
-        toast.success("Voucher removed");
-      }
-    } catch (error) {
-      console.error("Error applying voucher:", error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("Failed to apply voucher");
-      }
-      // Reset voucher selection on error
-      setSelectedVoucher(null);
-    } finally {
-      setApplyingVoucher(false);
-    }
-  };
-
-  // Handle payment initiation
-  const handleInitiatePayment = async () => {
-    if (!order || !selectedCourier) {
-      toast.error(
-        "Please select a shipping method before proceeding to payment"
-      );
-      return;
-    }
-
-    // Make sure the price is updated in the database before proceeding to payment
-    await updateDatabasePrice();
-
-    setIsUpdating(true);
-    try {
-      const token = await getAuthToken();
-      if (!token) {
-        toast.error("Authentication error");
-        return;
-      }
-
-      // Prepare shipping method object for the payment service
-      const shippingMethod = {
-        name: selectedCourier.shipping_name,
-        cost: selectedCourier.shipping_cost,
-      };
-
-      // Get the current final price
-      const finalPrice = getFinalPrice();
-
-      // Log the payment request details
-      console.log("Initiating payment:", {
-        orderId: order.order_id,
-        databasePrice: order.total_price,
-        finalCalculatedPrice: finalPrice,
-        shippingMethod,
-        discount: selectedVoucher ? calculateDiscount() : 0,
-      });
-
-      // Initiate payment with the selected shipping method
-      const paymentResponse = await paymentService.initiatePayment(
-        token,
-        order.order_id,
-        shippingMethod
-      );
-
-      if (paymentResponse.success && paymentResponse.payment_url) {
-        // Redirect to payment gateway
-        window.location.href = paymentResponse.payment_url;
-      } else {
-        toast.error("Failed to initiate payment");
-      }
-    } catch (error) {
-      console.error("Payment initiation error:", error);
-      if (error instanceof Error) {
-        toast.error(error.message);
-      } else {
-        toast.error("An unknown error occurred");
-      }
-    } finally {
-      setIsUpdating(false);
-    }
-  };
-
-  if (isLoading) {
-    return <LoadingState />;
-  }
-
   if (!order) {
     return <EmptyOrderState />;
   }
 
-  // Calculate total items
   const totalItems = order.items
     ? order.items.reduce((total, item) => total + (item.quantity || 0), 0)
     : 0;
@@ -373,18 +314,14 @@ export default function OrderedPage() {
       <div className="container mx-auto py-10 px-4 md:px-6 max-w-7xl">
         <PageHeader />
         <OrderConfirmationBanner />
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-8">
-          {/* Left Column - Order Details and Shipping */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Courier Selection Card */}
             <ShippingMethodCard
               selectedAddress={selectedAddress}
               setSelectedCourier={setSelectedCourier}
               onCourierSelect={handleCourierChange}
+              defaultCourier={null}
             />
-
-            {/* Voucher Selector */}
             <div>
               <VoucherSelector
                 selectedVoucher={selectedVoucher}
@@ -394,15 +331,13 @@ export default function OrderedPage() {
                 isLoading={applyingVoucher}
               />
             </div>
-
-            {/* Manual Update Price Button */}
             <div className="bg-gray-800 border border-gray-700 rounded-lg p-4">
               <p className="text-white mb-3">
                 After selecting shipping method and applying voucher, click the
                 button below to update the price in the database:
               </p>
               <button
-                onClick={handleManualPriceUpdate}
+                onClick={updateDatabasePrice}
                 disabled={isUpdating}
                 className={`w-full ${
                   isUpdating
@@ -420,11 +355,7 @@ export default function OrderedPage() {
                 )}
               </button>
             </div>
-
-            {/* Order Details */}
             <OrderDetailsCard order={order} />
-
-            {/* Shipping Information */}
             {order.shipping && (
               <ShippingInfoCard
                 shipping={order.shipping}
@@ -434,8 +365,6 @@ export default function OrderedPage() {
               />
             )}
           </div>
-
-          {/* Right Column - Order Summary */}
           <div>
             <OrderSummary
               order={order}
