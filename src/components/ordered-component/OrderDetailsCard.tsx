@@ -108,7 +108,7 @@ export default function OrderDetailsCard({ order }: OrderDetailsCardProps) {
                 </div>
                 <div className="text-right mt-2 sm:mt-0">
                   <p className="font-medium text-white">
-                    {formatRupiah(item.total_price || 0)}
+                    {formatRupiah(order.total_price || 0)} {/* Use total_price */}
                   </p>
                   <p className="text-xs text-gray-400">
                     {formatRupiah(item.price || 0)} each

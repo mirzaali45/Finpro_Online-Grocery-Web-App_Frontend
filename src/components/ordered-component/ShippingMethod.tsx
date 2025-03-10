@@ -1,3 +1,5 @@
+
+// export default ShippingMethodCard;
 import React, { useEffect, useState } from "react";
 import { Address } from "@/types/address-types";
 import { CourierOption } from "@/app/ordered/page";
@@ -6,21 +8,19 @@ import { CheckPricing } from "@/services/cek-ongkir/CekOngkirApi";
 
 interface ShippingMethodCardProps {
   selectedAddress: Address | null;
-  setSelectedCourier: React.Dispatch<
-    React.SetStateAction<CourierOption | null>
-  >;
+  setSelectedCourier: React.Dispatch<React.SetStateAction<CourierOption | null>>;
   onCourierSelect: (courier: CourierOption | null) => Promise<void>;
-  defaultCourier: CourierOption | null; // Add this prop to pass selected courier
+  defaultCourier: CourierOption | null;  // Add this prop to pass selected courier
 }
 
 const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
   selectedAddress,
   setSelectedCourier,
   onCourierSelect,
-  defaultCourier, // Get the default courier option from parent
+  defaultCourier,  // Get the default courier option from parent
 }) => {
   const [courierOptions, setCourierOptions] = useState<CourierOption[]>([]);
-  const [selectedOption, setSelectedOption] = useState<string | null>(null); // Store selected courier's value
+  const [selectedOption, setSelectedOption] = useState<string | null>(null);  // Store selected courier's value
   const [error, setError] = useState("");
   const [updating, setUpdating] = useState(false);
 
@@ -50,9 +50,7 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
       setError("");
     } catch (error) {
       setError(
-        error instanceof Error
-          ? error.message
-          : "Failed to load courier options"
+        error instanceof Error ? error.message : "Failed to load courier options"
       );
     }
   };
@@ -89,9 +87,7 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
     <div className="w-full bg-gradient-to-br from-gray-800 to-gray-700 border border-gray-600 rounded-lg text-white shadow-lg hover:shadow-xl transition-all duration-300">
       <div className="flex items-center justify-between border-b border-gray-600 p-4">
         <div className="flex items-center gap-3">
-          <span className="text-xl font-semibold tracking-wide">
-            Shipping Method
-          </span>
+          <span className="text-xl font-semibold tracking-wide">Shipping Method</span>
         </div>
         {selectedOption && (
           <span className="bg-blue-600 text-white px-3 py-1 rounded-full text-sm">
@@ -102,9 +98,7 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
       <div className="p-4">
         {!selectedAddress ? (
           <div className="bg-amber-900/30 border border-amber-800 rounded-lg p-4">
-            <p className="text-amber-200">
-              Please select a shipping address first
-            </p>
+            <p className="text-amber-200">Please select a shipping address first</p>
           </div>
         ) : error ? (
           <div className="bg-red-900/30 border border-red-800 rounded-lg p-4">
@@ -133,12 +127,8 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
                     </div>
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium text-white">
-                      {option.shipping_name}
-                    </div>
-                    <div className="text-sm text-gray-400">
-                      Estimated delivery: {option.estimated_days || "2-3 days"}
-                    </div>
+                    <div className="font-medium text-white">{option.shipping_name}</div>
+                    <div className="text-sm text-gray-400">Estimated delivery: {option.estimated_days}</div>
                     <div className="font-semibold mt-1 text-blue-400">
                       {formatRupiah
                         ? formatRupiah(option.shipping_cost)

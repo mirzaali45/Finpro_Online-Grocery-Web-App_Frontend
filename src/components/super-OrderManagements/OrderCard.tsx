@@ -8,12 +8,14 @@ interface OrderCardProps {
   order: Order;
   onUpdateShippingStatus: (orderId: number) => void; // Fungsi untuk mengupdate status pengiriman
   onCancelOrder: (orderId: number) => void; // Fungsi untuk membatalkan pesanan
+  formattedTotalPrice: string; // Add this line to accept formatted price
 }
 
 const OrderCard: React.FC<OrderCardProps> = ({
   order,
   onUpdateShippingStatus,
   onCancelOrder,
+  formattedTotalPrice, // Destructure this prop
 }) => {
   // Fungsi untuk menangani tombol konfirmasi status pengiriman menjadi "shipped"
   const handleUpdateShippingStatus = () => {
@@ -35,19 +37,14 @@ const OrderCard: React.FC<OrderCardProps> = ({
       </h3>
       <div className="mt-2 text-white">
         <p>Status Order: {order.order_status}</p>
-        <p>
-          Total Price:{" "}
-          {new Intl.NumberFormat("en-US", {
-            style: "currency",
-            currency: "USD",
-          }).format(order.total_price)}
-        </p>
+        <p>Total Price: {formattedTotalPrice}</p>
         <p>Items: {order.OrderItem.length}</p>
         <p>Shipping Status: {order.Shipping[0]?.shipping_status}</p>
       </div>
 
-      {/* Button to update shipping status if the order is completed and shipping is pending */}
-      {order.order_status === "completed" &&
+      {/* Button to update shipping status if the order is completed or shipped, and shipping is pending */}
+      {(order.order_status === "completed" ||
+        order.order_status === "shipped") &&
         order.Shipping[0]?.shipping_status === "pending" && (
           <button
             onClick={handleUpdateShippingStatus}

@@ -19,7 +19,6 @@ interface OrderSummaryProps {
   onInitiatePayment?: () => Promise<void>;
   isUpdating?: boolean;
 }
-
 const OrderSummary: React.FC<OrderSummaryProps> = ({
   order,
   totalItems,
@@ -34,11 +33,13 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
   isUpdating = false,
 }) => {
   const discount = calculateDiscount();
-  const finalPrice = getFinalPrice();
   const shippingCost = selectedCourier ? selectedCourier.shipping_cost : 0;
 
-  // Calculate the base subtotal (product prices only, before shipping and discounts)
+  // Ensure baseSubtotal is calculated correctly from the database price
   const baseSubtotal = order.total_price;
+
+  // Ensure final price calculation is done correctly
+  const finalPrice = baseSubtotal + shippingCost - discount;
 
   const handlePaymentClick = async () => {
     if (onInitiatePayment) {
@@ -106,7 +107,7 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
           </span>
         </div>
 
-        {/* Display Database Price (This is for debugging and can be removed in production) */}
+        {/* Display Database Price for debugging */}
         <div className="flex justify-between text-sm text-gray-400">
           <span>Database Price</span>
           <span>
@@ -168,5 +169,4 @@ const OrderSummary: React.FC<OrderSummaryProps> = ({
     </div>
   );
 };
-
 export default OrderSummary;

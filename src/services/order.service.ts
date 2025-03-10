@@ -77,7 +77,7 @@ export const orderService = {
     token: string,
     orderId: number
   ): Promise<ApiResponse<{ order_id: number }>> {
-    const response = await fetch(`${API_URL}/orders/my-orders/${orderId}`, {
+    const response = await fetch(`${API_URL}/orders/delete/${orderId}`, {
       method: "DELETE",
       headers: {
         Authorization: `Bearer ${token}`,
