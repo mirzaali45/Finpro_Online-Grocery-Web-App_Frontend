@@ -69,10 +69,10 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
       setSelectedOption(defaultCourier.value);
       setSelectedCourier(defaultCourier);
     }
-  }, [defaultCourier, setSelectedCourier, selectedOption]);
+  }, [defaultCourier, setSelectedCourier]);
 
   const handleOptionChange = async (value: string) => {
-    setSelectedOption(value); // Update langsung di UI
+    setSelectedOption(value);
     const selectedCourier =
       courierOptions.find((option) => option.value === value) || null;
     setSelectedCourier(selectedCourier);
@@ -116,32 +116,19 @@ const ShippingMethodCard: React.FC<ShippingMethodCardProps> = ({
               {courierOptions.map((option) => (
                 <div
                   key={option.value}
-                  className={`flex items-center space-x-3 border 
-      ${
-        selectedOption === option.value
-          ? "border-blue-500 bg-blue-900/20 ring-2 ring-blue-500"
-          : "border-gray-700 bg-gray-800"
-      }
-      rounded-lg p-3 hover:bg-gray-700 transition cursor-pointer
-      ${updating ? "opacity-70 pointer-events-none" : ""}`}
+                  className={`flex items-center space-x-3 border ${
+                    selectedOption === option.value
+                      ? "border-blue-500 bg-blue-900/20"
+                      : "border-gray-700 bg-gray-800"
+                  }
+                  rounded-lg p-3 hover:bg-gray-700 transition cursor-pointer
+                  ${updating ? "opacity-70 pointer-events-none" : ""}`}
                   onClick={() => !updating && handleOptionChange(option.value)}
                 >
                   <div className="flex-shrink-0">
-                    <div
-                      className={`w-5 h-5 rounded-full border ${
-                        selectedOption === option.value
-                          ? "border-blue-500 bg-blue-500"
-                          : "border-gray-500"
-                      } flex items-center justify-center`}
-                    >
+                    <div className="w-5 h-5 rounded-full border border-gray-500 flex items-center justify-center">
                       {selectedOption === option.value && (
-                        <svg
-                          className="w-3 h-3 text-white"
-                          fill="currentColor"
-                          viewBox="0 0 16 16"
-                        >
-                          <path d="M13.78 3.22a.75.75 0 0 1 0 1.06l-6 6a.75.75 0 0 1-1.06 0l-3-3a.75.75 0 1 1 1.06-1.06L7 8.94l5.72-5.72a.75.75 0 0 1 1.06 0z" />
-                        </svg>
+                        <div className="w-3 h-3 rounded-full bg-blue-500"></div>
                       )}
                     </div>
                   </div>

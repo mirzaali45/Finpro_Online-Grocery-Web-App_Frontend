@@ -2,14 +2,20 @@ import { Category, CategoryFormData,PaginatedResponse } from "@/types/category-t
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL_BE;
 
 export const categoryService = {
-  async getCategories(page: number = 1, limit: number = 8): Promise<PaginatedResponse<Category>> {
+  async getCategories(
+    page: number = 1,
+    limit: number = 8
+  ): Promise<PaginatedResponse<Category>> {
     try {
-      const response = await fetch(`${BASE_URL}/category?page=${page}&limit=${limit}`, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
+      const response = await fetch(
+        `${BASE_URL}/category?page=${page}&limit=${limit}`,
+        {
+          method: "GET",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      );
 
       if (!response.ok) {
         throw new Error("Failed to fetch categories");
@@ -21,11 +27,11 @@ export const categoryService = {
       throw error;
     }
   },
-  
-  // If you still need the original non-paginated function
+
   async getAllCategories(): Promise<Category[]> {
     try {
-      const response = await fetch(`${BASE_URL}/category?limit=999`, {
+      // Use the new all=true parameter instead of a large limit
+      const response = await fetch(`${BASE_URL}/category?all=true`, {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
@@ -33,7 +39,7 @@ export const categoryService = {
       });
 
       if (!response.ok) {
-        throw new Error("Failed to fetch categories");
+        throw new Error("Failed to fetch all categories");
       }
 
       const result = await response.json();
@@ -43,33 +49,6 @@ export const categoryService = {
       throw error;
     }
   },
-
-//  async createCategory(formData: FormData): Promise<Category> {
-//   const token = localStorage.getItem("token");
-//   if (!token) {
-//     throw new Error("Authentication required");
-//   }
-
-//   const response = await fetch(`${BASE_URL}/category`, {
-//     method: "POST",
-//     headers: {
-//       Authorization: `Bearer ${token}`,
-//     },
-//     body: formData,
-//   });
-
-//   const errorData = await response.json().catch(() => null);
-
-//   if (!response.ok) {
-//     // Specifically check for duplicate category error
-//     if (errorData?.error === "A category with this name already exists") {
-//       throw new Error("A category with this name already exists");
-//     }
-//     throw new Error(errorData?.error || "Failed to create category");
-//   }
-
-//   return errorData;
-// },
 
   async createCategoryWithImage(formData: FormData): Promise<Category> {
     const token = localStorage.getItem("token");

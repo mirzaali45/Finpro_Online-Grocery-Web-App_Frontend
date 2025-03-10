@@ -242,18 +242,19 @@ const InputField = ({ className = "", ...props }: InputFieldProps) => (
 );
 
 const SelectField = ({ className = "", ...props }: SelectFieldProps) => (
-  <select
-    {...props}
-    className={`w-full p-2 bg-white border border-gray-300 
-    rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
-    text-gray-900 ${className}`}
-  />
+  <div className="relative">
+    <select
+      {...props}
+      size={1}
+      className={`w-full p-2 bg-white border border-gray-300 
+      rounded-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 
+      text-gray-900 ${className}`}
+    />
+  </div>
 );
 
 const FormLabel = ({ children }: FormLabelProps) => (
-  <label className="block text-sm font-medium text-gray-700">
-    {children}
-  </label>
+  <label className="block text-sm font-medium text-gray-700">{children}</label>
 );
 
 export default function ProductForm({
@@ -282,18 +283,20 @@ export default function ProductForm({
       if (!token) throw new Error("No token found");
 
       const [categoriesResponse, storesResponse] = await Promise.all([
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/category`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/category?all=true`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
-        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/store`, {
+        fetch(`${process.env.NEXT_PUBLIC_BASE_URL_BE}/store?getAll=true`, {
           headers: { Authorization: `Bearer ${token}` },
         }),
       ]);
 
       if (!categoriesResponse.ok) {
-        throw new Error(`Failed to fetch categories: ${categoriesResponse.statusText}`);
+        throw new Error(
+          `Failed to fetch categories: ${categoriesResponse.statusText}`
+        );
       }
-      
+
       if (!storesResponse.ok) {
         throw new Error(`Failed to fetch stores: ${storesResponse.statusText}`);
       }
@@ -307,13 +310,19 @@ export default function ProductForm({
       let categoryItems: Category[] = [];
       if (Array.isArray(categoriesData)) {
         categoryItems = categoriesData;
-      } else if (categoriesData && typeof categoriesData === 'object') {
+      } else if (categoriesData && typeof categoriesData === "object") {
         // Check common API response patterns
         if (Array.isArray(categoriesData.data)) {
           categoryItems = categoriesData.data;
-        } else if (categoriesData.results && Array.isArray(categoriesData.results)) {
+        } else if (
+          categoriesData.results &&
+          Array.isArray(categoriesData.results)
+        ) {
           categoryItems = categoriesData.results;
-        } else if (categoriesData.categories && Array.isArray(categoriesData.categories)) {
+        } else if (
+          categoriesData.categories &&
+          Array.isArray(categoriesData.categories)
+        ) {
           categoryItems = categoriesData.categories;
         }
       }
@@ -322,7 +331,7 @@ export default function ProductForm({
       let storeItems: Store[] = [];
       if (Array.isArray(storesData)) {
         storeItems = storesData;
-      } else if (storesData && typeof storesData === 'object') {
+      } else if (storesData && typeof storesData === "object") {
         // Check common API response patterns
         if (Array.isArray(storesData.data)) {
           storeItems = storesData.data;
@@ -334,11 +343,11 @@ export default function ProductForm({
       }
 
       // Debug info
-      console.log('Categories response:', categoriesData);
-      console.log('Processed categories:', categoryItems);
-      
-      console.log('Stores response:', storesData);
-      console.log('Processed stores:', storeItems);
+      console.log("Categories response:", categoriesData);
+      console.log("Processed categories:", categoryItems);
+
+      console.log("Stores response:", storesData);
+      console.log("Processed stores:", storeItems);
 
       setCategories(categoryItems);
       setStores(storeItems);
@@ -442,6 +451,8 @@ export default function ProductForm({
           value={formData.category_id}
           onChange={handleCategoryChange}
           required
+          className="max-h-60"
+          style={{ maxHeight: "60px", overflow: "auto" }}
         >
           <option value="">Select Category</option>
           {Array.isArray(categories) && categories.length > 0 ? (
@@ -451,7 +462,9 @@ export default function ProductForm({
               </option>
             ))
           ) : (
-            <option value="" disabled>No categories available</option>
+            <option value="" disabled>
+              No categories available
+            </option>
           )}
         </SelectField>
       </div>
@@ -471,7 +484,9 @@ export default function ProductForm({
               </option>
             ))
           ) : (
-            <option value="" disabled>No stores available</option>
+            <option value="" disabled>
+              No stores available
+            </option>
           )}
         </SelectField>
       </div>
