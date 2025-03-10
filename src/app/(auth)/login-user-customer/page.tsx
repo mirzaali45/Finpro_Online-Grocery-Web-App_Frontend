@@ -115,7 +115,7 @@ export default function StoreLoginPage() {
                   <div className="flex items-center gap-3">
                     <Sparkles className="w-8 h-8 text-blue-400" />
                     <h2 className="text-3xl md:text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400">
-                      Welcome to TechElite
+                      Welcome to Techlite
                     </h2>
                   </div>
                   <p className="text-lg md:text-xl text-gray-300 pl-11">
