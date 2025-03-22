@@ -6,6 +6,7 @@ import { voucherService } from "@/services/voucher.service";
 import { Discount } from "@/types/discount-types";
 import { MapPin, Clock, ShoppingBag, Tag, AlertCircle } from "lucide-react";
 import { toast, Toaster } from "react-hot-toast";
+import Image from "next/image";
 
 const DiscountsList: React.FC = () => {
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -228,7 +229,7 @@ const DiscountsList: React.FC = () => {
           >
             <div className="relative">
               {discount.thumbnail ? (
-                <img
+                <Image
                   src={discount.thumbnail}
                   alt={discount.discount_code}
                   className="w-full h-48 object-cover"

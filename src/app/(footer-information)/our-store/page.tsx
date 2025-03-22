@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useStores } from "@/components/hooks/useGetStore";
+import Image from "next/image";
 
 export default function AllStores() {
   const { stores, loading, error, pagination, goToPage, setItemsPerPage } =
@@ -63,7 +64,7 @@ export default function AllStores() {
                   <div className="mr-5 flex-shrink-0">
                     {store.User?.avatar ? (
                       <div className="h-24 w-24 rounded-lg overflow-hidden shadow-lg ring-2 ring-indigo-500/30">
-                        <img
+                        <Image
                           src={store.User.avatar}
                           alt={`${store.User?.username || "Store owner"}`}
                           className="h-full w-full object-cover"

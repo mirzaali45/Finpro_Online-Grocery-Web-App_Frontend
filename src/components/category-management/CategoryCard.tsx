@@ -1,5 +1,6 @@
 import { Trash2, Image as ImageIcon } from "lucide-react";
 import { Category } from "@/types/category-types";
+import Image from "next/image";
 
 interface CategoryCardProps {
   category: Category;
@@ -16,7 +17,7 @@ export default function CategoryCard({
         {/* Category thumbnail */}
         <div className="w-20 h-20 rounded-md overflow-hidden flex-shrink-0 bg-gray-100 dark:bg-gray-700 flex items-center justify-center">
           {category.category_thumbnail ? (
-            <img
+            <Image
               src={category.category_thumbnail}
               alt={category.category_name}
               className="w-full h-full object-cover"

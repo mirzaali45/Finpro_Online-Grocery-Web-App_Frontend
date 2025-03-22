@@ -4,7 +4,7 @@
 import React, { useEffect, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
-import { User, LogOut, ChevronDown } from "lucide-react";
+import { User, LogOut, ChevronDown, Truck } from "lucide-react";
 import { jwtDecode, JwtPayload } from "jwt-decode";
 import Swal from "sweetalert2";
 import ProfileServices from "@/services/profile/services1";
@@ -170,6 +170,7 @@ export const NavLinks: React.FC<NavLinksProps> = ({
     profile.password_reset_token === null
       ? [
           { name: "Profile", path: "/profile", icon: User },
+          { name: "Order Overview", path: "/order-overview", icon: Truck },
           {
             name: "Logout",
             icon: LogOut,

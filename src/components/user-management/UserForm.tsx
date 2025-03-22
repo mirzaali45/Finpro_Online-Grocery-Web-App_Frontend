@@ -1,3 +1,4 @@
+import Image from "next/image";
 import React, { useState, useEffect, useRef } from "react";
 
 interface UserFormData {
@@ -299,7 +300,7 @@ const UserForm = ({
               <div className="flex items-center space-x-4">
                 <div className="h-20 w-20 rounded-full border-2 border-gray-300 dark:border-gray-600 overflow-hidden flex items-center justify-center bg-gray-100 dark:bg-gray-700">
                   {avatarPreview ? (
-                    <img
+                    <Image
                       src={avatarPreview}
                       alt="Avatar preview"
                       className="h-full w-full object-cover"

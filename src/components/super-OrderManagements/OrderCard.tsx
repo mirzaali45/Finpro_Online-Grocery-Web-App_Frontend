@@ -57,7 +57,7 @@ const OrderCard: React.FC<OrderCardProps> = ({
         )}
 
       {/* Button to cancel order if shipping is still pending and order status is completed */}
-      {order.order_status === "completed" &&
+      {(order.order_status === "shipped" || order.order_status === "completed" ) &&
         order.Shipping[0]?.shipping_status === "pending" && (
           <button
             onClick={handleCancelOrder}

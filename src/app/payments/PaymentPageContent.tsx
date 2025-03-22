@@ -16,7 +16,7 @@ const PaymentPage = () => {
       const fetchSnapToken = async () => {
         try {
           const response = await axios.post(
-            `${process.env.NEXT_PUBLIC_BASE_URL_BE!}/api/payments/snap-token`,
+            `${process.env.NEXT_PUBLIC_BASE_URL_BE!}/api/payments/redirect`,
             { order_id }
           );
           setSnapToken(response.data.token);

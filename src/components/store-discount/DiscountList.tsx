@@ -20,6 +20,7 @@ import {
 } from "@/components/ui/dialog";
 import { toast } from "react-hot-toast";
 import { formatRupiah } from "@/helper/currencyRp";
+import Image from "next/image";
 
 interface Product {
   product_id: number;
@@ -329,7 +330,7 @@ export default function DiscountList() {
                     <div className="flex items-center gap-3">
                       {discount.thumbnail && (
                         <div className="h-10 w-10 rounded-md overflow-hidden flex-shrink-0">
-                          <img
+                          <Image
                             src={discount.thumbnail}
                             alt={`${discount.discount_code} thumbnail`}
                             className="h-full w-full object-cover"
@@ -503,7 +504,7 @@ export default function DiscountList() {
                 <div className="flex gap-4 items-center">
                   {formData.thumbnail && !thumbnailFile && (
                     <div className="relative h-16 w-16 rounded overflow-hidden border border-gray-200 dark:border-gray-700">
-                      <img
+                      <Image
                         src={formData.thumbnail}
                         alt="Current thumbnail"
                         className="h-full w-full object-cover"
