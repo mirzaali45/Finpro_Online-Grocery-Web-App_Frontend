@@ -247,7 +247,7 @@ export default function PaymentSuccessPage() {
 
           <div className="flex flex-col md:flex-row gap-4 mt-8">
             <button
-              onClick={() => router.push(`/order-detail/${orderId}`)}
+              onClick={() => router.push(`/order-overview`)}
               className="w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-6 rounded-lg font-medium transition-colors"
             >
               View Order Details

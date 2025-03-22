@@ -14,12 +14,15 @@ export enum ShippingStatus {
 }
 
 export interface OrderItem {
+  discount: any;
   product_id: number;
   name: string;
   price: number;
   quantity: number;
   total_price: number;
   image: string | null;
+  discount_type?: "percentage" | "point"; // Tambahkan jika perlu
+  discount_value?: number; // Tambahkan jika perlu
 }
 
 export interface OrderStore {
