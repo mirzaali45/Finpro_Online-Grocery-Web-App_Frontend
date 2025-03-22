@@ -4,6 +4,7 @@ import { Discount } from "@/types/discount-types";
 import { formatRupiah } from "@/helper/currencyRp";
 import { productService } from "@/services/product.service";
 import { Product } from "@/types/product-types";
+import Image from "next/image";
 
 export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
   const [productData, setProductData] = useState<Product | null>(null);
@@ -57,7 +58,7 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
       // If we fetched a product image, use it
       if (productImage) {
         return (
-          <img
+          <Image
             src={productImage}
             alt={discount.product?.name || "Product"}
             className="w-full h-full object-contain p-4"
@@ -67,7 +68,7 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
       // If product has no image but discount has thumbnail, use that
       else if (discount.thumbnail) {
         return (
-          <img
+          <Image
             src={discount.thumbnail}
             alt={discount.product?.name || "Product"}
             className="w-full h-full object-contain p-4"
@@ -99,7 +100,7 @@ export const ProductDiscountCard = ({ discount }: { discount: Discount }) => {
     // For store-wide discount, always use the discount thumbnail
     else if (discount.thumbnail) {
       return (
-        <img
+        <Image
           src={discount.thumbnail}
           alt="Store-wide Discount"
           className="w-full h-full object-contain p-4"

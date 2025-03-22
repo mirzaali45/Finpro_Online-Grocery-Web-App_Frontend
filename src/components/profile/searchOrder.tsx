@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useRef, useState } from "react";
 
 const SearchOrder = () => {
@@ -187,7 +185,7 @@ const SearchOrder = () => {
               <div className="mt-4">
                 <p className="font-semibold">Order Items:</p>
                 {order.OrderItem.map((item: any) => {
-                  let priceBeforeDiscount = item.product?.price || 0;
+                  const priceBeforeDiscount = item.product?.price || 0; // use const
                   let priceAfterDiscount = priceBeforeDiscount;
 
                   if (item.product?.Discount?.length > 0) {

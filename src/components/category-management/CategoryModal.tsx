@@ -1,4 +1,5 @@
 import { CategoryFormData } from "@/types/category-types";
+import Image from "next/image";
 import { useState, useRef } from "react";
 
 interface CategoryModalProps {
@@ -130,7 +131,7 @@ export default function CategoryModal({
             />
             {imagePreview && (
               <div className="mt-2 relative">
-                <img
+                <Image
                   src={imagePreview}
                   alt="Category preview"
                   className="h-32 w-full object-contain rounded-md"
