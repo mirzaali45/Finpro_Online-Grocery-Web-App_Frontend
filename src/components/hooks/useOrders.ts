@@ -21,7 +21,7 @@ export const useOrders = () => {
       }
 
       const response = await orderService.getMyOrders(token, status);
-      setOrders(response.data);
+      setOrders(response.data || []);
       return response.data;
     } catch (err: any) {
       const errorMessage = err.message || "Failed to fetch orders";
@@ -83,7 +83,7 @@ export const useOrders = () => {
         }
 
         const data: ApiResponse<Order> = await response.json();
-        return data.data;
+        return data.data || null;
       } catch (err: any) {
         const errorMessage = err.message || "Failed to fetch order details";
         toast.error(errorMessage);
