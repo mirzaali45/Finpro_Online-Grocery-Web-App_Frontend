@@ -53,6 +53,9 @@ export interface Order {
 }
 
 export interface ApiResponse<T> {
-  message: string;
-  data: T;
+  // message: string;
+  // data: T;
+  success: boolean; // This is the change
+  data?: T; // The data field that will contain the actual response
+  message?: string; // Optionally include a message
 }

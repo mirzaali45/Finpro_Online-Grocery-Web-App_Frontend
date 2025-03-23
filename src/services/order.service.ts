@@ -132,4 +132,50 @@ export const orderService = {
       throw error;
     }
   },
+  async updateOrderStatus(
+    token: string,
+    orderId: string,
+    status: string
+  ): Promise<ApiResponse<Order>> {
+    try {
+      const response = await fetch(
+        `${API_URL}/orders/${orderId}/update-status`,
+        {
+          method: "PATCH",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ status }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.msg || "Failed to update order status");
+      }
+
+      const data = await response.json();
+      return {
+        success: true,
+        data: data.order,
+      };
+    } catch (error: unknown) {
+      // Narrow the type of error to `unknown`
+      if (error instanceof Error) {
+        // Check if error is an instance of Error
+        console.error("Error updating order status:", error.message);
+        return {
+          success: false,
+          message: error.message, // Access error.message after narrowing the type
+        };
+      } else {
+        console.error("Unknown error:", error);
+        return {
+          success: false,
+          message: "An unknown error occurred", // Handle non-Error type errors
+        };
+      }
+    }
+  },
 };
