@@ -2259,7 +2259,6 @@
       "action": "Refresh",
       "description": "{\"totalItems\":17,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
       "module": "Inventory Management",
-
       "timestamp": "2025-03-09T20:07:26.046Z"
     },
     {
@@ -2499,7 +2498,6 @@
       "description": "{\"totalItems\":17,\"totalCategories\":8,\"message\":\"Inventory refreshed\"}",
       "module": "Inventory Management",
       "timestamp": "2025-03-09T21:51:10.152Z"
-
     }
   ]
 }
